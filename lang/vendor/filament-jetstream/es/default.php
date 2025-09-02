@@ -237,13 +237,13 @@ return [
 
             'label' => [
 
-                'regenerate_recovery_codes' => 'Regenerate Recovery Codes',
+                'regenerate_recovery_codes' => 'Regenerar Códigos de Recuperación',
 
-                'use_recovery_code' => 'use a recovery code',
+                'use_recovery_code' => 'usar un código de recuperación',
 
-                'use_authentication_code' => 'use an authentication code',
+                'use_authentication_code' => 'usar un código de autenticación',
 
-                'logout' => 'Logout',
+                'logout' => 'Cerrar Sesión',
 
             ],
 
