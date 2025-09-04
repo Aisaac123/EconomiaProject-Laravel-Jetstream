@@ -30,10 +30,12 @@ class AppPanelProvider extends PanelProvider
             $panel
                 ->default()
                 ->id('app')
+                ->viteTheme('resources/css/filament/app/theme.css')
                 ->path('/')
                 ->homeUrl('/dashboard')
                 ->colors(['primary' => Color::Teal[950]])
                 ->brandLogo('assets/app-icon.png')
+                ->favicon('assets/app-icon.png')
                 ->brandLogoHeight('40px')
                 ->login()
                 ->registration()
@@ -42,14 +44,9 @@ class AppPanelProvider extends PanelProvider
                 ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
                 ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
                 ->pages([
-                    Dashboard::class,
-                    TasaInteres::class,
-                    Anualidad::class,
+                    \App\Filament\Pages\Dashboard::class,
                 ])
                 ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-                ->widgets([
-                    Widgets\AccountWidget::class,
-                ])
                 ->middleware([
                     EncryptCookies::class,
                     AddQueuedCookiesToResponse::class,
@@ -80,7 +77,7 @@ class AppPanelProvider extends PanelProvider
     private function custom(Panel $panel): Panel
     {
         return $panel
-            ->topNavigation()
+            ->sidebarCollapsibleOnDesktop()
             ->navigationItems([
                 NavigationItem::make('Introducción')
                     ->url('/dashboard')

@@ -15,4 +15,8 @@ class InteresSimple extends Page
     {
         return 2;
     }
+    public static function getNavigationLabel(): string
+    {
+        return 'Interés Simple';
+    }
 }

@@ -15,4 +15,8 @@ class InteresCompuesto extends Page
     {
         return 3;
     }
+    public static function getNavigationLabel(): string
+    {
+        return 'Interés Compuesto';
+    }
 }

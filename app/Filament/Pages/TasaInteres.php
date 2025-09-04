@@ -15,4 +15,8 @@ class TasaInteres extends Page
     {
         return 1;
     }
+    public static function getNavigationLabel(): string
+    {
+        return 'Tasa de interés';
+    }
 }
