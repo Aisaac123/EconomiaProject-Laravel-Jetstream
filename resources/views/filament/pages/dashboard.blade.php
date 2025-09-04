@@ -1,4 +1,4 @@
-<div class="container mx-auto my-8">
+<x-filament-panels::page>
 <!-- Encabezado principal -->
     <div class="border-2 border-primary-300 dark:border-primary-400 bg-white dark:bg-gray-800 rounded-xl p-8 mb-8 text-center shadow-lg transform transition-all duration-300 hover:shadow-xl">
         <h1 class="text-4xl font-bold text-primary-700 dark:text-primary-200 mb-3">
@@ -115,5 +115,4 @@
             en el ámbito universitario. Siempre verifica tus cálculos con múltiples fuentes para aplicaciones del mundo real.
         </p>
     </x-filament::section>
-
-</div>
+</x-filament-panels::page>
