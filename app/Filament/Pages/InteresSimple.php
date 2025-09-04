@@ -7,6 +7,7 @@ use Filament\Pages\Page;
 class InteresSimple extends Page
 {
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-calculator';
+
     protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-c-calculator';
 
     protected string $view = 'filament.pages.interes-simple';
@@ -15,6 +16,7 @@ class InteresSimple extends Page
     {
         return 2;
     }
+
     public static function getNavigationLabel(): string
     {
         return 'Interés Simple';

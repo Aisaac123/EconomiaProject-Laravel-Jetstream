@@ -2,8 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Pages\Anualidad;
-use App\Filament\Pages\TasaInteres;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -25,7 +23,7 @@ class AppPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        return ($this->custom(
+        return $this->custom(
             $panel
                 ->default()
                 ->id('app')
@@ -69,7 +67,6 @@ class AppPanelProvider extends PanelProvider
                         ->logoutBrowserSessions()
                         ->twoFactorAuthentication(),
                 ])
-            )
         );
     }
 

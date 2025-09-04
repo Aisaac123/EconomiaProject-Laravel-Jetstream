@@ -7,6 +7,7 @@ use Filament\Pages\Page;
 class InteresCompuesto extends Page
 {
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-arrow-trending-up';
+
     protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-c-arrow-trending-up';
 
     protected string $view = 'filament.pages.interes-compuesto';
@@ -15,6 +16,7 @@ class InteresCompuesto extends Page
     {
         return 3;
     }
+
     public static function getNavigationLabel(): string
     {
         return 'Interés Compuesto';
