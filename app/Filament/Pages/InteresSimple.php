@@ -6,9 +6,9 @@ use Filament\Pages\Page;
 
 class InteresSimple extends Page
 {
-    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-calculator';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-c-calculator';
+    protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-c-chart-bar';
 
     protected string $view = 'filament.pages.interes-simple';
 

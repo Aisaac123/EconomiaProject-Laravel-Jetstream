@@ -74,6 +74,7 @@ class AppPanelProvider extends PanelProvider
     {
         return $panel
             ->topNavigation()
+            ->font('Quicksand')
             ->authGuard('web')
             ->navigationItems([
                 NavigationItem::make('Introducción')
