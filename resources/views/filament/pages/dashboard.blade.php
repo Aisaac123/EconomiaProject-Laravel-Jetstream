@@ -24,7 +24,7 @@
     </div>
 
     <!-- Temas expuestos -->
-    <div id="conceptos" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4">
         <h2 class="text-2xl font-bold text-gray-800 dark:text-white flex justify-center">
             Temas expuestos
         </h2>
@@ -72,7 +72,7 @@
     </div>
 
     <!-- Panel de contenido principal -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div id="conceptos" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Sección de conceptos financieros -->
         <div class="lg:col-span-2">
             <x-filament::section>
@@ -248,7 +248,7 @@
                 </div>
             </x-filament::section>
         </div>
-    </section>
+    </div>
 
     <!-- Nota final -->
     <x-filament::section class="mt-8 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-xl">
