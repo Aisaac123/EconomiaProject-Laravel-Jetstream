@@ -33,3 +33,29 @@ html { scroll-behavior: smooth; }
     }
 }
 
+.custom-hover {
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.custom-hover:hover {
+    transform: translateY(-8px) scale(1.04);
+    box-shadow: 0 25px 45px rgba(0,0,0,0.28);
+}
+
+.custom-hover::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%);
+    transform: rotate(25deg) translateX(-100%);
+    pointer-events: none;
+    transition: transform 0.6s ease-in-out;
+}
+
+.custom-hover:hover::after {
+    transform: rotate(25deg) translateX(200%);
+}
+

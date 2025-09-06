@@ -7,387 +7,284 @@ use Filament\Notifications\Notification;
 
 trait FormCalculations
 {
-    public function calculateInteresCompuesto(): void
+    // Calculation methods
+    private function calculateInteresCompuesto(array $data): array
     {
-        try {
-            $data = $this->form->getState();
-
-            // Contar campos vacíos (excluyendo resultado y frecuencia que tiene default)
-            $camposVacios = 0;
-            $campoVacio = '';
-
-            if (empty($data['capital'])) {
-                $camposVacios++;
-                $campoVacio = 'capital';
+        $emptyFields = [];
+        foreach (['capital', 'monto_final', 'tasa_interes', 'tiempo'] as $field) {
+            if (empty($data[$field])) {
+                $emptyFields[] = $field;
             }
-            if (empty($data['monto_final'])) {
-                $camposVacios++;
-                $campoVacio = 'monto_final';
-            }
-            if (empty($data['tasa_interes'])) {
-                $camposVacios++;
-                $campoVacio = 'tasa_interes';
-            }
-            if (empty($data['tiempo'])) {
-                $camposVacios++;
-                $campoVacio = 'tiempo';
-            }
-
-            // Validar que solo haya un campo vacío
-            if ($camposVacios === 0) {
-                Notification::make()
-                    ->title('Error de validación')
-                    ->danger()
-                    ->body('Debe dejar vacío exactamente un campo para que sea calculado.')
-                    ->send();
-
-                return;
-            }
-
-            if ($camposVacios > 1) {
-                Notification::make()
-                    ->title('Error de validación')
-                    ->danger()
-                    ->body('Solo puede dejar vacío un campo. Actualmente hay '.$camposVacios.' campos vacíos.')
-                    ->send();
-
-                return;
-            }
-
-            // Valores por defecto
-            $frecuencia = $data['frecuencia'] ?? 12; // Mensual por defecto
-
-            // Convertir porcentaje a decimal
-            $tasaDecimal = ! empty($data['tasa_interes']) ? $data['tasa_interes'] / 100 : null;
-
-            $resultado = 0;
-            $mensajeResultado = '';
-
-            // Calcular según el campo vacío
-            switch ($campoVacio) {
-                case 'capital':
-                    // P = A / (1 + r/n)^(n*t)
-                    $resultado = $data['monto_final'] / pow(1 + ($tasaDecimal / $frecuencia), $frecuencia * $data['tiempo']);
-                    $mensajeResultado = 'Capital inicial requerido: $'.number_format($resultado, 2);
-                    break;
-
-                case 'monto_final':
-                    // A = P(1 + r/n)^(n*t)
-                    $resultado = $data['capital'] * pow(1 + ($tasaDecimal / $frecuencia), $frecuencia * $data['tiempo']);
-                    $mensajeResultado = 'Monto final obtenido: $'.number_format($resultado, 2);
-                    break;
-
-                case 'tasa_interes':
-                    // r = n * ((A/P)^(1/(n*t)) - 1)
-                    $tasaCalculada = $frecuencia * (pow($data['monto_final'] / $data['capital'], 1 / ($frecuencia * $data['tiempo'])) - 1);
-                    $resultado = $tasaCalculada * 100; // Convertir a porcentaje
-                    $mensajeResultado = 'Tasa de interés requerida: '.number_format($resultado, 2).'%';
-                    break;
-
-                case 'tiempo':
-                    // t = ln(A/P) / (n * ln(1 + r/n))
-                    $resultado = log($data['monto_final'] / $data['capital']) / ($frecuencia * log(1 + ($tasaDecimal / $frecuencia)));
-                    $mensajeResultado = 'Tiempo requerido: '.number_format($resultado, 2).' años';
-                    break;
-            }
-
-            // Actualizar el formulario con el resultado
-            $data['resultado'] = number_format($resultado, 2);
-            $this->form->fill($data);
-
-            // Mostrar notificación de éxito
-            Notification::make()
-                ->title('¡Cálculo completado!')
-                ->success()
-                ->body($mensajeResultado)
-                ->send();
-
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Error en el cálculo')
-                ->danger()
-                ->body('Verifique que todos los valores sean válidos: ')
-                ->send();
         }
+
+        if (count($emptyFields) !== 1) {
+            return [
+                'error' => true,
+                'message' => count($emptyFields) === 0
+                    ? 'Debes dejar exactamente un campo vacío para calcular.'
+                    : 'Solo un campo puede estar vacío. Actualmente hay '.count($emptyFields).' campos vacíos.',
+            ];
+        }
+
+        $field = $emptyFields[0];
+        $frequency = $data['frecuencia'] ?? 12;
+        $rate = ! empty($data['tasa_interes']) ? $data['tasa_interes'] / 100 : null;
+
+        $result = 0;
+        $message = '';
+
+        switch ($field) {
+            case 'capital':
+                $result = $data['monto_final'] / pow(1 + ($rate / $frequency), $frequency * $data['tiempo']);
+                $message = 'Capital inicial requerido: $'.number_format($result, 2);
+                break;
+
+            case 'monto_final':
+                $result = $data['capital'] * pow(1 + ($rate / $frequency), $frequency * $data['tiempo']);
+                $message = 'Monto final obtenido: $'.number_format($result, 2);
+                break;
+
+            case 'tasa_interes':
+                $rateCalc = $frequency * (pow($data['monto_final'] / $data['capital'], 1 / ($frequency * $data['tiempo'])) - 1);
+                $result = $rateCalc * 100;
+                $message = 'Tasa de interés requerida: '.number_format($result, 2).'%';
+                break;
+
+            case 'tiempo':
+                $result = log($data['monto_final'] / $data['capital']) / ($frequency * log(1 + ($rate / $frequency)));
+                $message = 'Tiempo requerido: '.number_format($result, 2).' años';
+                break;
+        }
+
+        return [
+            'error' => false,
+            'data' => array_merge($data, ['resultado' => number_format($result, 2)]),
+            'message' => $message,
+        ];
     }
 
-    public function calculateInteresSimple(): void
+    private function calculateInteresSimple(array $data): array
     {
-        try {
-            $data = $this->form->getState();
-
-            // Contar campos vacíos
-            $camposVacios = 0;
-            $campoVacio = '';
-
-            if (empty($data['capital'])) {
-                $camposVacios++;
-                $campoVacio = 'capital';
+        $emptyFields = [];
+        foreach (['capital', 'monto_final', 'tasa_interes', 'tiempo'] as $field) {
+            if (empty($data[$field])) {
+                $emptyFields[] = $field;
             }
-            if (empty($data['monto_final'])) {
-                $camposVacios++;
-                $campoVacio = 'monto_final';
-            }
-            if (empty($data['tasa_interes'])) {
-                $camposVacios++;
-                $campoVacio = 'tasa_interes';
-            }
-            if (empty($data['tiempo'])) {
-                $camposVacios++;
-                $campoVacio = 'tiempo';
-            }
-
-            // Validar que solo haya un campo vacío
-            if ($camposVacios === 0) {
-                Notification::make()
-                    ->title('Error de validación')
-                    ->danger()
-                    ->body('Debe dejar vacío exactamente un campo para que sea calculado.')
-                    ->send();
-
-                return;
-            }
-
-            if ($camposVacios > 1) {
-                Notification::make()
-                    ->title('Error de validación')
-                    ->danger()
-                    ->body('Solo puede dejar vacío un campo. Actualmente hay '.$camposVacios.' campos vacíos.')
-                    ->send();
-
-                return;
-            }
-
-            // Convertir porcentaje a decimal
-            $tasaDecimal = ! empty($data['tasa_interes']) ? $data['tasa_interes'] / 100 : null;
-
-            $resultado = 0;
-            $mensajeResultado = '';
-
-            // Calcular según el campo vacío - Fórmula: A = P(1 + r*t)
-            switch ($campoVacio) {
-                case 'capital':
-                    // P = A / (1 + r*t)
-                    $resultado = $data['monto_final'] / (1 + ($tasaDecimal * $data['tiempo']));
-                    $mensajeResultado = 'Capital inicial requerido: $'.number_format($resultado, 2);
-                    break;
-
-                case 'monto_final':
-                    // A = P(1 + r*t)
-                    $resultado = $data['capital'] * (1 + ($tasaDecimal * $data['tiempo']));
-                    $mensajeResultado = 'Monto final obtenido: $'.number_format($resultado, 2);
-                    break;
-
-                case 'tasa_interes':
-                    // r = (A/P - 1) / t
-                    $tasaCalculada = (($data['monto_final'] / $data['capital']) - 1) / $data['tiempo'];
-                    $resultado = $tasaCalculada * 100; // Convertir a porcentaje
-                    $mensajeResultado = 'Tasa de interés requerida: '.number_format($resultado, 2).'%';
-                    break;
-
-                case 'tiempo':
-                    // t = (A/P - 1) / r
-                    $resultado = (($data['monto_final'] / $data['capital']) - 1) / $tasaDecimal;
-                    $mensajeResultado = 'Tiempo requerido: '.number_format($resultado, 2).' años';
-                    break;
-            }
-
-            // Actualizar el formulario con el resultado
-            $data['resultado'] = number_format($resultado, 2);
-            $this->form->fill($data);
-
-            // Mostrar notificación de éxito
-            Notification::make()
-                ->title('¡Cálculo completado!')
-                ->success()
-                ->body($mensajeResultado)
-                ->send();
-
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Error en el cálculo')
-                ->danger()
-                ->body('Verifique que todos los valores sean válidos: '.$e->getMessage())
-                ->send();
         }
+
+        if (count($emptyFields) !== 1) {
+            return [
+                'error' => true,
+                'message' => count($emptyFields) === 0
+                    ? 'Debes dejar exactamente un campo vacío para calcular.'
+                    : 'Solo un campo puede estar vacío. Actualmente hay '.count($emptyFields).' campos vacíos.',
+            ];
+        }
+
+        $field = $emptyFields[0];
+        $rate = ! empty($data['tasa_interes']) ? $data['tasa_interes'] / 100 : null;
+
+        $result = 0;
+        $message = '';
+
+        switch ($field) {
+            case 'capital':
+                $result = $data['monto_final'] / (1 + ($rate * $data['tiempo']));
+                $message = 'Capital inicial requerido: $'.number_format($result, 2);
+                break;
+
+            case 'monto_final':
+                $result = $data['capital'] * (1 + ($rate * $data['tiempo']));
+                $message = 'Monto final obtenido: $'.number_format($result, 2);
+                break;
+
+            case 'tasa_interes':
+                $rateCalc = (($data['monto_final'] / $data['capital']) - 1) / $data['tiempo'];
+                $result = $rateCalc * 100;
+                $message = 'Tasa de interés requerida: '.number_format($result, 2).'%';
+                break;
+
+            case 'tiempo':
+                $result = (($data['monto_final'] / $data['capital']) - 1) / $rate;
+                $message = 'Tiempo requerido: '.number_format($result, 2).' años';
+                break;
+        }
+
+        return [
+            'error' => false,
+            'data' => array_merge($data, ['resultado' => number_format($result, 2)]),
+            'message' => $message,
+        ];
     }
 
-    public function calculateAnualidad(): void
+    private function calculateAnualidad(array $data): array
     {
+        $emptyFields = [];
+        foreach (['pago_periodico', 'valor_presente', 'valor_futuro', 'tasa_interes', 'numero_pagos'] as $field) {
+            if (empty($data[$field])) {
+                $emptyFields[] = $field;
+            }
+        }
+
+        // Validación de campos
+        if (count($emptyFields) === 0 || count($emptyFields) > 2) {
+            return [
+                'error' => true,
+                'message' => count($emptyFields) === 0
+                    ? 'Debes dejar 1 o 2 campos vacíos para calcular.'
+                    : 'Solo puedes dejar máximo 2 campos vacíos. Actualmente hay '.count($emptyFields).' vacíos.',
+            ];
+        }
+
+        $rate = ! empty($data['tasa_interes']) ? $data['tasa_interes'] / 100 : null;
+        $messages = [];
+
         try {
-            $data = $this->form->getState();
-
-            // Contar campos vacíos
-            $camposVacios = 0;
-            $camposVaciosArray = [];
-
-            if (empty($data['pago_periodico'])) {
-                $camposVacios++;
-                $camposVaciosArray[] = 'pago_periodico';
-            }
-            if (empty($data['valor_presente'])) {
-                $camposVacios++;
-                $camposVaciosArray[] = 'valor_presente';
-            }
-            if (empty($data['valor_futuro'])) {
-                $camposVacios++;
-                $camposVaciosArray[] = 'valor_futuro';
-            }
-            if (empty($data['tasa_interes'])) {
-                $camposVacios++;
-                $camposVaciosArray[] = 'tasa_interes';
-            }
-            if (empty($data['numero_pagos'])) {
-                $camposVacios++;
-                $camposVaciosArray[] = 'numero_pagos';
+            // Calcular según qué campo falta
+            if (in_array('valor_presente', $emptyFields) && ! empty($data['pago_periodico']) && $rate !== null && ! empty($data['numero_pagos'])) {
+                // VP = PMT × [(1 - (1 + r)^-n) / r]
+                $vp = $data['pago_periodico'] * ((1 - pow(1 + $rate, -$data['numero_pagos'])) / $rate);
+                $data['valor_presente'] = round($vp, 2);
+                $messages[] = "VP: {$data['valor_presente']}";
             }
 
-            // Validar que haya exactamente 1 o 2 campos vacíos
-            if ($camposVacios === 0) {
-                Notification::make()
-                    ->title('Error de validación')
-                    ->danger()
-                    ->body('Debe dejar vacío 1 o 2 campos para que sean calculados.')
-                    ->send();
-
-                return;
+            if (in_array('valor_futuro', $emptyFields) && ! empty($data['pago_periodico']) && $rate !== null && ! empty($data['numero_pagos'])) {
+                // VF = PMT × [((1 + r)^n - 1) / r]
+                $vf = $data['pago_periodico'] * ((pow(1 + $rate, $data['numero_pagos']) - 1) / $rate);
+                $data['valor_futuro'] = round($vf, 2);
+                $messages[] = "VF: {$data['valor_futuro']}";
             }
 
-            if ($camposVacios > 2) {
-                Notification::make()
-                    ->title('Error de validación')
-                    ->danger()
-                    ->body('Solo puede dejar vacíos máximo 2 campos. Actualmente hay '.$camposVacios.' campos vacíos.')
-                    ->send();
-
-                return;
+            if (in_array('pago_periodico', $emptyFields) && ! empty($data['valor_presente']) && $rate !== null && ! empty($data['numero_pagos'])) {
+                // PMT = VP × [r / (1 - (1+r)^-n)]
+                $pmt = $data['valor_presente'] * ($rate / (1 - pow(1 + $rate, -$data['numero_pagos'])));
+                $data['pago_periodico'] = round($pmt, 2);
+                $messages[] = "PMT (VP): {$data['pago_periodico']}";
             }
 
-            // Convertir porcentaje a decimal
-            $tasaDecimal = ! empty($data['tasa_interes']) ? $data['tasa_interes'] / 100 : null;
+            if (in_array('pago_periodico', $emptyFields) && ! empty($data['valor_futuro']) && $rate !== null && ! empty($data['numero_pagos'])) {
+                // PMT = VF × [r / ((1+r)^n - 1)]
+                $pmt = $data['valor_futuro'] * ($rate / (pow(1 + $rate, $data['numero_pagos']) - 1));
+                $data['pago_periodico'] = round($pmt, 2);
+                $messages[] = "PMT (VF): {$data['pago_periodico']}";
+            }
 
-            $mensajes = [];
+            if (in_array('numero_pagos', $emptyFields) && ! empty($data['valor_futuro']) && ! empty($data['pago_periodico']) && $rate !== null) {
+                // n = log(VF*r/PMT + 1) / log(1+r)
+                $n = log(($data['valor_futuro'] * $rate / $data['pago_periodico']) + 1) / log(1 + $rate);
+                $data['numero_pagos'] = (int) round($n, 0);
+                $messages[] = "Número de pagos calculado: {$data['numero_pagos']}";
+            }
 
-            // Si solo hay un campo vacío
-            if ($camposVacios === 1) {
-                $campoVacio = $camposVaciosArray[0];
+            if (in_array('tasa_interes', $emptyFields) && ! empty($data['pago_periodico']) && ! empty($data['numero_pagos'])) {
+                $r = 0.05; // Estimación inicial (5%)
+                $maxIter = 100;
+                $tol = 1e-7;
+                $n = $data['numero_pagos'];
+                $pmt = $data['pago_periodico'];
 
-                switch ($campoVacio) {
-                    case 'pago_periodico':
-                        if (! empty($data['valor_presente'])) {
-                            // PMT desde VP: PMT = PV * [r(1+r)^n] / [(1+r)^n - 1]
-                            $factor = pow(1 + $tasaDecimal, $data['numero_pagos']);
-                            $resultado = $data['valor_presente'] * ($tasaDecimal * $factor) / ($factor - 1);
-                            $data['pago_periodico'] = number_format($resultado, 2);
-                            $mensajes[] = 'Pago periódico (desde VP): $'.number_format($resultado, 2);
-                        } elseif (! empty($data['valor_futuro'])) {
-                            // PMT desde VF: PMT = FV * r / [(1+r)^n - 1]
-                            $factor = pow(1 + $tasaDecimal, $data['numero_pagos']);
-                            $resultado = $data['valor_futuro'] * $tasaDecimal / ($factor - 1);
-                            $data['pago_periodico'] = number_format($resultado, 2);
-                            $mensajes[] = 'Pago periódico (desde VF): $'.number_format($resultado, 2);
+                // Dependiendo de si tenemos VP o VF, usamos la fórmula correspondiente
+                if (! empty($data['valor_presente'])) {
+                    $vp = $data['valor_presente'];
+                    for ($i = 0; $i < $maxIter; $i++) {
+                        $f = $pmt * ((1 - pow(1 + $r, -$n)) / $r) - $vp;
+                        $fprime = $pmt * ((pow(1 + $r, -$n) * $n / (1 + $r) * $r - (1 - pow(1 + $r, -$n))) / ($r * $r));
+                        if (abs($fprime) < 1e-12) {
+                            break;
                         }
-                        break;
-
-                    case 'valor_presente':
-                        // PV = PMT * [(1+r)^n - 1] / [r(1+r)^n]
-                        $factor = pow(1 + $tasaDecimal, $data['numero_pagos']);
-                        $resultado = $data['pago_periodico'] * ($factor - 1) / ($tasaDecimal * $factor);
-                        $data['valor_presente'] = number_format($resultado, 2);
-                        $mensajes[] = 'Valor presente: $'.number_format($resultado, 2);
-                        break;
-
-                    case 'valor_futuro':
-                        // FV = PMT * [(1+r)^n - 1] / r
-                        $factor = pow(1 + $tasaDecimal, $data['numero_pagos']);
-                        $resultado = $data['pago_periodico'] * ($factor - 1) / $tasaDecimal;
-                        $data['valor_futuro'] = number_format($resultado, 2);
-                        $mensajes[] = 'Valor futuro: $'.number_format($resultado, 2);
-                        break;
-
-                    case 'numero_pagos':
-                        if (! empty($data['valor_presente'])) {
-                            // n = ln(1 + (PV * r) / PMT) / ln(1 + r)
-                            $resultado = log(1 + ($data['valor_presente'] * $tasaDecimal) / $data['pago_periodico']) / log(1 + $tasaDecimal);
-                            $data['numero_pagos'] = number_format($resultado, 0);
-                            $mensajes[] = 'Número de pagos: '.number_format($resultado, 0);
-                        } elseif (! empty($data['valor_futuro'])) {
-                            // n = ln(1 + (FV * r) / PMT) / ln(1 + r)
-                            $resultado = log(($data['valor_futuro'] * $tasaDecimal) / $data['pago_periodico'] + 1) / log(1 + $tasaDecimal);
-                            $data['numero_pagos'] = number_format($resultado, 0);
-                            $mensajes[] = 'Número de pagos: '.number_format($resultado, 0);
+                        $r_new = $r - $f / $fprime;
+                        if (abs($r_new - $r) < $tol) {
+                            $r = $r_new;
+                            break;
                         }
-                        break;
-                }
-            }
-            // Si hay dos campos vacíos
-            else {
-                // Casos comunes de dos campos vacíos
-                if (in_array('valor_presente', $camposVaciosArray) && in_array('valor_futuro', $camposVaciosArray)) {
-                    // Calcular VP y VF conociendo PMT, tasa y número de pagos
-                    $factor = pow(1 + $tasaDecimal, $data['numero_pagos']);
-
-                    // VP = PMT * [(1+r)^n - 1] / [r(1+r)^n]
-                    $vp = $data['pago_periodico'] * ($factor - 1) / ($tasaDecimal * $factor);
-                    $data['valor_presente'] = number_format($vp, 2);
-                    $mensajes[] = 'Valor presente: $'.number_format($vp, 2);
-
-                    // VF = PMT * [(1+r)^n - 1] / r
-                    $vf = $data['pago_periodico'] * ($factor - 1) / $tasaDecimal;
-                    $data['valor_futuro'] = number_format($vf, 2);
-                    $mensajes[] = 'Valor futuro: $'.number_format($vf, 2);
-                } elseif (in_array('pago_periodico', $camposVaciosArray) && in_array('numero_pagos', $camposVaciosArray)) {
-                    // Este caso requiere más datos específicos o aproximaciones
-                    Notification::make()
-                        ->title('Cálculo complejo')
-                        ->warning()
-                        ->body('Este cálculo requiere métodos iterativos. Proporcione más información.')
-                        ->send();
-
-                    return;
-                } else {
-                    // Otros casos pueden requerir métodos más complejos
-                    Notification::make()
-                        ->title('Combinación no soportada')
-                        ->warning()
-                        ->body('Esta combinación de campos vacíos no está soportada actualmente.')
-                        ->send();
-
-                    return;
+                        $r = $r_new;
+                    }
+                    $data['tasa_interes'] = $this->smartRound(round($r * 100, 4));
+                    $messages[] = "Tasa de interés aproximada (VP): {$data['tasa_interes']}%";
+                } elseif (! empty($data['valor_futuro'])) {
+                    $vf = $data['valor_futuro'];
+                    for ($i = 0; $i < $maxIter; $i++) {
+                        $f = $pmt * ((pow(1 + $r, $n) - 1) / $r) - $vf;
+                        $fprime = $pmt * (($n * pow(1 + $r, $n - 1) * $r - (pow(1 + $r, $n) - 1)) / ($r * $r));
+                        if (abs($fprime) < 1e-12) {
+                            break;
+                        }
+                        $r_new = $r - $f / $fprime;
+                        if (abs($r_new - $r) < $tol) {
+                            $r = $r_new;
+                            break;
+                        }
+                        $r = $r_new;
+                    }
+                    $data['tasa_interes'] = $this->smartRound(round($r * 100, 4));
+                    $messages[] = "Tasa de interés aproximada (VF): {$data['tasa_interes']}%";
                 }
             }
 
-            // Actualizar resultado combinado
-            $data['resultado'] = implode(' | ', $mensajes);
-            $this->form->fill($data);
-
-            // Mostrar notificación de éxito
-            Notification::make()
-                ->title('¡Cálculo completado!')
-                ->success()
-                ->body(implode('. ', $mensajes))
-                ->send();
-
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Error en el cálculo')
-                ->danger()
-                ->body('Verifique que todos los valores sean válidos: '.$e->getMessage())
-                ->send();
+        } catch (\Throwable $e) {
+            return [
+                'error' => true,
+                'message' => 'Error en cálculo: '.$e->getMessage(),
+            ];
         }
+
+        return [
+            'error' => false,
+            'data' => array_merge($data, ['resultado' => implode(' | ', $messages)]),
+            'message' => implode('. ', $messages),
+        ];
     }
 
-    public function calculate(CalculationType $calculationType)
+    // Helping methods
+    private function calculate(CalculationType $calculationType, array $formData): array
     {
-        if ($calculationType === CalculationType::ANUALIDAD) {
-            $this->calculateAnualidad();
+        return match ($calculationType) {
+            CalculationType::ANUALIDAD => $this->calculateAnualidad($formData),
+            CalculationType::SIMPLE => $this->calculateInteresSimple($formData),
+            CalculationType::COMPUESTO => $this->calculateInteresCompuesto($formData),
+            CalculationType::TASA_INTERES => throw new \Exception('Por implementar'),
+        };
+    }
+
+    private function smartRound(float $value): float
+    {
+        // Si está casi en un entero (±0.01), devolver como entero
+        if (abs($value - round($value)) < 0.01) {
+            return round($value);
         }
-        if ($calculationType === CalculationType::SIMPLE) {
-            $this->calculateInteresSimple();
+
+        // Si el segundo decimal es 0 ó >= 5 → 1 decimal
+        $oneDecimal = round($value, 1);
+        if (abs($value - $oneDecimal) < 0.05) {
+            return $oneDecimal;
         }
-        if ($calculationType === CalculationType::COMPUESTO) {
-            $this->calculateInteresCompuesto();
+
+        // En otros casos → 2 decimales
+        return round($value, 2);
+    }
+
+    // Exposed methods
+    public function formSubmit(CalculationType $calculationType): void
+    {
+        $formData = $this->form->getState();
+        $result = $this->calculate($calculationType, $formData);
+
+        if ($result['error']) {
+            Notification::make()
+                ->title('Error de validación')
+                ->danger()
+                ->body($result['message'])
+                ->send();
+
+            return;
         }
+        $this->form->fill($result['data']);
+
+        Notification::make()
+            ->title('¡Cálculo completado!')
+            ->success()
+            ->body($result['message'])
+            ->send();
     }
 
     public function limpiar(): void
