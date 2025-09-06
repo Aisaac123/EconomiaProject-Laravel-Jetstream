@@ -1,27 +1,17 @@
 <x-filament-panels::page>
     <!-- Hero Section Mejorada -->
-    <div class="relative bg-gradient-to-r from-primary-500 via-primary-800 to-primary-800 dark:from-primary-700 dark:via-primary-800 dark:to-primary-900 rounded-2xl p-8 mb-10 text-center shadow-xl overflow-hidden">
-        <div class="absolute inset-0 bg-grid-white/10 bg-[size:40px_40px]"></div>
-        <div class="relative z-10">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6">
-                <span class="text-4xl">📊</span>
+    <x-sections.heading-title
+        title="Calculadora Financiera Académica"
+        quote="Herramienta educativa avanzada para el análisis de modelos financieros y tasas de interés"
+        button-text="Comenzar"
+        href="#conceptos"
+    >
+        <x-slot:icon>
+            <div class="">
+                <span class="text-5xl">📊</span>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
-                Calculadora Financiera Académica
-            </h1>
-            <p class="text-xl text-white/90 max-w-3xl mx-auto">
-                Herramienta educativa avanzada para el análisis de modelos financieros y tasas de interés
-            </p>
-
-            <div class="mt-8 flex flex-wrap justify-center gap-4">
-                <a href="#conceptos">
-                    <button class="bg-white text-primary-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg">
-                        Comenzar a calcular
-                    </button>
-                </a>
-            </div>
-        </div>
-    </div>
+        </x-slot:icon>
+    </x-sections.heading-title>
 
     <!-- Temas expuestos -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4">
@@ -73,90 +63,9 @@
 
     <!-- Panel de contenido principal -->
     <div id="conceptos" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Sección de conceptos financieros -->
         <div class="lg:col-span-2">
-            <x-filament::section>
-                <x-slot name="heading" class="text-2xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
-                    <span class="mr-3">📚</span> Conceptos Financieros Fundamentales
-                </x-slot>
-
-                <p class="text-gray-700 dark:text-gray-300 mb-6">
-                    Explora los principales modelos de cálculo financiero utilizados en el ámbito académico y profesional.
-                </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <!-- Tarjeta Tasa de Interés -->
-                    <a href="{{ url('/tasa-interes') }}" class="group block focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-xl transition-all duration-300 transform hover:-translate-y-1">
-                        <x-filament::card class="rounded-xl border-l-4 border-primary-500 shadow-md group-hover:shadow-lg p-5">
-                            <div class="flex items-start">
-                                <div class="bg-primary-100 dark:bg-primary-900/30 p-3 rounded-lg mr-4">
-                                    <span class="text-2xl text-primary-500">💰</span>
-                                </div>
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200">Tasa de Interés</h3>
-                                    <p class="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-                                        Calcula el porcentaje aplicado al capital para determinar el interés en un período específico.
-                                    </p>
-                                </div>
-                            </div>
-                        </x-filament::card>
-                    </a>
-
-                    <!-- Tarjeta Interés Simple -->
-                    <a href="{{ url('/interes-simple') }}" class="group block focus:outline-none focus:ring-2 focus:ring-success-500 rounded-xl transition-all duration-300 transform hover:-translate-y-1">
-                        <x-filament::card class="rounded-xl border-l-4 border-success-500 shadow-md group-hover:shadow-lg p-5">
-                            <div class="flex items-start">
-                                <div class="bg-success-100 dark:bg-success-900/30 p-3 rounded-lg mr-4">
-                                    <span class="text-2xl text-success-500">📈</span>
-                                </div>
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200">Interés Simple</h3>
-                                    <p class="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-                                        Calcula intereses exclusivamente sobre el capital inicial durante todo el período.
-                                    </p>
-                                </div>
-                            </div>
-                        </x-filament::card>
-                    </a>
-
-                    <!-- Tarjeta Interés Compuesto -->
-                    <a href="{{ url('/interes-compuesto') }}" class="group block focus:outline-none focus:ring-2 focus:ring-danger-500 rounded-xl transition-all duration-300 transform hover:-translate-y-1">
-                        <x-filament::card class="rounded-xl border-l-4 border-danger-500 shadow-md group-hover:shadow-lg p-5">
-                            <div class="flex items-start">
-                                <div class="bg-danger-100 dark:bg-danger-900/30 p-3 rounded-lg mr-4">
-                                    <span class="text-2xl text-danger-500">📊</span>
-                                </div>
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200">Interés Compuesto</h3>
-                                    <p class="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-                                        Calcula "intereses sobre intereses" para entender el crecimiento exponencial.
-                                    </p>
-                                </div>
-                            </div>
-                        </x-filament::card>
-                    </a>
-
-                    <!-- Tarjeta Anualidad -->
-                    <a href="{{ url('/anualidad') }}" class="group block focus:outline-none focus:ring-2 focus:ring-warning-500 rounded-xl transition-all duration-300 transform hover:-translate-y-1">
-                        <x-filament::card class="rounded-xl border-l-4 border-warning-500 shadow-md group-hover:shadow-lg p-5">
-                            <div class="flex items-start">
-                                <div class="bg-warning-100 dark:bg-warning-900/30 p-3 rounded-lg mr-4">
-                                    <span class="text-2xl text-warning-500">🔄</span>
-                                </div>
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200">Anualidad</h3>
-                                    <p class="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-                                        Serie de pagos o cobros iguales realizados a intervalos regulares.
-                                    </p>
-                                </div>
-                            </div>
-                        </x-filament::card>
-                    </a>
-                </div>
-            </x-filament::section>
-
             <!-- Sección de metodología -->
-            <x-filament::section class="mt-8">
+            <x-filament::section>
                 <x-slot name="heading" class="text-2xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
                     <span class="mr-3">🔍</span> Metodología de Cálculo
                 </x-slot>
@@ -178,10 +87,135 @@
                     </ol>
                 </x-filament::card>
             </x-filament::section>
+            <!-- Sección de modelos financieros -->
+            <x-filament::section class="mt-6">
+                <x-slot name="heading" class="text-2xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
+                    <span class="mr-3">📚</span> Modelos Financieros Fundamentales
+                </x-slot>
+
+                <p class="text-gray-700 dark:text-gray-300">
+                    Explora los principales modelos de cálculo financiero utilizados en el ámbito académico y profesional.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300 mb-6">
+                    Dale click a alguno de nuestros modelos.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+
+                    <!-- Tarjeta Tasa de Interés -->
+                    <a href="{{ url('/tasa-interes') }}" class="group block focus:outline-none">
+                        <x-filament::card class="custom-hover rounded-xl shadow-md border-l-4 border-primary-500 p-5 relative overflow-hidden text-gray-800 dark:text-gray-200">
+                            <div class="absolute inset-0 bg-primary-500/20 rounded-xl -z-10 transition-all duration-700 group-hover:bg-gradient-to-r group-hover:from-primary-400 group-hover:via-primary-600 group-hover:to-primary-500"></div>
+                            <div class="flex items-start relative z-10 transition-colors duration-500 group-hover:text-white">
+                                <div class="bg-primary-100 dark:bg-primary-900/30 p-3 rounded-lg mr-4 group-hover:bg-white/30 transition-colors duration-500">
+                                    <span class="text-3xl text-primary-500 group-hover:text-white transition-colors duration-500">💰</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold">Tasa de Interés</h3>
+                                    <p class="mt-2 text-sm">
+                                        Calcula el porcentaje aplicado al capital para determinar el interés en un período específico.
+                                    </p>
+                                </div>
+                            </div>
+                        </x-filament::card>
+                    </a>
+
+                    <!-- Tarjeta Interés Simple -->
+                    <a href="{{ url('/interes-simple') }}" class="group block focus:outline-none">
+                        <x-filament::card class="custom-hover rounded-xl shadow-md border-l-4 border-success-500 p-5 relative overflow-hidden text-gray-800 dark:text-gray-200">
+                            <div class="absolute inset-0 bg-success-500/20 rounded-xl -z-10 transition-all duration-700 group-hover:bg-gradient-to-r group-hover:from-success-400 group-hover:via-success-600 group-hover:to-success-500"></div>
+                            <div class="flex items-start relative z-10 transition-colors duration-500 group-hover:text-white">
+                                <div class="bg-success-100 dark:bg-success-900/30 p-3 rounded-lg mr-4 group-hover:bg-white/30 transition-colors duration-500">
+                                    <span class="text-3xl text-success-500 group-hover:text-white transition-colors duration-500">📈</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold">Interés Simple</h3>
+                                    <p class="mt-2 text-sm">
+                                        Calcula intereses exclusivamente sobre el capital inicial durante todo el período.
+                                    </p>
+                                </div>
+                            </div>
+                        </x-filament::card>
+                    </a>
+
+                    <!-- Tarjeta Interés Compuesto -->
+                    <a href="{{ url('/interes-compuesto') }}" class="group block focus:outline-none">
+                        <x-filament::card class="custom-hover rounded-xl shadow-md border-l-4 border-danger-500 p-5 relative overflow-hidden text-gray-800 dark:text-gray-200">
+                            <div class="absolute inset-0 bg-danger-500/20 rounded-xl -z-10 transition-all duration-700 group-hover:bg-gradient-to-r group-hover:from-danger-400 group-hover:via-danger-600 group-hover:to-danger-500"></div>
+                            <div class="flex items-start relative z-10 transition-colors duration-500 group-hover:text-white">
+                                <div class="bg-danger-100 dark:bg-danger-900/30 p-3 rounded-lg mr-4 group-hover:bg-white/30 transition-colors duration-500">
+                                    <span class="text-3xl text-danger-500 group-hover:text-white transition-colors duration-500">📊</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold">Interés Compuesto</h3>
+                                    <p class="mt-2 text-sm">
+                                        Calcula "intereses sobre intereses" para entender el crecimiento exponencial.
+                                    </p>
+                                </div>
+                            </div>
+                        </x-filament::card>
+                    </a>
+
+                    <!-- Tarjeta Anualidad -->
+                    <a href="{{ url('/anualidad') }}" class="group block focus:outline-none">
+                        <x-filament::card class="custom-hover rounded-xl shadow-md border-l-4 border-warning-500 p-5 relative overflow-hidden text-gray-800 dark:text-gray-200">
+                            <div class="absolute inset-0 bg-warning-500/20 rounded-xl -z-10 transition-all duration-700 group-hover:bg-gradient-to-r group-hover:from-warning-400 group-hover:via-warning-600 group-hover:to-warning-500"></div>
+                            <div class="flex items-start relative z-10 transition-colors duration-500 group-hover:text-white">
+                                <div class="bg-warning-100 dark:bg-warning-900/30 p-3 rounded-lg mr-4 group-hover:bg-white/30 transition-colors duration-500">
+                                    <span class="text-3xl text-warning-500 group-hover:text-white transition-colors duration-500">🔄</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold">Anualidad</h3>
+                                    <p class="mt-2 text-sm">
+                                        Serie de pagos o cobros iguales realizados a intervalos regulares.
+                                    </p>
+                                </div>
+                            </div>
+                        </x-filament::card>
+                    </a>
+
+                </div>
+
+            </x-filament::section>
         </div>
 
         <!-- Sidebar con información adicional -->
-        <div class="space-y-8">
+        <div class="space-y-6">
+            <!-- Consejos útiles -->
+            <x-filament::section>
+                <x-slot name="heading" class="text-xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
+                    <span class="mr-2">💡</span> Consejos Prácticos
+                </x-slot>
+
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="flex-shrink-0 text-success-500 text-lg mr-2">•</span>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Siempre verifica que la tasa de interés y el período estén en la misma unidad de tiempo.</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="flex-shrink-0 text-success-500 text-lg mr-2">•</span>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Para comparar opciones de inversión, convierte todas las tasas a la misma periodicidad.</p>
+                    </div>
+                </div>
+            </x-filament::section>
+            <!-- Enlaces útiles -->
+            <x-filament::section>
+                <x-slot name="heading" class="text-xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
+                    <span class="mr-2">🔗</span> Enlaces de Interés
+                </x-slot>
+
+                <div class="space-y-2">
+                    <a href="#" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
+                        <span class="mr-2">→</span> Glosario de términos financieros
+                    </a>
+                    <a href="#" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
+                        <span class="mr-2">→</span> Fórmulas financieras esenciales
+                    </a>
+                    <a href="#" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
+                        <span class="mr-2">→</span> Ejercicios prácticos resueltos
+                    </a>
+                </div>
+            </x-filament::section>
             <!-- Calculadora rápida -->
             <x-filament::section>
                 <x-slot name="heading" class="text-xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
@@ -204,47 +238,6 @@
                     <button class="w-full filament-button filament-button-size-md inline-flex items-center justify-center py-2 gap-2 font-medium rounded-lg border transition-colors focus:outline-none focus:ring-offset-2 focus:ring-2 focus:ring-inset dark:focus:ring-offset-0 min-h-[2.5rem] px-4 text-sm text-white bg-primary-600 hover:bg-primary-500 focus:bg-primary-700 focus:ring-offset-primary-700 focus:ring-white border-transparent">
                         <span class="mr-2">🧮</span> Calcular
                     </button>
-                </div>
-            </x-filament::section>
-
-            <!-- Consejos útiles -->
-            <x-filament::section>
-                <x-slot name="heading" class="text-xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
-                    <span class="mr-2">💡</span> Consejos Prácticos
-                </x-slot>
-
-                <div class="space-y-4">
-                    <div class="flex items-start">
-                        <span class="flex-shrink-0 text-success-500 text-lg mr-2">•</span>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Siempre verifica que la tasa de interés y el período estén en la misma unidad de tiempo.</p>
-                    </div>
-                    <div class="flex items-start">
-                        <span class="flex-shrink-0 text-success-500 text-lg mr-2">•</span>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Para comparar opciones de inversión, convierte todas las tasas a la misma periodicidad.</p>
-                    </div>
-                    <div class="flex items-start">
-                        <span class="flex-shrink-0 text-success-500 text-lg mr-2">•</span>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Considera el efecto de la inflación en tus cálculos para obtener resultados reales.</p>
-                    </div>
-                </div>
-            </x-filament::section>
-
-            <!-- Enlaces útiles -->
-            <x-filament::section>
-                <x-slot name="heading" class="text-xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
-                    <span class="mr-2">🔗</span> Enlaces de Interés
-                </x-slot>
-
-                <div class="space-y-2">
-                    <a href="#" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
-                        <span class="mr-2">→</span> Glosario de términos financieros
-                    </a>
-                    <a href="#" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
-                        <span class="mr-2">→</span> Fórmulas financieras esenciales
-                    </a>
-                    <a href="#" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
-                        <span class="mr-2">→</span> Ejercicios prácticos resueltos
-                    </a>
                 </div>
             </x-filament::section>
         </div>

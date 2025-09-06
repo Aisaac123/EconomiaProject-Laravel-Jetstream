@@ -6,14 +6,15 @@ use App\Filament\Schemas\AnualidadSchema;
 use App\Traits\FormCalculations;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 
 class Anualidad extends Page
 {
     use FormCalculations;
 
-    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-calendar';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-calendar-days';
 
-    protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-s-calendar';
+    protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-s-calendar-days';
 
     protected string $view = 'filament.pages.anualidad';
 
@@ -22,7 +23,7 @@ class Anualidad extends Page
         return 4;
     }
 
-    public function getHeading(): \Illuminate\Contracts\Support\Htmlable|string
+    public function getHeading(): Htmlable|string
     {
         return '';
     }
