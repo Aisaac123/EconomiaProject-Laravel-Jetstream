@@ -11,7 +11,7 @@ class InteresSimple extends Page
 {
     use FormCalculations;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calculator';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-calculator';
 
     protected string $view = 'filament.pages.interes-simple';
 
