@@ -34,4 +34,3 @@ class InteresSimple extends Page
             ->operation('calculate');
     }
 }
-
