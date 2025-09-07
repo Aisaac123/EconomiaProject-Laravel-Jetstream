@@ -73,7 +73,6 @@ class AppPanelProvider extends PanelProvider
     private function custom(Panel $panel): Panel
     {
         return $panel
-            ->topNavigation()
             ->font('Quicksand')
             ->authGuard('web')
             ->navigationItems([
