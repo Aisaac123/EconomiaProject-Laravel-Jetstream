@@ -1,6 +1,6 @@
 @props(['calculationType'])
 
-<form wire:submit="formSubmit('{{ $calculationType }}')" class="space-y-6">
+<form wire:submit.prevent="formSubmit('{{ $calculationType }}')" class="space-y-6">
     <div class="flex items-start space-x-3">
         <x-heroicon-o-information-circle class="h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5" />
         <div class="text-sm">
