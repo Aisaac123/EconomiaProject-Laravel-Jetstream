@@ -2,8 +2,8 @@
 
 namespace App\Filament\Schemas;
 
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -153,9 +153,9 @@ class InteresCompuestoSchema
                                     <div class='rounded-lg p-4 border {$bgClass}'>
                                         <div class='flex items-center justify-between mb-2'>
                                             <h4 class='font-semibold {$textClass}'>💵 Capital Inicial</h4>
-                                            " . ($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                                            ".($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                                         </div>
-                                        <p class='text-2xl font-bold {$textClass}'>" . ($capital ? '$' . number_format($capital, 2) : $resultado) . "</p>
+                                        <p class='text-2xl font-bold {$textClass}'>".($capital ? '$'.number_format($capital, 2) : $resultado)."</p>
                                         <p class='text-sm text-gray-600 dark:text-gray-400'>Inversión inicial</p>
                                     </div>
                                 ";
@@ -170,9 +170,9 @@ class InteresCompuestoSchema
                                     <div class='rounded-lg p-4 border {$bgClass}'>
                                         <div class='flex items-center justify-between mb-2'>
                                             <h4 class='font-semibold {$textClass}'>🎯 Monto Final</h4>
-                                            " . ($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                                            ".($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                                         </div>
-                                        <p class='text-2xl font-bold {$textClass}'>" . ($montoFinal ? '$' . number_format($montoFinal, 2) : $resultado) . "</p>
+                                        <p class='text-2xl font-bold {$textClass}'>".($montoFinal ? '$'.number_format($montoFinal, 2) : $resultado)."</p>
                                         <p class='text-sm text-gray-600 dark:text-gray-400'>Valor al vencimiento</p>
                                     </div>
                                 ";
@@ -187,9 +187,9 @@ class InteresCompuestoSchema
                                     <div class='rounded-lg p-4 border {$bgClass}'>
                                         <div class='flex items-center justify-between mb-2'>
                                             <h4 class='font-semibold {$textClass}'>📈 Tasa de Interés</h4>
-                                            " . ($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                                            ".($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                                         </div>
-                                        <p class='text-2xl font-bold {$textClass}'>" . ($tasaInteres ? $tasaInteres . '%' : $resultado) . "</p>
+                                        <p class='text-2xl font-bold {$textClass}'>".($tasaInteres ? $tasaInteres.'%' : $resultado)."</p>
                                         <p class='text-sm text-gray-600 dark:text-gray-400'>Tasa anual</p>
                                     </div>
                                 ";
@@ -204,9 +204,9 @@ class InteresCompuestoSchema
                                     <div class='rounded-lg p-4 border {$bgClass}'>
                                         <div class='flex items-center justify-between mb-2'>
                                             <h4 class='font-semibold {$textClass}'>⏰ Tiempo</h4>
-                                            " . ($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                                            ".($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                                         </div>
-                                        <p class='text-2xl font-bold {$textClass}'>" . ($tiempo ? $tiempo . ' años' : $resultado . ' años') . "</p>
+                                        <p class='text-2xl font-bold {$textClass}'>".($tiempo ? $tiempo.' años' : $resultado.' años')."</p>
                                         <p class='text-sm text-gray-600 dark:text-gray-400'>Período de inversión</p>
                                     </div>
                                 ";
@@ -219,7 +219,7 @@ class InteresCompuestoSchema
 
                                     // Frecuencia de capitalización
                                     if ($frecuencia) {
-                                        $frecuenciaTexto = match((int)$frecuencia) {
+                                        $frecuenciaTexto = match ((int) $frecuencia) {
                                             1 => 'Anual',
                                             2 => 'Semestral',
                                             4 => 'Trimestral',
@@ -228,7 +228,7 @@ class InteresCompuestoSchema
                                             52 => 'Semanal',
                                             365 => 'Diaria',
                                             360 => 'Diaria (Aproximada)',
-                                            default => $frecuencia . ' veces/año'
+                                            default => $frecuencia.' veces/año'
                                         };
 
                                         $html .= "
@@ -251,7 +251,7 @@ class InteresCompuestoSchema
                                                     <span class='text-amber-600 dark:text-amber-400'>💎</span>
                                                     <h4 class='font-semibold text-amber-900 dark:text-amber-100'>Interés Generado</h4>
                                                 </div>
-                                                <p class='text-xl font-bold text-amber-900 dark:text-amber-100'>$" . $interesGenerado . "</p>
+                                                <p class='text-xl font-bold text-amber-900 dark:text-amber-100'>$".$interesGenerado."</p>
                                                 <p class='text-sm text-amber-600 dark:text-amber-400'>Ganancia total</p>
                                             </div>
                                         ";
@@ -278,9 +278,9 @@ class InteresCompuestoSchema
                                 $html .= '</div>'; // Fin del contenedor principal
 
                                 return new HtmlString($html);
-                            })
+                            }),
                     ]),
-                ])
+                ]),
         ]);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Schemas;
 
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -144,9 +144,9 @@ class AnualidadSchema
                                     <div class='rounded-lg p-4 border {$bgClass}'>
                                         <div class='flex items-center justify-between mb-2'>
                                             <h4 class='font-semibold {$textClass}'>💵 Pago Periódico</h4>
-                                            " . ($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                                            ".($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                                         </div>
-                                        <p class='text-2xl font-bold {$textClass}'>" . ($pagoPeriodico ? '$' . number_format($pagoPeriodico, 2) : 'N/A') . "</p>
+                                        <p class='text-2xl font-bold {$textClass}'>".($pagoPeriodico ? '$'.number_format($pagoPeriodico, 2) : 'N/A')."</p>
                                         <p class='text-sm text-gray-600 dark:text-gray-400'>Monto de cada pago (PMT)</p>
                                     </div>
                                 ";
@@ -161,9 +161,9 @@ class AnualidadSchema
                                     <div class='rounded-lg p-4 border {$bgClass}'>
                                         <div class='flex items-center justify-between mb-2'>
                                             <h4 class='font-semibold {$textClass}'>📉 Valor Presente</h4>
-                                            " . ($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                                            ".($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                                         </div>
-                                        <p class='text-2xl font-bold {$textClass}'>" . ($valorPresente ? '$' . number_format($valorPresente, 2) : 'N/A') . "</p>
+                                        <p class='text-2xl font-bold {$textClass}'>".($valorPresente ? '$'.number_format($valorPresente, 2) : 'N/A')."</p>
                                         <p class='text-sm text-gray-600 dark:text-gray-400'>Valor actual (VP)</p>
                                     </div>
                                 ";
@@ -178,9 +178,9 @@ class AnualidadSchema
                                     <div class='rounded-lg p-4 border {$bgClass}'>
                                         <div class='flex items-center justify-between mb-2'>
                                             <h4 class='font-semibold {$textClass}'>📈 Valor Futuro</h4>
-                                            " . ($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                                            ".($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                                         </div>
-                                        <p class='text-2xl font-bold {$textClass}'>" . ($valorFuturo ? '$' . number_format($valorFuturo, 2) : 'N/A') . "</p>
+                                        <p class='text-2xl font-bold {$textClass}'>".($valorFuturo ? '$'.number_format($valorFuturo, 2) : 'N/A')."</p>
                                         <p class='text-sm text-gray-600 dark:text-gray-400'>Valor acumulado (VF)</p>
                                     </div>
                                 ";
@@ -195,9 +195,9 @@ class AnualidadSchema
                                     <div class='rounded-lg p-4 border {$bgClass}'>
                                         <div class='flex items-center justify-between mb-2'>
                                             <h4 class='font-semibold {$textClass}'>🎯 Tasa de Interés</h4>
-                                            " . ($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                                            ".($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                                         </div>
-                                        <p class='text-2xl font-bold {$textClass}'>" . ($tasaInteres ? $tasaInteres . '%' : 'N/A') . "</p>
+                                        <p class='text-2xl font-bold {$textClass}'>".($tasaInteres ? $tasaInteres.'%' : 'N/A')."</p>
                                         <p class='text-sm text-gray-600 dark:text-gray-400'>Tasa por período (r)</p>
                                     </div>
                                 ";
@@ -212,9 +212,9 @@ class AnualidadSchema
                                     <div class='rounded-lg p-4 border {$bgClass}'>
                                         <div class='flex items-center justify-between mb-2'>
                                             <h4 class='font-semibold {$textClass}'>🔄 Número de Pagos</h4>
-                                            " . ($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                                            ".($isCalculated ? "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-2 py-1 text-xs rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                                         </div>
-                                        <p class='text-2xl font-bold {$textClass}'>" . ($numeroPagos ? $numeroPagos . ' pagos' : 'N/A') . "</p>
+                                        <p class='text-2xl font-bold {$textClass}'>".($numeroPagos ? $numeroPagos.' pagos' : 'N/A')."</p>
                                         <p class='text-sm text-gray-600 dark:text-gray-400'>Total de pagos (n)</p>
                                     </div>
                                 ";
@@ -239,9 +239,9 @@ class AnualidadSchema
                                 $html .= '</div>'; // Fin del contenedor principal
 
                                 return new HtmlString($html);
-                            })
+                            }),
                     ]),
-                ])
+                ]),
         ]);
     }
 }
