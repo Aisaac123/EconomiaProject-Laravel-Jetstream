@@ -64,7 +64,7 @@ trait FormCalculations
         }
 
         $finalAmount = $finalAmount ?? $data['monto_final'];
-        return $this->calculateResult($finalAmount, $data, $result, $message);
+        return $this->calculateResponse($finalAmount, $data, $result, $message);
     }
     private function calculateInteresSimple(array $data): array
     {
@@ -114,11 +114,14 @@ trait FormCalculations
         }
 
         $finalAmount = $finalAmount ?? $data['monto_final'];
-        return $this->calculateResult($finalAmount, $data, $result, $message);
+        return $this->calculateResponse($finalAmount, $data, $result, $message);
     }
     private function calculateAnualidad(array $data): array
     {
         $emptyFields = [];
+        $camposCalculados = [];
+        $messages = [];
+
         foreach (['pago_periodico', 'valor_presente', 'valor_futuro', 'tasa_interes', 'numero_pagos'] as $field) {
             if (empty($data[$field])) {
                 $emptyFields[] = $field;
@@ -135,48 +138,52 @@ trait FormCalculations
             ];
         }
 
-        $rate = ! empty($data['tasa_interes']) ? $data['tasa_interes'] / 100 : null;
-        $messages = [];
+        $rate = !empty($data['tasa_interes']) ? $data['tasa_interes'] / 100 : null;
         $calc = $data;
 
         try {
-            // Calcular según qué campo falta
-            if (in_array('valor_presente', $emptyFields) && ! empty($calc['pago_periodico']) && $rate !== null && ! empty($calc['numero_pagos'])) {
+            // Calcular según qué campos faltan
+            if (in_array('valor_presente', $emptyFields) && !empty($calc['pago_periodico']) && $rate !== null && !empty($calc['numero_pagos'])) {
                 // VP = PMT × [(1 - (1 + r)^-n) / r]
                 $vp = $calc['pago_periodico'] * ((1 - pow(1 + $rate, -$calc['numero_pagos'])) / $rate);
                 $calc['valor_presente'] = round($vp, 2);
-                $messages[] = "VP: {$calc['valor_presente']}";
+                $camposCalculados[] = 'valor_presente';
+                $messages[] = "Valor Presente calculado: $" . number_format($calc['valor_presente'], 2);
             }
 
-            if (in_array('valor_futuro', $emptyFields) && ! empty($calc['pago_periodico']) && $rate !== null && ! empty($calc['numero_pagos'])) {
+            if (in_array('valor_futuro', $emptyFields) && !empty($calc['pago_periodico']) && $rate !== null && !empty($calc['numero_pagos'])) {
                 // VF = PMT × [((1 + r)^n - 1) / r]
                 $vf = $calc['pago_periodico'] * ((pow(1 + $rate, $calc['numero_pagos']) - 1) / $rate);
                 $calc['valor_futuro'] = round($vf, 2);
-                $messages[] = "VF: {$calc['valor_futuro']}";
+                $camposCalculados[] = 'valor_futuro';
+                $messages[] = "Valor Futuro calculado: $" . number_format($calc['valor_futuro'], 2);
             }
 
-            if (in_array('pago_periodico', $emptyFields) && ! empty($calc['valor_presente']) && $rate !== null && ! empty($calc['numero_pagos'])) {
+            if (in_array('pago_periodico', $emptyFields) && !empty($calc['valor_presente']) && $rate !== null && !empty($calc['numero_pagos'])) {
                 // PMT = VP × [r / (1 - (1+r)^-n)]
                 $pmt = $calc['valor_presente'] * ($rate / (1 - pow(1 + $rate, -$calc['numero_pagos'])));
                 $calc['pago_periodico'] = round($pmt, 2);
-                $messages[] = "PMT (VP): {$calc['pago_periodico']}";
+                $camposCalculados[] = 'pago_periodico';
+                $messages[] = "Pago Periódico calculado (desde VP): $" . number_format($calc['pago_periodico'], 2);
             }
 
-            if (in_array('pago_periodico', $emptyFields) && ! empty($calc['valor_futuro']) && $rate !== null && ! empty($calc['numero_pagos'])) {
+            if (in_array('pago_periodico', $emptyFields) && !empty($calc['valor_futuro']) && $rate !== null && !empty($calc['numero_pagos'])) {
                 // PMT = VF × [r / ((1+r)^n - 1)]
                 $pmt = $calc['valor_futuro'] * ($rate / (pow(1 + $rate, $calc['numero_pagos']) - 1));
                 $calc['pago_periodico'] = round($pmt, 2);
-                $messages[] = "PMT (VF): {$calc['pago_periodico']}";
+                $camposCalculados[] = 'pago_periodico';
+                $messages[] = "Pago Periódico calculado (desde VF): $" . number_format($calc['pago_periodico'], 2);
             }
 
-            if (in_array('numero_pagos', $emptyFields) && ! empty($calc['valor_futuro']) && ! empty($calc['pago_periodico']) && $rate !== null) {
+            if (in_array('numero_pagos', $emptyFields) && !empty($calc['valor_futuro']) && !empty($calc['pago_periodico']) && $rate !== null) {
                 // n = log(VF*r/PMT + 1) / log(1+r)
                 $n = log(($calc['valor_futuro'] * $rate / $calc['pago_periodico']) + 1) / log(1 + $rate);
                 $calc['numero_pagos'] = (int) round($n, 0);
-                $messages[] = "Número de pagos calculado: {$calc['numero_pagos']}";
+                $camposCalculados[] = 'numero_pagos';
+                $messages[] = "Número de pagos calculado: " . $calc['numero_pagos'];
             }
 
-            if (in_array('tasa_interes', $emptyFields) && ! empty($calc['pago_periodico']) && ! empty($calc['numero_pagos'])) {
+            if (in_array('tasa_interes', $emptyFields) && !empty($calc['pago_periodico']) && !empty($calc['numero_pagos'])) {
                 $r = 0.05; // Estimación inicial (5%)
                 $maxIter = 100;
                 $tol = 1e-7;
@@ -184,7 +191,7 @@ trait FormCalculations
                 $pmt = $calc['pago_periodico'];
 
                 // Dependiendo de si tenemos VP o VF, usamos la fórmula correspondiente
-                if (! empty($calc['valor_presente'])) {
+                if (!empty($calc['valor_presente'])) {
                     $vp = $calc['valor_presente'];
                     for ($i = 0; $i < $maxIter; $i++) {
                         $f = $pmt * ((1 - pow(1 + $r, -$n)) / $r) - $vp;
@@ -200,8 +207,9 @@ trait FormCalculations
                         $r = $r_new;
                     }
                     $calc['tasa_interes'] = $this->smartRound(round($r * 100, 4));
-                    $messages[] = "Tasa de interés aproximada (VP): {$calc['tasa_interes']}%";
-                } elseif (! empty($calc['valor_futuro'])) {
+                    $camposCalculados[] = 'tasa_interes';
+                    $messages[] = "Tasa de interés aproximada (VP): " . $calc['tasa_interes'] . "%";
+                } elseif (!empty($calc['valor_futuro'])) {
                     $vf = $calc['valor_futuro'];
                     for ($i = 0; $i < $maxIter; $i++) {
                         $f = $pmt * ((pow(1 + $r, $n) - 1) / $r) - $vf;
@@ -217,7 +225,8 @@ trait FormCalculations
                         $r = $r_new;
                     }
                     $calc['tasa_interes'] = $this->smartRound(round($r * 100, 4));
-                    $messages[] = "Tasa de interés aproximada (VF): {$calc['tasa_interes']}%";
+                    $camposCalculados[] = 'tasa_interes';
+                    $messages[] = "Tasa de interés aproximada (VF): " . $calc['tasa_interes'] . "%";
                 }
             }
 
@@ -228,12 +237,15 @@ trait FormCalculations
             ];
         }
 
-        $this->result = [
+        return [
             'error' => false,
-            'data' => array_merge($calc, ['resultado' => implode(' | ', $messages)]),
+            'data' => array_merge($calc, [
+                'resultado' => implode(' | ', $messages),
+                'campos_calculados' => json_encode($camposCalculados),
+                'mensaje' => implode('. ', $messages)
+            ]),
             'message' => implode('. ', $messages),
         ];
-        return $this->result;
     }
 
     /**
@@ -248,22 +260,24 @@ trait FormCalculations
             CalculationType::TASA_INTERES => throw new \Exception('Por implementar'),
         };
     }
-    private function calculateResult($finalAmount, array $data, float|int $result, string $message): array
+    private function calculateResponse($finalAmount, array $data, float|int $result, string $message): array
     {
-
         $interest = null;
         if (!empty($finalAmount) && !empty($data['capital'])) {
             $interest = $finalAmount - $data['capital'];
+        } else if (empty($finalAmount) && !empty($data['capital'])){
+            $interest = $result - $data['capital'];
         }
 
         $this->result = [
             'error' => false,
             'data' => array_merge($data, [
-                'result' => number_format($result, 2),
-                'interest_generated' => $interest !== null ? number_format($interest, 2) : null,
-                'final_amount' => $finalAmount,
+                'resultado' => number_format($result, 2),
+                'interes_generado' => $interest !== null ? number_format($interest, 2) : null,
+                'monto_final' => $finalAmount,
+                'mensaje' => $message
             ]),
-            'message' => $message . ($interest !== null ? ' | Interest generated: $' . number_format($interest, 2) : ''),
+            'message' => $message . ($interest !== null ? ' | Interés generado: $' . number_format($interest, 2) : ''),
         ];
         return $this->result;
     }

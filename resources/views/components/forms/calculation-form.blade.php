@@ -1,4 +1,4 @@
-@props(['calculationType', 'result'])
+@props(['calculationType'])
 
 <form wire:submit.prevent="formSubmit('{{ $calculationType }}')" class="space-y-6">
     <div class="flex items-start space-x-3">
