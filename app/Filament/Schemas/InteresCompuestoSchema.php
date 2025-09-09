@@ -2,12 +2,12 @@
 
 namespace App\Filament\Schemas;
 
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -124,7 +124,7 @@ class InteresCompuestoSchema
                                 ->hint('Períodos por año')
                                 ->default(1)
                                 ->columnSpan(9)
-                                ->visible(fn (callable $get) => !$get('usar_select_periodicidad_tasa'))
+                                ->visible(fn (callable $get) => ! $get('usar_select_periodicidad_tasa'))
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(function (callable $set) {
                                     $set('campo_calculado', null);
@@ -192,7 +192,7 @@ class InteresCompuestoSchema
                                 ->step(0.01)
                                 ->hint('Duración en años')
                                 ->columnSpan(8)
-                                ->visible(fn (callable $get) => !$get('usar_fechas_tiempo'))
+                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(function (callable $set) {
                                     $set('campo_calculado', null);
@@ -274,7 +274,7 @@ class InteresCompuestoSchema
                                 ->hint('Veces por año')
                                 ->default(12)
                                 ->columnSpan(9)
-                                ->visible(fn (callable $get) => !$get('usar_select_frecuencia'))
+                                ->visible(fn (callable $get) => ! $get('usar_select_frecuencia'))
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(function (callable $set) {
                                     $set('campo_calculado', null);
@@ -398,9 +398,9 @@ class InteresCompuestoSchema
                                             <p class="text-sm text-gray-400">Presiona el botón "Calcular" para ver los resultados</p>
                                         </div>
                                     ');
-                                })
+                                }),
                         ]),
-                    ])
+                    ]),
             ]);
     }
 
@@ -447,7 +447,7 @@ class InteresCompuestoSchema
                         <span>💵</span>
                         Capital Inicial
                     </h4>
-                    " . ($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                    ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                 </div>
                 <p class='text-3xl font-bold {$textClass} mb-2'>{$displayValue}</p>
                 <p class='text-sm text-gray-600 dark:text-gray-400'>Inversión inicial</p>
@@ -471,7 +471,7 @@ class InteresCompuestoSchema
                         <span>🎯</span>
                         Monto Final
                     </h4>
-                    " . ($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                    ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                 </div>
                 <p class='text-3xl font-bold {$textClass} mb-2'>{$displayValue}</p>
                 <p class='text-sm text-gray-600 dark:text-gray-400'>Valor al vencimiento</p>
@@ -487,8 +487,8 @@ class InteresCompuestoSchema
         $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
 
         $displayValue = $isCalculated
-            ? $resultado . '%'
-            : (is_numeric($tasaInteres) ? $tasaInteres . '%' : '--');
+            ? $resultado.'%'
+            : (is_numeric($tasaInteres) ? $tasaInteres.'%' : '--');
 
         $html .= "
             <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
@@ -497,7 +497,7 @@ class InteresCompuestoSchema
                         <span>📈</span>
                         Tasa de Interés
                     </h4>
-                    " . ($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                    ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                 </div>
                 <p class='text-3xl font-bold {$textClass} mb-2'>{$displayValue}</p>
                 <p class='text-sm text-gray-600 dark:text-gray-400'>Según periodicidad seleccionada</p>
@@ -512,8 +512,8 @@ class InteresCompuestoSchema
         $textClass = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-gray-100';
         $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
         $displayValue = $isCalculated
-            ? $resultado . ' años'
-            : (is_numeric($tiempo) ? $tiempo . ' años' : '--');
+            ? $resultado.' años'
+            : (is_numeric($tiempo) ? $tiempo.' años' : '--');
         $html .= "
             <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
                 <div class='flex items-center justify-between mb-3'>
@@ -521,7 +521,7 @@ class InteresCompuestoSchema
                         <span>⏰</span>
                         Tiempo
                     </h4>
-                    " . ($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>") . "
+                    ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
                 </div>
                 <p class='text-3xl font-bold {$textClass} mb-2'>{$displayValue}</p>
                 <p class='text-sm text-gray-600 dark:text-gray-400'>Período de inversión</p>
@@ -536,7 +536,7 @@ class InteresCompuestoSchema
 
             // Periodicidad de la tasa
             if ($periodicidadTasa) {
-                $periodicidadTexto = match((int)$periodicidadTasa) {
+                $periodicidadTexto = match ((int) $periodicidadTasa) {
                     1 => 'Anual',
                     2 => 'Semestral',
                     4 => 'Trimestral',
@@ -546,7 +546,7 @@ class InteresCompuestoSchema
                     52 => 'Semanal',
                     360 => 'Diaria Comercial',
                     365 => 'Diaria',
-                    default => $periodicidadTasa . ' veces/año'
+                    default => $periodicidadTasa.' veces/año'
                 };
 
                 $html .= "
@@ -563,7 +563,7 @@ class InteresCompuestoSchema
 
             // Frecuencia de capitalización
             if ($frecuencia) {
-                $frecuenciaTexto = match((int)$frecuencia) {
+                $frecuenciaTexto = match ((int) $frecuencia) {
                     1 => 'Anual',
                     2 => 'Semestral',
                     4 => 'Trimestral',
@@ -573,7 +573,7 @@ class InteresCompuestoSchema
                     52 => 'Semanal',
                     365 => 'Diaria',
                     360 => 'Diaria Comercial',
-                    default => $frecuencia . ' veces/año'
+                    default => $frecuencia.' veces/año'
                 };
 
                 $html .= "
@@ -596,7 +596,7 @@ class InteresCompuestoSchema
                             <span class='text-amber-600 dark:text-amber-400'>💎</span>
                             <h4 class='font-semibold text-amber-900 dark:text-amber-100 text-sm'>Interés Generado</h4>
                         </div>
-                        <p class='text-lg font-bold text-amber-900 dark:text-amber-100'>$" . number_format($interesGenerado, 2) . "</p>
+                        <p class='text-lg font-bold text-amber-900 dark:text-amber-100'>$".number_format($interesGenerado, 2)."</p>
                         <p class='text-xs text-amber-600 dark:text-amber-400'>Ganancia total</p>
                     </div>
                 ";
@@ -646,6 +646,7 @@ class InteresCompuestoSchema
             }
         }
     }
+
     private static function smartRound(float $value): float
     {
         if (abs($value - round($value)) < 0.01) {

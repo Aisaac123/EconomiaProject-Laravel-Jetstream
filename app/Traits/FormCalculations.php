@@ -39,7 +39,7 @@ trait FormCalculations
 
         // Convertir la tasa a la periodicidad correcta para el cálculo
         $rate = null;
-        if (!empty($data['tasa_interes'])) {
+        if (! empty($data['tasa_interes'])) {
             // Si la tasa está en periodicidad diferente a anual, convertirla
             $tasaAnual = $data['tasa_interes'];
             if ($periodicidadTasa != 1) {
@@ -108,7 +108,7 @@ trait FormCalculations
 
         // Convertir la tasa a anual si es necesario
         $rate = null;
-        if (!empty($data['tasa_interes'])) {
+        if (! empty($data['tasa_interes'])) {
             $tasaAnual = $data['tasa_interes'];
             if ($periodicidadTasa != 1) {
                 $tasaAnual = $data['tasa_interes'] / $periodicidadTasa;
@@ -175,7 +175,7 @@ trait FormCalculations
 
         $periodicidadTasa = $data['periodicidad_tasa'] ?? 1;
         $rate = null;
-        if (!empty($data['tasa_interes'])) {
+        if (! empty($data['tasa_interes'])) {
             $tasaAnual = $data['tasa_interes'];
             if ($periodicidadTasa != 1) {
                 $tasaAnual = $data['tasa_interes'] / $periodicidadTasa;
@@ -307,23 +307,23 @@ trait FormCalculations
         };
     }
 
-    private function calculateResponse($finalAmount, array $data, float|int $result, string $message, string $calculatedField = null): array
+    private function calculateResponse($finalAmount, array $data, float|int $result, string $message, ?string $calculatedField = null): array
     {
         $interest = null;
         if (! empty($finalAmount) && ! empty($data['capital'])) {
             $interest = $finalAmount - $data['capital'];
         } elseif (empty($finalAmount) && ! empty($data['capital'])) {
             $interest = $result - $data['capital'];
-        } elseif (!empty($finalAmount) && empty($data['capital'])) {
-            $interest = $finalAmount - $result ;
+        } elseif (! empty($finalAmount) && empty($data['capital'])) {
+            $interest = $finalAmount - $result;
         }
 
         // Preservar fechas si existen y se usaron para calcular tiempo
         $responseData = $data;
-        if (!empty($data['fecha_inicio'])) {
+        if (! empty($data['fecha_inicio'])) {
             $responseData['fecha_inicio'] = $data['fecha_inicio'];
         }
-        if (!empty($data['fecha_final'])) {
+        if (! empty($data['fecha_final'])) {
             $responseData['fecha_final'] = $data['fecha_final'];
         }
 
@@ -352,7 +352,7 @@ trait FormCalculations
 
     private function getPeriodicidadTexto(int $periodicidad): string
     {
-        return match($periodicidad) {
+        return match ($periodicidad) {
             1 => 'anual',
             2 => 'semestral',
             4 => 'trimestral',
@@ -391,13 +391,14 @@ trait FormCalculations
         $formData = $this->form->getState();
 
         // Si se están usando fechas para calcular tiempo, verificar que las fechas estén presentes
-        if (!empty($formData['usar_fechas_tiempo']) && $formData['usar_fechas_tiempo']) {
+        if (! empty($formData['usar_fechas_tiempo']) && $formData['usar_fechas_tiempo']) {
             if (empty($formData['fecha_inicio']) || empty($formData['fecha_final'])) {
                 Notification::make()
                     ->title('Error de validación')
                     ->danger()
                     ->body('Debe seleccionar tanto la fecha de inicio como la fecha final para calcular el tiempo.')
                     ->send();
+
                 return;
             }
 
