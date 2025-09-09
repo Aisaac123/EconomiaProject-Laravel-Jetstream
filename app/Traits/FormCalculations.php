@@ -35,7 +35,19 @@ trait FormCalculations
 
         $field = $emptyFields[0];
         $frequency = $data['frecuencia'] ?? 12;
-        $rate = ! empty($data['tasa_interes']) ? $data['tasa_interes'] / 100 : null;
+        $periodicidadTasa = $data['periodicidad_tasa'] ?? 1;
+
+        // Convertir la tasa a la periodicidad correcta para el cálculo
+        $rate = null;
+        if (! empty($data['tasa_interes'])) {
+            // Si la tasa está en periodicidad diferente a anual, convertirla
+            $tasaAnual = $data['tasa_interes'];
+            if ($periodicidadTasa != 1) {
+                // Convertir de la periodicidad dada a anual
+                $tasaAnual = $data['tasa_interes'] / $periodicidadTasa;
+            }
+            $rate = $tasaAnual / 100;
+        }
 
         $result = 0;
         $message = '';
@@ -53,8 +65,10 @@ trait FormCalculations
 
             case 'tasa_interes':
                 $rateCalc = $frequency * (pow($data['monto_final'] / $data['capital'], 1 / ($frequency * $data['tiempo'])) - 1);
-                $result = $rateCalc * 100;
-                $message = 'Tasa de interés requerida: '.number_format($result, 2).'%';
+                // Convertir la tasa calculada según la periodicidad deseada
+                $result = ($rateCalc * 100) * $periodicidadTasa;
+                $periodicidadTexto = $this->getPeriodicidadTexto($periodicidadTasa);
+                $message = 'Tasa de interés requerida: '.number_format($result, 4).'% '.$periodicidadTexto;
                 break;
 
             case 'tiempo':
@@ -63,9 +77,12 @@ trait FormCalculations
                 break;
         }
 
-        $finalAmount = $finalAmount ?? $data['monto_final'];
+        $finalAmount = $data['monto_final'] ?? $result;
+        if ($field === 'monto_final') {
+            $finalAmount = $result;
+        }
 
-        return $this->calculateResponse($finalAmount, $data, $result, $message);
+        return $this->calculateResponse($finalAmount, $data, $result, $message, $field);
     }
 
     private function calculateInteresSimple(array $data): array
@@ -87,7 +104,17 @@ trait FormCalculations
         }
 
         $field = $emptyFields[0];
-        $rate = ! empty($data['tasa_interes']) ? $data['tasa_interes'] / 100 : null;
+        $periodicidadTasa = $data['periodicidad_tasa'] ?? 1;
+
+        // Convertir la tasa a anual si es necesario
+        $rate = null;
+        if (! empty($data['tasa_interes'])) {
+            $tasaAnual = $data['tasa_interes'];
+            if ($periodicidadTasa != 1) {
+                $tasaAnual = $data['tasa_interes'] / $periodicidadTasa;
+            }
+            $rate = $tasaAnual / 100;
+        }
 
         $result = 0;
         $message = '';
@@ -105,8 +132,9 @@ trait FormCalculations
 
             case 'tasa_interes':
                 $rateCalc = (($data['monto_final'] / $data['capital']) - 1) / $data['tiempo'];
-                $result = $rateCalc * 100;
-                $message = 'Tasa de interés requerida: '.number_format($result, 2).'%';
+                $result = ($rateCalc * 100) * $periodicidadTasa;
+                $periodicidadTexto = $this->getPeriodicidadTexto($periodicidadTasa);
+                $message = 'Tasa de interés requerida: '.number_format($result, 4).'% '.$periodicidadTexto;
                 break;
 
             case 'tiempo':
@@ -115,9 +143,12 @@ trait FormCalculations
                 break;
         }
 
-        $finalAmount = $finalAmount ?? $data['monto_final'];
+        $finalAmount = $data['monto_final'] ?? $result;
+        if ($field === 'monto_final') {
+            $finalAmount = $result;
+        }
 
-        return $this->calculateResponse($finalAmount, $data, $result, $message);
+        return $this->calculateResponse($finalAmount, $data, $result, $message, $field);
     }
 
     private function calculateAnualidad(array $data): array
@@ -142,7 +173,16 @@ trait FormCalculations
             ];
         }
 
-        $rate = ! empty($data['tasa_interes']) ? $data['tasa_interes'] / 100 : null;
+        $periodicidadTasa = $data['periodicidad_tasa'] ?? 1;
+        $rate = null;
+        if (! empty($data['tasa_interes'])) {
+            $tasaAnual = $data['tasa_interes'];
+            if ($periodicidadTasa != 1) {
+                $tasaAnual = $data['tasa_interes'] / $periodicidadTasa;
+            }
+            $rate = $tasaAnual / 100;
+        }
+
         $calc = $data;
 
         try {
@@ -210,9 +250,10 @@ trait FormCalculations
                         }
                         $r = $r_new;
                     }
-                    $calc['tasa_interes'] = $this->smartRound(round($r * 100, 4));
+                    $calc['tasa_interes'] = $this->smartRound(round(($r * 100) * $periodicidadTasa, 4));
                     $camposCalculados[] = 'tasa_interes';
-                    $messages[] = 'Tasa de interés aproximada (VP): '.$calc['tasa_interes'].'%';
+                    $periodicidadTexto = $this->getPeriodicidadTexto($periodicidadTasa);
+                    $messages[] = 'Tasa de interés aproximada (VP): '.$calc['tasa_interes'].'% '.$periodicidadTexto;
                 } elseif (! empty($calc['valor_futuro'])) {
                     $vf = $calc['valor_futuro'];
                     for ($i = 0; $i < $maxIter; $i++) {
@@ -228,9 +269,10 @@ trait FormCalculations
                         }
                         $r = $r_new;
                     }
-                    $calc['tasa_interes'] = $this->smartRound(round($r * 100, 4));
+                    $calc['tasa_interes'] = $this->smartRound(round(($r * 100) * $periodicidadTasa, 4));
                     $camposCalculados[] = 'tasa_interes';
-                    $messages[] = 'Tasa de interés aproximada (VF): '.$calc['tasa_interes'].'%';
+                    $periodicidadTexto = $this->getPeriodicidadTexto($periodicidadTasa);
+                    $messages[] = 'Tasa de interés aproximada (VF): '.$calc['tasa_interes'].'% '.$periodicidadTexto;
                 }
             }
 
@@ -265,18 +307,38 @@ trait FormCalculations
         };
     }
 
-    private function calculateResponse($finalAmount, array $data, float|int $result, string $message): array
+    private function calculateResponse($finalAmount, array $data, float|int $result, string $message, ?string $calculatedField = null): array
     {
         $interest = null;
         if (! empty($finalAmount) && ! empty($data['capital'])) {
             $interest = $finalAmount - $data['capital'];
         } elseif (empty($finalAmount) && ! empty($data['capital'])) {
             $interest = $result - $data['capital'];
+        } elseif (! empty($finalAmount) && empty($data['capital'])) {
+            $interest = $finalAmount - $result;
         }
+
+        // Preservar fechas si existen y se usaron para calcular tiempo
+        $responseData = $data;
+        if (! empty($data['fecha_inicio'])) {
+            $responseData['fecha_inicio'] = $data['fecha_inicio'];
+        }
+        if (! empty($data['fecha_final'])) {
+            $responseData['fecha_final'] = $data['fecha_final'];
+        }
+
+        // NO asignar el campo calculado directamente
+        // En su lugar, usar campos ocultos para almacenar los resultados
 
         $this->result = [
             'error' => false,
-            'data' => array_merge($data, [
+            'data' => array_merge($responseData, [
+                // Campos ocultos para resultados
+                'campo_calculado' => $calculatedField,
+                'resultado_calculado' => $result,
+                'interes_generado_calculado' => $interest,
+                'mensaje_calculado' => $message,
+                // Datos legacy (mantener por compatibilidad)
                 'resultado' => number_format($result, 2),
                 'interes_generado' => $interest !== null ? number_format($interest, 2) : null,
                 'monto_final' => $finalAmount,
@@ -286,6 +348,22 @@ trait FormCalculations
         ];
 
         return $this->result;
+    }
+
+    private function getPeriodicidadTexto(int $periodicidad): string
+    {
+        return match ($periodicidad) {
+            1 => 'anual',
+            2 => 'semestral',
+            4 => 'trimestral',
+            6 => 'bimestral',
+            12 => 'mensual',
+            24 => 'quincenal',
+            52 => 'semanal',
+            360 => 'diario (comercial)',
+            365 => 'diario',
+            default => "cada $periodicidad períodos"
+        };
     }
 
     private function smartRound(float $value): float
@@ -311,6 +389,31 @@ trait FormCalculations
     public function formSubmit(CalculationType $calculationType): void
     {
         $formData = $this->form->getState();
+
+        // Si se están usando fechas para calcular tiempo, verificar que las fechas estén presentes
+        if (! empty($formData['usar_fechas_tiempo']) && $formData['usar_fechas_tiempo']) {
+            if (empty($formData['fecha_inicio']) || empty($formData['fecha_final'])) {
+                Notification::make()
+                    ->title('Error de validación')
+                    ->danger()
+                    ->body('Debe seleccionar tanto la fecha de inicio como la fecha final para calcular el tiempo.')
+                    ->send();
+
+                return;
+            }
+
+            // Calcular tiempo desde fechas si no está presente
+            if (empty($formData['tiempo'])) {
+                $inicio = \Carbon\Carbon::parse($formData['fecha_inicio']);
+                $final = \Carbon\Carbon::parse($formData['fecha_final']);
+
+                if ($final->gt($inicio)) {
+                    $tiempoEnAnios = $inicio->diffInDays($final) / 365.25;
+                    $formData['tiempo'] = round($tiempoEnAnios, 4);
+                }
+            }
+        }
+
         $result = $this->calculate($calculationType, $formData);
 
         if ($result['error']) {
@@ -322,6 +425,8 @@ trait FormCalculations
 
             return;
         }
+
+        // Solo llenar con los campos ocultos de resultado, NO con el campo calculado
         $this->form->fill($result['data']);
 
         Notification::make()
