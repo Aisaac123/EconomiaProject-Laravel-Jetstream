@@ -2,23 +2,35 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Schemas\InteresSimpleSchema;
+use App\Traits\FormCalculations;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 
 class InteresSimple extends Page
 {
-    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-chart-bar';
+    use FormCalculations;
 
-    protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-c-chart-bar';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-calculator';
 
     protected string $view = 'filament.pages.interes-simple';
 
     public static function getNavigationSort(): ?int
     {
-        return 2;
+        return 1;
     }
 
-    public static function getNavigationLabel(): string
+    public ?array $data = [];
+
+    public function mount(): void
     {
-        return 'Interés Simple';
+        $this->form->fill();
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return InteresSimpleSchema::configure($schema)
+            ->statePath('data')
+            ->operation('calculate');
     }
 }
