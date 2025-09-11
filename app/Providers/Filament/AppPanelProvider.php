@@ -30,7 +30,7 @@ class AppPanelProvider extends PanelProvider
                 ->viteTheme('resources/css/filament/app/theme.css')
                 ->path('/')
                 ->homeUrl('/dashboard')
-                ->colors(['primary' => Color::Teal[950]])
+                ->colors(['primary' => Color::hex('#0A2C28')])
                 ->brandLogo('assets/app-icon.png')
                 ->favicon('assets/app-icon.png')
                 ->brandLogoHeight('40px')
