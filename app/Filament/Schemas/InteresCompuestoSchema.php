@@ -102,7 +102,7 @@ class InteresCompuestoSchema
                         Grid::make(12)->schema([
                             Toggle::make('usar_select_periodicidad_tasa')
                                 ->label('Selector de periodicidad')
-                                ->default(false)
+                                ->default(true)
                                 ->live()
                                 ->inline(false)
                                 ->columnSpan(3)
@@ -136,14 +136,15 @@ class InteresCompuestoSchema
                             Select::make('periodicidad_tasa')
                                 ->label('Periodicidad de la Tasa')
                                 ->options([
-                                    1 => 'Anual',
-                                    2 => 'Semestral',
-                                    4 => 'Trimestral',
-                                    6 => 'Bimestral',
-                                    12 => 'Mensual',
-                                    24 => 'Quincenal',
-                                    52 => 'Semanal',
-                                    365 => 'Diaria',
+                                    1 => 'Anual (1 vez/año)',
+                                    2 => 'Semestral (2 veces/año)',
+                                    4 => 'Trimestral (4 veces/año)',
+                                    6 => 'Bimestral (6 veces/año)',
+                                    12 => 'Mensual (12 veces/año)',
+                                    24 => 'Quincenal (24 veces/año)',
+                                    52 => 'Semanal (52 veces/año)',
+                                    365 => 'Diaria (365 veces/año)',
+                                    360 => 'Diaria Comercial (360 veces/año)',
                                 ])
                                 ->default(1)
                                 ->searchable()
@@ -252,7 +253,7 @@ class InteresCompuestoSchema
                         Grid::make(12)->schema([
                             Toggle::make('usar_select_frecuencia')
                                 ->label('Selector de frecuencia')
-                                ->default(false)
+                                ->default(true)
                                 ->live()
                                 ->inline(false)
                                 ->columnSpan(3)
@@ -272,7 +273,7 @@ class InteresCompuestoSchema
                                 ->numeric()
                                 ->placeholder('12 para mensual')
                                 ->hint('Veces por año')
-                                ->default(12)
+                                ->default(1)
                                 ->columnSpan(9)
                                 ->visible(fn (callable $get) => ! $get('usar_select_frecuencia'))
                                 ->live(onBlur: true)

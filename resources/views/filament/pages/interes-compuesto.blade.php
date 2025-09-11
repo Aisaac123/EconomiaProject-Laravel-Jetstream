@@ -87,12 +87,21 @@
 
             <x-slot:explanation>
                 <x-sections.contents.calculator-explanation>
-                    <p><strong>A = P(1 + r/n)^(n×t)</strong></p>
-                    <p><strong>A:</strong> Monto final</p>
-                    <p><strong>P:</strong> Capital inicial</p>
-                    <p><strong>r:</strong> Tasa de interés anual (decimal)</p>
-                    <p><strong>n:</strong> Frecuencia de capitalización por año</p>
-                    <p><strong>t:</strong> Tiempo en años</p>
+                    <x-slot:formula_slot>
+                        <p><strong>A = P(1 + r/n)^(n×t)</strong></p>
+                        <p><strong>P:</strong> P = A / (1 + r/n)^(n×t)</p>
+                        <p><strong>r:</strong> r = n × ((A/P)^(1/(n×t)) - 1)</p>
+                        <p><strong>n:</strong> n = (ln(A/P) / ln(1 + r)) / t</p>
+                        <p><strong>t:</strong> t = ln(A/P) / (n × ln(1 + r/n))</p>
+                    </x-slot:formula_slot>
+                    <x-slot:var_slot>
+                        <p><strong>A:</strong> Monto final</p>
+                        <p><strong>P:</strong> Capital inicial</p>
+                        <p><strong>r:</strong> Tasa de interés anual (decimal)</p>
+                        <p><strong>n:</strong> Frecuencia de capitalización por año</p>
+                        <p><strong>t:</strong> Tiempo en años</p>
+                    </x-slot:var_slot>
+
                 </x-sections.contents.calculator-explanation>
             </x-slot:explanation>
         </x-sections.calculator>
