@@ -44,7 +44,7 @@ trait FormCalculations
             $tasaAnual = $data['tasa_interes'];
             if ($periodicidadTasa != 1) {
                 // Convertir de la periodicidad dada a anual
-                $tasaAnual = $data['tasa_interes'] / $periodicidadTasa;
+                $tasaAnual = $data['tasa_interes'] * $periodicidadTasa;
             }
             $rate = $tasaAnual / 100;
         }
@@ -66,9 +66,9 @@ trait FormCalculations
             case 'tasa_interes':
                 $rateCalc = $frequency * (pow($data['monto_final'] / $data['capital'], 1 / ($frequency * $data['tiempo'])) - 1);
                 // Convertir la tasa calculada según la periodicidad deseada
-                $result = ($rateCalc * 100) * $periodicidadTasa;
+                $result = number_format(($rateCalc * 100) / $periodicidadTasa, 2);
                 $periodicidadTexto = $this->getPeriodicidadTexto($periodicidadTasa);
-                $message = 'Tasa de interés requerida: '.number_format($result, 4).'% '.$periodicidadTexto;
+                $message = 'Tasa de interés requerida: '.number_format($result, 2).'% '.$periodicidadTexto;
                 break;
 
             case 'tiempo':
@@ -439,6 +439,12 @@ trait FormCalculations
     public function limpiar(): void
     {
         $this->form->fill([]);
+        $this->form->fill([
+            'usar_select_frecuencia' => true,
+            'usar_select_periodicidad_tasa' => true,
+            'periodicidad_tasa' => 1,
+            'frecuencia' => 1,
+        ]);
 
         Notification::make()
             ->title('Formulario limpiado')
