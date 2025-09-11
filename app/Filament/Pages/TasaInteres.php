@@ -6,19 +6,10 @@ use Filament\Pages\Page;
 
 class TasaInteres extends Page
 {
-    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-percent-badge';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
 
-    protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-c-percent-badge';
+    protected static ?string $navigationLabel = 'Tasa de Interés';
+    protected static ?string $title = 'Tasa de Interés';
 
     protected string $view = 'filament.pages.tasa-interes';
-
-    public static function getNavigationSort(): ?int
-    {
-        return 1;
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return 'Tasa de interés';
-    }
 }
