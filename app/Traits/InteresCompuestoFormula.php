@@ -57,7 +57,7 @@ trait InteresCompuestoFormula
             case 'tasa_interes':
                 $rateCalc = $frequency * (pow($data['monto_final'] / $data['capital'], 1 / ($frequency * $data['tiempo'])) - 1);
                 // Convertir la tasa calculada según la periodicidad deseada
-                $result = number_format(($rateCalc * 100) / $periodicidadTasa, 2);
+                $result = ($rateCalc * 100) / $periodicidadTasa; // CORREGIDO: quitar number_format aquí
                 $periodicidadTexto = $this->getPeriodicidadTexto($periodicidadTasa);
                 $message = 'Tasa de interés requerida: '.number_format($result, 2).'% '.$periodicidadTexto;
                 break;
@@ -73,6 +73,27 @@ trait InteresCompuestoFormula
             $finalAmount = $result;
         }
 
-        return $this->calculateResponse($finalAmount, $data, $result, $message, $field);
+        // Calcular interés generado
+        $interest = null;
+        if (! empty($finalAmount) && ! empty($data['capital'])) {
+            $interest = $finalAmount - $data['capital'];
+        } elseif (empty($finalAmount) && ! empty($data['capital'])) {
+            $interest = $result - $data['capital'];
+        } elseif (! empty($finalAmount) && empty($data['capital'])) {
+            $interest = $finalAmount - $result;
+        }
+
+        // Retornar SOLO los campos ocultos, NO modificar los campos principales
+        return [
+            'error' => false,
+            'data' => array_merge($data, [
+                // Campos ocultos para almacenar resultados
+                'campo_calculado' => $field,
+                'resultado_calculado' => $result,
+                'interes_generado_calculado' => $interest,
+                'mensaje_calculado' => $message,
+            ]),
+            'message' => $message.($interest !== null ? ' | Interés generado: $'.number_format($interest, 2) : ''),
+        ];
     }
 }

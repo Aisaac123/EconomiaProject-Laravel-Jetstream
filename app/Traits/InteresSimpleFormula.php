@@ -60,7 +60,7 @@ trait InteresSimpleFormula
 
             case 'tiempo':
                 $result = (($data['monto_final'] / $data['capital']) - 1) / $rate;
-                $message = 'Tiempo requerido: '.$this->smartRound($result).' años';
+                $message = 'Tiempo requerido: '.smartRound($result).' años';
                 break;
         }
 
@@ -69,6 +69,27 @@ trait InteresSimpleFormula
             $finalAmount = $result;
         }
 
-        return $this->calculateResponse($finalAmount, $data, $result, $message, $field);
+        // Calcular interés generado
+        $interest = null;
+        if (! empty($finalAmount) && ! empty($data['capital'])) {
+            $interest = $finalAmount - $data['capital'];
+        } elseif (empty($finalAmount) && ! empty($data['capital'])) {
+            $interest = $result - $data['capital'];
+        } elseif (! empty($finalAmount) && empty($data['capital'])) {
+            $interest = $finalAmount - $result;
+        }
+
+        // Retornar SOLO los campos ocultos, NO modificar los campos principales
+        return [
+            'error' => false,
+            'data' => array_merge($data, [
+                // Campos ocultos para almacenar resultados
+                'campo_calculado' => $field,
+                'resultado_calculado' => $result,
+                'interes_generado_calculado' => $interest,
+                'mensaje_calculado' => $message,
+            ]),
+            'message' => $message.($interest !== null ? ' | Interés generado: $'.number_format($interest, 2) : ''),
+        ];
     }
 }

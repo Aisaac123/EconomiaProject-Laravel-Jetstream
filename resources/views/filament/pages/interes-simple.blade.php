@@ -65,14 +65,25 @@
 
             {{-- Ejemplos --}}
             <x-sections.contents.examples>
-                    <p>📌 <strong>Ejemplo 1:</strong> Inviertes $1,000 a una tasa del 5% anual durante 2 años.</p>
-                    <p>A = 1000 × (1 + 0.05 × 2) = 1000 × 1.10 = $1,100</p>
+                <div class="space-y-4">
+                    <x-sections.contents.example
+                        title="📌 Ejemplo 1: Inversión básica"
+                        description="Inviertes $1,000 a una tasa del 5% anual durante 2 años."
+                        solution="A = 1000 × (1 + 0.05 × 2) = 1000 × 1.10 = $1,100"
+                    />
 
-                    <p>📌 <strong>Ejemplo 2:</strong> Préstamo de $5,000 al 12% anual por 6 meses (0.5 años).</p>
-                    <p>A = 5000 × (1 + 0.12 × 0.5) = 5000 × 1.06 = $5,300</p>
+                    <x-sections.contents.example
+                        title="📌 Ejemplo 2: Préstamo a corto plazo"
+                        description="Préstamo de $5,000 al 12% anual por 6 meses (0.5 años)."
+                        solution="A = 5000 × (1 + 0.12 × 0.5) = 5000 × 1.06 = $5,300"
+                    />
 
-                    <p>📌 <strong>Ejemplo 3:</strong> Deseas obtener $2,200 en 1 año con una tasa del 10% anual.</p>
-                    <p>P = 2200 / (1 + 0.10 × 1) = 2200 / 1.10 ≈ $2,000</p>
+                    <x-sections.contents.example
+                        title="📌 Ejemplo 3: Cálculo de capital inicial"
+                        description="Deseas obtener $2,200 en 1 año con una tasa del 10% anual."
+                        solution="P = 2200 / (1 + 0.10 × 1) = 2200 / 1.10 ≈ $2,000"
+                    />
+                </div>
 
                 <x-slot:advice>
                     El interés simple es ideal para cálculos rápidos y préstamos a corto plazo donde la simplicidad es prioritaria.

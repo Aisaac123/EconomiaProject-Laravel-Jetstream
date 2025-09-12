@@ -24,7 +24,7 @@
 
                     {{-- Tipos --}}
                     <div class="pt-8">
-                        <x-sections.contents.types title="Tipos de Interés Compuesto">
+                        <x-sections.contents.types title="Capitalización del interés compuesto">
                             <ul class="list-disc list-inside space-y-1">
                                 <li><strong>Capitalización anual:</strong> Se calcula el interés una vez al año.</li>
                                 <li><strong>Capitalización semestral:</strong> Dos veces al año.</li>
@@ -64,14 +64,25 @@
 
             {{-- Ejemplos --}}
             <x-sections.contents.examples>
-                    <p>📌 <strong>Ejemplo 1:</strong> Inviertes $1,000 a una tasa del 5% anual con capitalización anual durante 3 años.</p>
-                    <p>A = 1000 × (1 + 0.05/1)^(1×3) = 1157.63</p>
+                <div class="space-y-4">
+                    <x-sections.contents.example
+                        title="📌 Ejemplo 1: Capitalización anual"
+                        description="Inviertes $1,000 a una tasa del 5% anual con capitalización anual durante 3 años."
+                        solution="A = 1000 × (1 + 0.05/1)^(1×3) = $1,157.63"
+                    />
 
-                    <p>📌 <strong>Ejemplo 2:</strong> Mismo capital y tasa, capitalización semestral.</p>
-                    <p>A = 1000 × (1 + 0.05/2)^(2×3) = 1159.69</p>
+                    <x-sections.contents.example
+                        title="📌 Ejemplo 2: Capitalización semestral"
+                        description="Mismo capital y tasa, capitalización semestral durante 3 años."
+                        solution="A = 1000 × (1 + 0.05/2)^(2×3) = $1,159.69"
+                    />
 
-                    <p>📌 <strong>Ejemplo 3:</strong> Deseas $2,000 en 5 años a una tasa del 4% anual, capitalización mensual.</p>
-                    <p>P = 2000 / (1 + 0.04/12)^(12×5) ≈ 1638.62</p>
+                    <x-sections.contents.example
+                        title="📌 Ejemplo 3: Cálculo de capital inicial"
+                        description="Deseas $2,000 en 5 años a una tasa del 4% anual, capitalización mensual."
+                        solution="P = 2000 / (1 + 0.04/12)^(12×5) ≈ $1,638.62"
+                    />
+                </div>
 
                 <x-slot:advice>
                     Mayor frecuencia de capitalización y mayor tiempo maximizan los beneficios del interés compuesto.

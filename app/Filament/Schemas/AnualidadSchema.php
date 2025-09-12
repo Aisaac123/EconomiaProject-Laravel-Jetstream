@@ -481,12 +481,12 @@ class AnualidadSchema
 
         // Header con título dinámico
         $html .= '
-            <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 rounded-xl p-6 border border-green-200 dark:border-green-800">
-                <h3 class="text-xl font-bold text-green-900 dark:text-green-100 flex items-center gap-3">
+            <div class="bg-gradient-to-r from-yellow-50 to-yellow-200 dark:from-yellow-950/50 dark:to-yellow-700/50 rounded-xl p-6 border border-yellow-200 dark:border-yellow-800">
+                <h3 class="text-xl font-bold text-yellow-900 dark:text-yellow-100 flex items-center gap-3">
                     <span class="text-3xl">💰</span>
                     <div>
                         <div>Resumen de Anualidades</div>
-                        <div class="text-sm font-normal text-green-600 dark:text-green-300">Cálculos financieros completados</div>
+                        <div class="text-sm font-normal text-yellow-600 dark:text-yellow-300">Cálculos financieros completados</div>
                     </div>
                 </h3>
             </div>
@@ -703,7 +703,7 @@ class AnualidadSchema
                     $diasTotales = $inicio->diffInDays($final);
                     $anios = $diasTotales / 365.25; // Usamos 365.25 para considerar años bisiestos
 
-                    $set('tiempo_calculado_fechas', static::smartRound($anios));
+                    $set('tiempo_calculado_fechas', smartRound($anios));
                 } else {
                     $set('tiempo_calculado_fechas', null);
                 }
@@ -715,55 +715,6 @@ class AnualidadSchema
         }
 
         // Recalcular número de pagos después de actualizar el tiempo
-        static::calcularNumeroPagosDesdeTiempo($set, $get);
-    }
-
-    /**
-     * Método helper para calcular número de pagos desde el tiempo
-     */
-    private static function calcularNumeroPagosDesdeTiempo(callable $set, callable $get): void
-    {
-        $modoTiempoPagos = $get('modo_tiempo_pagos');
-
-        if ($modoTiempoPagos === 'anios_frecuencia') {
-            $tiempoAnios = $get('tiempo_anios');
-            $frecuencia = $get('frecuencia_anios') ?: 1;
-            if (is_numeric($tiempoAnios) && is_numeric($frecuencia)) {
-                $n = $tiempoAnios * $frecuencia;
-                $set('numero_pagos_calculado_anios', round($n));
-                $set('numero_pagos', round($n));
-            }
-        } elseif ($modoTiempoPagos === 'fechas_frecuencia') {
-            $tiempoCalculado = $get('tiempo_calculado_fechas');
-            $frecuencia = $get('frecuencia_fechas') ?: 1;
-            if (is_numeric($tiempoCalculado) && is_numeric($frecuencia)) {
-                $n = $tiempoCalculado * $frecuencia;
-                $set('numero_pagos_calculado_fechas', round($n));
-                $set('numero_pagos', round($n));
-            }
-        } elseif ($modoTiempoPagos === 'manual') {
-            // Asegurar que el campo manual también actualice el campo oculto
-            $numeroPagosManual = $get('numero_pagos');
-            if (is_numeric($numeroPagosManual)) {
-                $set('numero_pagos', $numeroPagosManual);
-            }
-        }
-    }
-
-    /**
-     * Método helper para redondeo inteligente
-     */
-    private static function smartRound(float $value): float
-    {
-        if (abs($value - round($value)) < 0.01) {
-            return round($value);
-        }
-
-        $oneDecimal = round($value, 1);
-        if (abs($value - $oneDecimal) < 0.05) {
-            return $oneDecimal;
-        }
-
-        return round($value, 2);
+        calcularNumeroPagosDesdeTiempo($set, $get);
     }
 }

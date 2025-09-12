@@ -24,9 +24,6 @@ trait HelpersFormula
             $responseData['fecha_final'] = $data['fecha_final'];
         }
 
-        // NO asignar el campo calculado directamente
-        // En su lugar, usar campos ocultos para almacenar los resultados
-
         $this->result = [
             'error' => false,
             'data' => array_merge($responseData, [
@@ -62,21 +59,5 @@ trait HelpersFormula
             default => "cada $periodicidad períodos"
         };
     }
-
-    private function smartRound(float $value): float
-    {
-        // Si está casi en un entero (±0.01), devolver como entero
-        if (abs($value - round($value)) < 0.01) {
-            return round($value);
-        }
-
-        // Si el segundo decimal es 0 ó >= 5 → 1 decimal
-        $oneDecimal = round($value, 1);
-        if (abs($value - $oneDecimal) < 0.05) {
-            return $oneDecimal;
-        }
-
-        // En otros casos → 2 decimales
-        return round($value, 2);
-    }
 }
+

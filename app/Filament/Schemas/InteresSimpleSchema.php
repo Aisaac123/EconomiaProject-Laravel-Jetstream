@@ -25,8 +25,9 @@ class InteresSimpleSchema
                 Hidden::make('resultado_calculado'),
                 Hidden::make('interes_generado_calculado'),
                 Hidden::make('mensaje_calculado'),
+                Hidden::make('tiempo'),
 
-                Section::make('Calculadora de Interés Compuesto')
+                Section::make('Calculadora de Interés Simple')
                     ->description('Complete los campos conocidos. El campo vacío será calculado automáticamente.')
                     ->icon('heroicon-o-calculator')
                     ->schema([
@@ -173,7 +174,7 @@ class InteresSimpleSchema
                                 ->default(false)
                                 ->live()
                                 ->inline(false)
-                                ->columnSpan(4)
+                                ->columnSpan(12)
                                 ->afterStateUpdated(function (callable $set) {
                                     $set('campo_calculado', null);
                                     $set('resultado_calculado', null);
@@ -181,26 +182,78 @@ class InteresSimpleSchema
                                     $set('mensaje_calculado', null);
                                 }),
 
+                                TextInput::make('anio')
+                                    ->rules(['nullable', 'numeric', 'min:0'])
+                                    ->validationMessages([
+                                        'min' => 'El tiempo debe ser mayor o igual a 0',
+                                    ])
+                                    ->label('Años')
+                                    ->numeric()
+                                    ->suffix('años')
+                                    ->placeholder('Ejemplo: 5')
+                                    ->step(0.01)
+                                    ->columnSpan(4)
+                                    ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
+                                    ->live()
+                                    ->afterStateUpdated(function (callable $set, callable $get) {
+                                        calcularTiempo($set, $get);
+                                        $set('campo_calculado', null);
+                                        $set('resultado_calculado', null);
+                                        $set('interes_generado_calculado', null);
+                                        $set('mensaje_calculado', null);
+                                    }),
+                                TextInput::make('mes')
+                                    ->rules(['nullable', 'numeric', 'min:0'])
+                                    ->validationMessages([
+                                        'min' => 'El tiempo debe ser mayor o igual a 0',
+                                    ])
+                                    ->label('Meses')
+                                    ->numeric()
+                                    ->suffix('meses')
+                                    ->placeholder('Ejemplo: 7')
+                                    ->step(0.01)
+                                    ->columnSpan(4)
+                                    ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
+                                    ->live()
+                                    ->afterStateUpdated(function (callable $set, callable $get) {
+                                        calcularTiempo($set, $get);
+                                        $set('campo_calculado', null);
+                                        $set('resultado_calculado', null);
+                                        $set('interes_generado_calculado', null);
+                                        $set('mensaje_calculado', null);
+                                    }),
+                                TextInput::make('dia')
+                                    ->rules(['nullable', 'numeric', 'min:0'])
+                                    ->validationMessages([
+                                        'min' => 'El tiempo debe ser mayor o igual a 0',
+                                    ])
+                                    ->label('Dias')
+                                    ->numeric()
+                                    ->suffix('dias')
+                                    ->placeholder('Ejemplo: 21')
+                                    ->step(0.01)
+                                    ->columnSpan(4)
+                                    ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
+                                    ->live()
+                                    ->afterStateUpdated(function (callable $set, callable $get) {
+                                        calcularTiempo($set, $get);
+                                        $set('campo_calculado', null);
+                                        $set('resultado_calculado', null);
+                                        $set('interes_generado_calculado', null);
+                                        $set('mensaje_calculado', null);
+                                    }),
                             TextInput::make('tiempo')
                                 ->rules(['nullable', 'numeric', 'min:0'])
                                 ->validationMessages([
                                     'min' => 'El tiempo debe ser mayor o igual a 0',
                                 ])
+                                ->disabled()
                                 ->label('Tiempo en años')
                                 ->numeric()
                                 ->suffix('años')
-                                ->placeholder('Ejemplo: 5.5')
-                                ->step(0.01)
-                                ->hint('Duración en años')
-                                ->columnSpan(8)
+                                ->columnSpan(6)
                                 ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
-                                ->live()
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campo_calculado', null);
-                                    $set('resultado_calculado', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
+                                ->live(),
                         ]),
 
                         Grid::make(2)->schema([
@@ -210,7 +263,7 @@ class InteresSimpleSchema
                                 ->hint('Fecha de inicio de la inversión')
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get, $state) {
-                                    static::calcularTiempoDesdeFechas($set, $get);
+                                    calcularTiempoDesdeFechas($set, $get);
                                     $set('campo_calculado', null);
                                     $set('resultado_calculado', null);
                                     $set('interes_generado_calculado', null);
@@ -224,7 +277,7 @@ class InteresSimpleSchema
                                 ->hint('Fecha de vencimiento de la inversión')
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get, $state) {
-                                    static::calcularTiempoDesdeFechas($set, $get);
+                                    calcularTiempoDesdeFechas($set, $get);
                                     $set('campo_calculado', null);
                                     $set('resultado_calculado', null);
                                     $set('interes_generado_calculado', null);
@@ -245,7 +298,7 @@ class InteresSimpleSchema
 
                 // Sección de Frecuencia de Capitalización
                 Section::make('Frecuencia de Capitalización')
-                    ->description('Configure con qué frecuencia se capitaliza el interés')
+                    ->description('Solo para mostrar en los resultados. (No afecta en los cálculos)')
                     ->icon('heroicon-o-arrow-path')
                     ->collapsible()
                     ->collapsed()
@@ -417,12 +470,12 @@ class InteresSimpleSchema
 
         // Header con título dinámico
         $html .= '
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
-                <h3 class="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-3">
+            <div class="bg-gradient-to-r from-green-50 to-emerald-200 dark:from-green-950/50 dark:to-emerald-700/50 rounded-xl p-6 border border-green-200 dark:border-green-800">
+                <h3 class="text-xl font-bold text-green-900 dark:text-green-100 flex items-center gap-3">
                     <span class="text-3xl">💰</span>
                     <div>
-                        <div>Resumen de Interés Compuesto</div>
-                        <div class="text-sm font-normal text-blue-600 dark:text-blue-300">Cálculos financieros completados</div>
+                        <div>Resumen de Interés Simple</div>
+                        <div class="text-sm font-normal text-green-600 dark:text-green-300">Cálculos financieros completados</div>
                     </div>
                 </h3>
             </div>
@@ -481,7 +534,7 @@ class InteresSimpleSchema
 
         // Tasa de Interés
         $isCalculated = $campoCalculado === 'tasa_interes';
-        $isCalculated = static::smartRound($isCalculated);
+        $isCalculated = smartRound($isCalculated);
 
         $bgClass = $isCalculated ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700' : 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700';
         $textClass = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-gray-100';
@@ -507,7 +560,7 @@ class InteresSimpleSchema
 
         // Tiempo
         $isCalculated = $campoCalculado === 'tiempo';
-        $isCalculated = static::smartRound($isCalculated);
+        $isCalculated = smartRound($isCalculated);
 
         $bgClass = $isCalculated ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700' : 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700';
         $textClass = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-gray-100';
@@ -629,36 +682,7 @@ class InteresSimpleSchema
     /**
      * Método helper para calcular tiempo desde fechas
      */
-    protected static function calcularTiempoDesdeFechas(callable $set, callable $get): void
-    {
-        $fechaInicio = $get('fecha_inicio');
-        $fechaFinal = $get('fecha_final');
 
-        if ($fechaInicio && $fechaFinal) {
-            $inicio = \Carbon\Carbon::parse($fechaInicio);
-            $final = \Carbon\Carbon::parse($fechaFinal);
 
-            if ($final->gt($inicio)) {
-                // Calcular diferencia en años (más preciso)
-                $tiempoEnAnios = $inicio->diffInDays($final) / 365.25;
-                $set('tiempo', static::smartRound($tiempoEnAnios));
-            } else {
-                $set('tiempo', null);
-            }
-        }
-    }
 
-    protected static function smartRound(float $value): float
-    {
-        if (abs($value - round($value)) < 0.01) {
-            return round($value);
-        }
-
-        $oneDecimal = round($value, 1);
-        if (abs($value - $oneDecimal) < 0.05) {
-            return $oneDecimal;
-        }
-
-        return round($value, 2);
-    }
 }

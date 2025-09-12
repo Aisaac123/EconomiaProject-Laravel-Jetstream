@@ -256,7 +256,7 @@ trait AnualidadFormula
 
                     if ($found && $r > -0.99 && $r < 10) {
                         $rate = $r; // Actualizar para futuros cálculos
-                        $values['tasa_interes'] = $this->smartRound(($r * 100) * $periodicidadTasa);
+                        $values['tasa_interes'] = smartRound(($r * 100) * $periodicidadTasa);
                         $resultados['tasa_interes'] = $values['tasa_interes'];
                         $camposCalculados[] = 'tasa_interes';
                         $periodicidadTexto = $this->getPeriodicidadTexto($periodicidadTasa);

@@ -26,45 +26,46 @@
                     </x-sections.contents.description>
 
                     {{-- Tipos de Anualidades --}}
-                    <div class="pt-8 space-y-3">
+                    <div class="pt-8">
                         <x-sections.contents.types title="Tipos de Anualidades">
+                            <div class="space-y-4">
+                                <x-filament::section heading="Anualidad Ordinaria (Vencida)" collapsed="true" collapsible="true">
+                                    <p class="text-gray-600 font-medium text-sm dark:text-gray-300">
+                                        Pagos al final de cada período.
+                                    </p>
+                                    <p class="mt-1 font-medium text-primary-600 dark:text-primary-300">
+                                        VP = PMT × [(1 - (1 + r)^-n) / r] <br>
+                                        VF = PMT × [((1 + r)^n - 1) / r]
+                                    </p>
+                                </x-filament::section>
 
-                            <x-filament::section collapsible collapsed heading="Anualidad Ordinaria (Vencida)">
-                                <p class="text-gray-300">
-                                    Pagos al final de cada período.
-                                </p>
-                                <p class="mt-2 font-mono text-green-400">
-                                    VP = PMT × [(1 - (1 + r)^-n) / r] <br>
-                                    VF = PMT × [((1 + r)^n - 1) / r]
-                                </p>
-                            </x-filament::section>
+                                <x-filament::section collapsible="true" collapsed="true" heading="Anualidad Anticipada">
+                                    <p class="text-gray-600 font-medium text-sm dark:text-gray-300">
+                                        Pagos al inicio de cada período.
+                                    </p>
+                                    <p class="mt-1 font-medium text-primary-600 dark:text-primary-300">
+                                        VP = PMT × [(1 - (1 + r)^-n) / r] × (1 + r)
+                                    </p>
+                                </x-filament::section>
 
-                            <x-filament::section collapsible collapsed heading="Anualidad Anticipada">
-                                <p class="text-gray-300">
-                                    Pagos al inicio de cada período.
-                                </p>
-                                <p class="mt-2 font-mono text-green-400">
-                                    VP = PMT × [(1 - (1 + r)^-n) / r] × (1 + r)
-                                </p>
-                            </x-filament::section>
+                                <x-filament::section collapsible="true" collapsed="true" heading="Anualidad Diferida">
+                                    <p class="text-gray-600 font-medium text-sm dark:text-gray-300">
+                                        Incluye un período de gracia antes de iniciar los pagos.
+                                    </p>
+                                    <p class="mt-1 font-medium text-primary-600 dark:text-primary-300">
+                                        VP = [PMT × (1 - (1 + r)^-n) / r] ÷ (1 + r)^k
+                                    </p>
+                                </x-filament::section>
 
-                            <x-filament::section collapsible collapsed heading="Anualidad Diferida">
-                                <p class="text-gray-300">
-                                    Incluye un período de gracia antes de iniciar los pagos.
-                                </p>
-                                <p class="mt-2 font-mono text-green-400">
-                                    VP = [PMT × (1 - (1 + r)^-n) / r] ÷ (1 + r)^k
-                                </p>
-                            </x-filament::section>
-
-                            <x-filament::section collapsible collapsed heading="Perpetuidad">
-                                <p class="text-gray-300">
-                                    Pagos infinitos, como fondos de becas o rentas perpetuas.
-                                </p>
-                                <p class="mt-2 font-mono text-green-400">
-                                    VP = PMT / r
-                                </p>
-                            </x-filament::section>
+                                <x-filament::section collapsible="true" collapsed="true" heading="Perpetuidad">
+                                    <p class="text-gray-600 font-medium text-sm dark:text-gray-300">
+                                        Pagos infinitos, como fondos de becas o rentas perpetuas.
+                                    </p>
+                                    <p class="mt-1 font-medium text-primary-600 dark:text-primary-300">
+                                        VP = PMT / r
+                                    </p>
+                                </x-filament::section>
+                            </div>
 
                         </x-sections.contents.types>
                     </div>
@@ -106,83 +107,42 @@
             {{-- Ejemplos --}}
             <x-sections.contents.examples>
                 <!-- Ejemplos prácticos -->
-                <div class="mt-8">
+                <div class="mt-2">
+                    <div class="space-y-4">
+                        <x-sections.contents.example
+                            title="📌 Ejemplo 1 (Anualidad Vencida – Valor Presente)"
+                            description="Deseas recibir $1,000 al final de cada año durante 5 años a una tasa del 5% anual."
+                            solution="VP = 1000 × [(1 - (1 + 0.05)^-5) / 0.05] ≈ $4,329.48"
+                        />
 
-                    <div class="space-y-6">
-                        <!-- Ejemplo 1 -->
-                        <div class="bg-white dark:bg-gray-900 rounded-xl p-5 shadow">
-                            <p class="text-white dark:text-white font-semibold mb-2">
-                                📌 Ejemplo 1 (Anualidad Vencida – Valor Presente)
-                            </p>
-                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                                Deseas recibir $1,000 al final de cada año durante 5 años a una tasa del 5% anual.
-                                <br>
-                                <span class="block mt-2 font-mono text-green-600 dark:text-green-400 text-lg">
-                                    VP = 1000 × [(1 - (1 + 0.05)^-5) / 0.05] ≈ $4,329.48
-                                </span>
-                            </p>
-                        </div>
+                        <x-sections.contents.example
+                            title="📌 Ejemplo 2 (Anualidad Vencida – Valor Futuro)"
+                            description="Inviertes $500 cada año durante 10 años a una tasa del 4% anual."
+                            solution="VF = 500 × [((1 + 0.04)^10 - 1) / 0.04] ≈ $6,024.83"
+                        />
 
-                        <!-- Ejemplo 2 -->
-                        <div class="bg-white dark:bg-gray-900 rounded-xl p-5 shadow">
-                            <p class="text-white dark:text-white font-semibold mb-2">
-                                📌 Ejemplo 2 (Anualidad Vencida – Valor Futuro)
-                            </p>
-                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                                Inviertes $500 cada año durante 10 años a una tasa del 4% anual.
-                                <br>
-                                <span class="block mt-2 font-mono text-green-600 dark:text-green-400 text-lg">
-                                    VF = 500 × [((1 + 0.04)^10 - 1) / 0.04] ≈ $6,024.83
-                                </span>
-                            </p>
-                        </div>
+                        <x-sections.contents.example
+                            title="📌 Ejemplo 3 (Anualidad Vencida – Pago Periódico)"
+                            description="Con un valor presente de $10,000 y 8 pagos anuales, calcula el pago periódico a una tasa del 6% anual."
+                            solution="PMT = 10000 × [0.06 / (1 - (1+0.06)^-8)] ≈ $1,685.06"
+                        />
 
-                        <!-- Ejemplo 3 -->
-                        <div class="bg-white dark:bg-gray-900 rounded-xl p-5 shadow ">
-                            <p class="text-white dark:text-white font-semibold mb-2">
-                                📌 Ejemplo 3 (Anualidad Vencida – Pago Periódico)
-                            </p>
-                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                                Con un valor presente de $10,000 y 8 pagos anuales, calcula el pago periódico a una tasa del 6% anual.
-                                <br>
-                                <span class="block mt-2 font-mono text-green-600 dark:text-green-400 text-lg">
-                                    PMT = 10000 × [0.06 / (1 - (1+0.06)^-8)] ≈ $1,685.06
-                                </span>
-                            </p>
-                        </div>
+                        <x-sections.contents.example
+                            title="📌 Ejemplo 4 (Anualidad Anticipada – Valor Presente)"
+                            description="Deseas pagar $2,000 al inicio de cada año durante 4 años, con una tasa del 5% anual."
+                            solution="VP = 2000 × [(1 - (1 + 0.05)^-4) / 0.05] × (1 + 0.05) ≈ $7,239.78"
+                        />
 
-                        <!-- Ejemplo 4 -->
-                        <div class="bg-white dark:bg-gray-900 rounded-xl p-5 shadow">
-                            <p class="text-white dark:text-white font-semibold mb-2">
-                                📌 Ejemplo 4 (Anualidad Anticipada – Valor Presente)
-                            </p>
-                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                                Deseas pagar $2,000 al inicio de cada año durante 4 años, con una tasa del 5% anual.
-                                <br>
-                                <span class="block mt-2 font-mono text-green-600 dark:text-green-400 text-lg">
-                                    VP = 2000 × [(1 - (1 + 0.05)^-4) / 0.05] × (1 + 0.05) ≈ $7,239.78
-                                </span>
-                            </p>
-                        </div>
-
-                        <!-- Ejemplo 5 -->
-                        <div class="bg-white dark:bg-gray-900 rounded-xl p-5 shadow">
-                            <p class="text-white dark:text-white font-semibold mb-2">
-                                📌 Ejemplo 5 (Perpetuidad)
-                            </p>
-                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                                Una empresa reparte $500 cada año de manera indefinida, con una tasa de descuento del 10% anual.
-                                <br>
-                                <span class="block mt-2 font-mono text-green-600 dark:text-green-400 text-lg">
-                                    VP = 500 / 0.10 = $5,000
-                                </span>
-                            </p>
-                        </div>
+                        <x-sections.contents.example
+                            title="📌 Ejemplo 5 (Perpetuidad)"
+                            description="Una empresa reparte $500 cada año de manera indefinida, con una tasa de descuento del 10% anual."
+                            solution="VP = 500 / 0.10 = $5,000"
+                        />
                     </div>
 
                     <!-- Consejo -->
-                    <div class="mt-8 bg-gray-200 dark:bg-gray-800 border-l-4 border-yellow-400 p-5 rounded-lg shadow">
-                        <p class="text-yellow-700 dark:text-yellow-300 font-medium leading-relaxed">
+                    <div class="mt-8 bg-gray-200 dark:bg-gray-800 border-l-4 border-yellow-300 p-4 rounded-lg shadow">
+                        <p class=" dark:text-gray-200 text-gray-700 font-medium leading-relaxed">
                             💡 Consejo: Una mayor tasa de interés o más pagos incrementan significativamente el valor futuro de la anualidad.
                         </p>
                     </div>
