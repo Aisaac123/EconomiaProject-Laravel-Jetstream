@@ -32,7 +32,7 @@ trait InteresSimpleFormula
         if (! empty($data['tasa_interes'])) {
             $tasaAnual = $data['tasa_interes'];
             if ($periodicidadTasa != 1) {
-                $tasaAnual = $data['tasa_interes'] / $periodicidadTasa;
+                $tasaAnual = $data['tasa_interes'] * $periodicidadTasa;
             }
             $rate = $tasaAnual / 100;
         }
@@ -53,7 +53,7 @@ trait InteresSimpleFormula
 
             case 'tasa_interes':
                 $rateCalc = (($data['monto_final'] / $data['capital']) - 1) / $data['tiempo'];
-                $result = ($rateCalc * 100) * $periodicidadTasa;
+                $result = ($rateCalc * 100) / $periodicidadTasa;
                 $periodicidadTexto = $this->getPeriodicidadTexto($periodicidadTasa);
                 $message = 'Tasa de interés requerida: '.number_format($result, 4).'% '.$periodicidadTexto;
                 break;
