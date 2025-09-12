@@ -98,10 +98,10 @@
                     <x-slot:formula_slot>
                         <p><strong>VP = PMT × [(1 - (1 + r)^-n) / r]</strong></p>
                         <p><strong>VF = PMT × [((1 + r)^n - 1) / r]</strong></p>
-                        <p><strong>PMT:</strong> PMT = VP × [r / (1 - (1+r)^-n)]</p>
-                        <p><strong>VP:</strong> VP = PMT × [(1 - (1+r)^-n) / r]</p>
-                        <p><strong>VF:</strong> VF = PMT × [((1+r)^n - 1) / r]</p>
-                        <p><strong>n:</strong> n = log(VF * r / PMT + 1) / log(1 + r)</p>
+                        <p><strong>PMT:</strong> VP × [r / (1 - (1+r)^-n)]</p>
+                        <p><strong>VP:</strong> PMT × [(1 - (1+r)^-n) / r]</p>
+                        <p><strong>VF:</strong> PMT × [((1+r)^n - 1) / r]</p>
+                        <p><strong>n:</strong> log(VF * r / PMT + 1) / log(1 + r)</p>
                         <p><strong>r:</strong> Se calcula mediante métodos iterativos o aproximaciones.</p>
                     </x-slot:formula_slot>
                     <x-slot:var_slot>

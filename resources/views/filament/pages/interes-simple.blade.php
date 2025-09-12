@@ -10,7 +10,7 @@
                 Útil para préstamos o inversiones a corto plazo y para explicaciones rápidas.
             </p>
             <div class="mt-6">
-                <a href="#interes-simple-form" class="inline-block rounded-lg bg-white text-teal-700 px-6 py-2 font-semibold shadow">
+                <a href="#calculadora" class="inline-block rounded-lg bg-white text-teal-700 px-6 py-2 font-semibold shadow">
                     Comenzar a calcular
                 </a>
             </div>
@@ -58,8 +58,31 @@
         </div>
     </div>
 
-    {{-- FORMULARIO --}}
-    <div id="interes-simple-form" class="mb-12">
-        {{ $this->form }}
-    </div>
+    <x-sections.calculator>
+        <x-slot:form>
+            <x-sections.contents.calculator-form>
+                <x-forms.calculation-form calculation-type="simple" />
+            </x-sections.contents.calculator-form>
+        </x-slot:form>
+
+        <x-slot:explanation>
+            <x-sections.contents.calculator-explanation>
+                <x-slot:formula_slot>
+                    <p><strong>A = P(1 + r/n)^(n×t)</strong></p>
+                    <p><strong>P:</strong> P = A / (1 + r/n)^(n×t)</p>
+                    <p><strong>r:</strong> r = n × ((A/P)^(1/(n×t)) - 1)</p>
+                    <p><strong>n:</strong> n = (ln(A/P) / ln(1 + r)) / t</p>
+                    <p><strong>t:</strong> t = ln(A/P) / (n × ln(1 + r/n))</p>
+                </x-slot:formula_slot>
+                <x-slot:var_slot>
+                    <p><strong>A:</strong> Monto final</p>
+                    <p><strong>P:</strong> Capital inicial</p>
+                    <p><strong>r:</strong> Tasa de interés anual (decimal)</p>
+                    <p><strong>n:</strong> Frecuencia de capitalización por año</p>
+                    <p><strong>t:</strong> Tiempo en años</p>
+                </x-slot:var_slot>
+
+            </x-sections.contents.calculator-explanation>
+        </x-slot:explanation>
+    </x-sections.calculator>
 </x-filament::page>

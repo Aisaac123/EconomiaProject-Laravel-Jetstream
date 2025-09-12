@@ -16,7 +16,7 @@ class InteresSimple extends Page implements HasForms
     use InteractsWithForms;
 
     // ✅ Corrección: usamos ?string|\BackedEnum, que es lo que espera Filament
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-calculator';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
 
     // ✅ Corrección: cambiamos a un icono válido de Heroicons (por ejemplo banknotes)
     protected static string|\BackedEnum|null $activeNavigationIcon = 'heroicon-s-banknotes';
@@ -41,10 +41,6 @@ class InteresSimple extends Page implements HasForms
      * Método invocado por la operación `calculate`.
      * Llama al trait para ejecutar el cálculo de interés simple.
      */
-    public function calculate(): void
-    {
-        $this->formSubmit(CalculationType::SIMPLE);
-    }
 
     public static function getNavigationSort(): ?int
     {
@@ -58,6 +54,6 @@ class InteresSimple extends Page implements HasForms
 
     public function getHeading(): \Illuminate\Contracts\Support\Htmlable|string
     {
-        return 'Interés Simple';
+        return '';
     }
 }

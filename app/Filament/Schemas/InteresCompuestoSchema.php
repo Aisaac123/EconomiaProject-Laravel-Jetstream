@@ -41,7 +41,7 @@ class InteresCompuestoSchema
                                 ->prefix('$')
                                 ->placeholder('Ejemplo: 10000')
                                 ->hint('Monto inicial de inversión')
-                                ->live(onBlur: true)
+                                ->live()
                                 ->afterStateUpdated(function (callable $set) {
                                     // Limpiar campos de cálculo cuando el usuario modifica un valor
                                     $set('campo_calculado', null);
@@ -60,7 +60,7 @@ class InteresCompuestoSchema
                                 ->prefix('$')
                                 ->placeholder('Ejemplo: 15000')
                                 ->hint('Valor final esperado')
-                                ->live(onBlur: true)
+                                ->live()
                                 ->afterStateUpdated(function (callable $set) {
                                     $set('campo_calculado', null);
                                     $set('resultado_calculado', null);
@@ -90,7 +90,7 @@ class InteresCompuestoSchema
                                 ->step(0.01)
                                 ->hint('Tasa en porcentaje')
                                 ->columnSpan(2)
-                                ->live(onBlur: true)
+                                ->live()
                                 ->afterStateUpdated(function (callable $set) {
                                     $set('campo_calculado', null);
                                     $set('resultado_calculado', null);
@@ -125,7 +125,7 @@ class InteresCompuestoSchema
                                 ->default(1)
                                 ->columnSpan(9)
                                 ->visible(fn (callable $get) => ! $get('usar_select_periodicidad_tasa'))
-                                ->live(onBlur: true)
+                                ->live()
                                 ->afterStateUpdated(function (callable $set) {
                                     $set('campo_calculado', null);
                                     $set('resultado_calculado', null);
@@ -194,7 +194,7 @@ class InteresCompuestoSchema
                                 ->hint('Duración en años')
                                 ->columnSpan(8)
                                 ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
-                                ->live(onBlur: true)
+                                ->live()
                                 ->afterStateUpdated(function (callable $set) {
                                     $set('campo_calculado', null);
                                     $set('resultado_calculado', null);
@@ -208,7 +208,7 @@ class InteresCompuestoSchema
                                 ->label('Fecha de Inicio')
                                 ->placeholder('Seleccione la fecha inicial')
                                 ->hint('Fecha de inicio de la inversión')
-                                ->live(onBlur: true)
+                                ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get, $state) {
                                     static::calcularTiempoDesdeFechas($set, $get);
                                     $set('campo_calculado', null);
@@ -222,7 +222,7 @@ class InteresCompuestoSchema
                                 ->label('Fecha Final')
                                 ->placeholder('Seleccione la fecha final')
                                 ->hint('Fecha de vencimiento de la inversión')
-                                ->live(onBlur: true)
+                                ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get, $state) {
                                     static::calcularTiempoDesdeFechas($set, $get);
                                     $set('campo_calculado', null);
@@ -276,7 +276,7 @@ class InteresCompuestoSchema
                                 ->default(1)
                                 ->columnSpan(9)
                                 ->visible(fn (callable $get) => ! $get('usar_select_frecuencia'))
-                                ->live(onBlur: true)
+                                ->live()
                                 ->afterStateUpdated(function (callable $set) {
                                     $set('campo_calculado', null);
                                     $set('resultado_calculado', null);
