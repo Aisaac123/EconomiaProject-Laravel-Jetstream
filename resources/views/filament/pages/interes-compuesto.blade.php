@@ -7,7 +7,7 @@
             href="#calculadora"
         >
             <x-slot:icon>
-                <x-heroicon-c-arrow-trending-up class="size-16 text-white dark:text-primary-300" aria-hidden="true" />
+                <x-heroicon-c-arrow-trending-up class="size-16 text-white" aria-hidden="true" />
             </x-slot:icon>
         </x-sections.heading-title>
         <x-sections.content>

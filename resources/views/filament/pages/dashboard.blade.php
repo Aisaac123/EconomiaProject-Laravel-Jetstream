@@ -7,9 +7,7 @@
         href="#conceptos"
     >
         <x-slot:icon>
-            <div class="">
-                <span class="text-5xl">📊</span>
-            </div>
+            <x-heroicon-c-calculator class="size-16 text-white" aria-hidden="true" />
         </x-slot:icon>
     </x-sections.heading-title>
 

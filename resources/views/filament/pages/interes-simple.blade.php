@@ -1,88 +1,113 @@
-{{-- filepath: resources/views/filament/pages/interes-simple.blade.php --}}
-<x-filament::page>
-    {{-- HERO / Introducción --}}
-    <div class="rounded-2xl bg-gradient-to-r from-emerald-700 to-teal-700 p-12 text-center text-white mb-6">
-        <div class="max-w-4xl mx-auto">
-            <div class="text-6xl mb-4">💡</div>
-            <h1 class="text-4xl font-bold mb-2">Interés Simple</h1>
-            <p class="text-lg/relaxed">
-                El interés simple calcula los intereses sobre el capital inicial únicamente.
-                Útil para préstamos o inversiones a corto plazo y para explicaciones rápidas.
-            </p>
-            <div class="mt-6">
-                <a href="#calculadora" class="inline-block rounded-lg bg-white text-teal-700 px-6 py-2 font-semibold shadow">
-                    Comenzar a calcular
-                </a>
-            </div>
-        </div>
-    </div>
+<x-filament-panels::page>
+    <div class="space-y-6">
+        <x-sections.heading-title
+            title="Interés Simple"
+            quote='"La simplicidad es la máxima sofisticación." — Leonardo da Vinci'
+            button-text="Comenzar a calcular"
+            href="#calculadora"
+        >
+            <x-slot:icon>
+                <x-heroicon-c-banknotes class="size-16 text-white" aria-hidden="true" />
+            </x-slot:icon>
+        </x-sections.heading-title>
+        <x-sections.content>
+            <div class="grid grid-cols-12 gap-4">
+                <div class="lg:col-span-6 col-span-12">
+                    {{-- Descripción --}}
+                    <x-sections.contents.description>
+                        <p>
+                            El <strong>interés simple</strong> es un método de cálculo financiero donde los intereses se calculan únicamente
+                            sobre el capital inicial. A diferencia del interés compuesto, los intereses generados no se reinvierten,
+                            manteniendo un crecimiento lineal constante a lo largo del tiempo.
+                        </p>
+                    </x-sections.contents.description>
 
-    {{-- Contenido: izquierda (descripción + ejemplos) / derecha (fórmula) --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div class="lg:col-span-2 space-y-4">
-            <x-filament::card>
-                <h3 class="text-lg font-bold mb-2">¿Qué es el interés simple?</h3>
-                <p class="text-sm text-gray-400">
-                    El interés simple se calcula sobre el capital inicial y no sobre los intereses acumulados.
-                    Fórmula básica: <code>I = P × r × t</code>, y <code>A = P × (1 + r × t)</code>.
-                </p>
-            </x-filament::card>
-
-            <x-filament::card>
-                <h3 class="text-lg font-bold mb-2">Ejemplos guía</h3>
-                <ul class="text-sm text-gray-400 space-y-2">
-                    <li><strong>Ejemplo 1:</strong> Inviertes $1,000 al 5% anual por 2 años → I = 1000 × 0.05 × 2 = $100 → A = $1,100</li>
-                    <li><strong>Ejemplo 2:</strong> Préstamo $5,000 al 12% anual por 0.5 años (6 meses) → I = 5000 × 0.12 × 0.5 = $300 → A = $5,300</li>
-                    <li><strong>Ejemplo 3:</strong> Quieres $2,200 en 1 año con r = 10% → P = 2200 / (1 + 0.10×1) = $2,000</li>
-                </ul>
-            </x-filament::card>
-        </div>
-
-        <div>
-            <x-filament::card>
-                <h3 class="text-lg font-bold mb-2">Fórmula principal</h3>
-                <div class="text-sm text-gray-400">
-                    <p><strong>I = P × r × t</strong> — Interés generado</p>
-                    <p class="mt-2"><strong>A = P × (1 + r × t)</strong> — Monto final</p>
-
-                    <div class="mt-4">
-                        <strong>Despejes útiles</strong>
-                        <ul class="mt-2 text-sm space-y-1">
-                            <li>P = A / (1 + r × t)</li>
-                            <li>r = (A / P − 1) / t</li>
-                            <li>t = (A / P − 1) / r</li>
-                        </ul>
+                    {{-- Tipos --}}
+                    <div class="pt-8">
+                        <x-sections.contents.types title="Características del Interés Simple">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Cálculo lineal:</strong> Los intereses se calculan solo sobre el capital inicial.</li>
+                                <li><strong>Fácil de entender:</strong> Ideal para préstamos a corto plazo y cálculos rápidos.</li>
+                                <li><strong>Predictible:</strong> El crecimiento es constante y fácil de proyectar en el tiempo.</li>
+                            </ul>
+                        </x-sections.contents.types>
                     </div>
                 </div>
-            </x-filament::card>
-        </div>
+
+                <div class="lg:col-span-6 col-span-12">
+                    {{-- Fórmulas --}}
+                    <x-sections.contents.formula>
+                        <div class="bg-gray-50 dark:bg-gray-800 border-r-4 border-primary-700 dark:border-primary-400 rounded-lg p-4 space-y-2">
+                            <p><strong>Fórmula del interés simple:</strong></p>
+                            <p class="font-medium text-lg">A = P × (1 + r × t)</p>
+
+                            <p><strong>Variables:</strong></p>
+                            <ul class="list-disc list-inside">
+                                <li><strong>A:</strong> Monto final después de intereses</li>
+                                <li><strong>P:</strong> Capital inicial invertido</li>
+                                <li><strong>r:</strong> Tasa de interés anual (decimal, ej. 5% = 0.05)</li>
+                                <li><strong>t:</strong> Tiempo total de inversión en años</li>
+                            </ul>
+
+                            <p><strong>Fórmula del interés generado:</strong></p>
+                            <p class="font-medium text-lg">I = P × r × t</p>
+
+                            <h4 class="font-medium mt-2 text-primary-700 dark:text-primary-300">Despejes para otras variables</h4>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>P (capital inicial):</strong> P = A / (1 + r × t)</li>
+                                <li><strong>r (tasa de interés):</strong> r = (A / P - 1) / t</li>
+                                <li><strong>t (tiempo):</strong> t = (A / P - 1) / r</li>
+                            </ul>
+                        </div>
+                    </x-sections.contents.formula>
+                </div>
+            </div>
+
+            {{-- Ejemplos --}}
+            <x-sections.contents.examples>
+                    <p>📌 <strong>Ejemplo 1:</strong> Inviertes $1,000 a una tasa del 5% anual durante 2 años.</p>
+                    <p>A = 1000 × (1 + 0.05 × 2) = 1000 × 1.10 = $1,100</p>
+
+                    <p>📌 <strong>Ejemplo 2:</strong> Préstamo de $5,000 al 12% anual por 6 meses (0.5 años).</p>
+                    <p>A = 5000 × (1 + 0.12 × 0.5) = 5000 × 1.06 = $5,300</p>
+
+                    <p>📌 <strong>Ejemplo 3:</strong> Deseas obtener $2,200 en 1 año con una tasa del 10% anual.</p>
+                    <p>P = 2200 / (1 + 0.10 × 1) = 2200 / 1.10 ≈ $2,000</p>
+
+                <x-slot:advice>
+                    El interés simple es ideal para cálculos rápidos y préstamos a corto plazo donde la simplicidad es prioritaria.
+                </x-slot:advice>
+            </x-sections.contents.examples>
+        </x-sections.content>
+        <x-sections.calculator>
+            <x-slot:form>
+                <x-sections.contents.calculator-form>
+                    <x-forms.calculation-form calculation-type="simple" />
+                </x-sections.contents.calculator-form>
+            </x-slot:form>
+
+            <x-slot:explanation>
+                <x-sections.contents.calculator-explanation>
+                    <x-slot:formula_slot>
+                        <p><strong>A = P × (1 + r × t)</strong></p>
+                        <p><strong>I = P × r × t</strong></p>
+                        <p><strong>P:</strong> P = A / (1 + r × t)</p>
+                        <p><strong>r:</strong> r = (A / P - 1) / t</p>
+                        <p><strong>t:</strong> t = (A / P - 1) / r</p>
+                    </x-slot:formula_slot>
+                    <x-slot:var_slot>
+                        <p><strong>A:</strong> Monto final</p>
+                        <p><strong>P:</strong> Capital inicial</p>
+                        <p><strong>r:</strong> Tasa de interés anual (decimal)</p>
+                        <p><strong>t:</strong> Tiempo en años</p>
+                        <p><strong>I:</strong> Interés generado</p>
+                    </x-slot:var_slot>
+
+                </x-sections.contents.calculator-explanation>
+            </x-slot:explanation>
+        </x-sections.calculator>
     </div>
 
-    <x-sections.calculator>
-        <x-slot:form>
-            <x-sections.contents.calculator-form>
-                <x-forms.calculation-form calculation-type="simple" />
-            </x-sections.contents.calculator-form>
-        </x-slot:form>
-
-        <x-slot:explanation>
-            <x-sections.contents.calculator-explanation>
-                <x-slot:formula_slot>
-                    <p><strong>A = P(1 + r/n)^(n×t)</strong></p>
-                    <p><strong>P:</strong> P = A / (1 + r/n)^(n×t)</p>
-                    <p><strong>r:</strong> r = n × ((A/P)^(1/(n×t)) - 1)</p>
-                    <p><strong>n:</strong> n = (ln(A/P) / ln(1 + r)) / t</p>
-                    <p><strong>t:</strong> t = ln(A/P) / (n × ln(1 + r/n))</p>
-                </x-slot:formula_slot>
-                <x-slot:var_slot>
-                    <p><strong>A:</strong> Monto final</p>
-                    <p><strong>P:</strong> Capital inicial</p>
-                    <p><strong>r:</strong> Tasa de interés anual (decimal)</p>
-                    <p><strong>n:</strong> Frecuencia de capitalización por año</p>
-                    <p><strong>t:</strong> Tiempo en años</p>
-                </x-slot:var_slot>
-
-            </x-sections.contents.calculator-explanation>
-        </x-slot:explanation>
-    </x-sections.calculator>
-</x-filament::page>
+    {{-- Modales --}}
+    <x-filament-actions::modals />
+</x-filament-panels::page>
