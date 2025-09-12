@@ -67,7 +67,17 @@
                             </x-filament::section>
 
                         </x-sections.contents.types>
+
+
                     </div>
+
+                    <!-- Nota informativa -->
+                        <div class="mt-4 bg-gray-100 dark:bg-gray-800 border-l-4 border-primary-500 p-4 rounded-lg shadow">
+                            <p class="text-gray-700 dark:text-gray-300 font-medium">
+                                ℹ️ <span class="text-primary-600 dark:text-primary-400 font-semibold">Nota:</span>
+                                En esta aplicación se está utilizando la <strong>Anualidad Ordinaria (Vencida)</strong>.
+                            </p>
+                        </div>
 
                 </div>
 
