@@ -60,7 +60,7 @@ trait InteresSimpleFormula
 
             case 'tiempo':
                 $result = (($data['monto_final'] / $data['capital']) - 1) / $rate;
-                $message = 'Tiempo requerido: '.number_format($result, 2).' años';
+                $message = 'Tiempo requerido: '.$this->smartRound($result).' años';
                 break;
         }
 

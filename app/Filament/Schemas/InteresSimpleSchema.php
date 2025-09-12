@@ -641,7 +641,7 @@ class InteresSimpleSchema
             if ($final->gt($inicio)) {
                 // Calcular diferencia en años (más preciso)
                 $tiempoEnAnios = $inicio->diffInDays($final) / 365.25;
-                $set('tiempo', static::smartRound(round($tiempoEnAnios, 4)));
+                $set('tiempo', static::smartRound($tiempoEnAnios));
             } else {
                 $set('tiempo', null);
             }
