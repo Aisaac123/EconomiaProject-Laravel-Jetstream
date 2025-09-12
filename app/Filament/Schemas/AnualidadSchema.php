@@ -241,7 +241,7 @@ class AnualidadSchema
                                 ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia')
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get) {
-                                    static::calcularNumeroPagosDesdeTiempo($set, $get);
+                                    calcularNumeroPagosDesdeTiempo($set, $get);
                                     $set('campos_calculados', null);
                                     $set('resultados_calculados', null);
                                     $set('interes_generado_calculado', null);
@@ -267,7 +267,7 @@ class AnualidadSchema
                                 ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia')
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get) {
-                                    static::calcularNumeroPagosDesdeTiempo($set, $get);
+                                    calcularNumeroPagosDesdeTiempo($set, $get);
                                     $set('campos_calculados', null);
                                     $set('resultados_calculados', null);
                                     $set('interes_generado_calculado', null);
@@ -294,7 +294,7 @@ class AnualidadSchema
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                     static::calcularTiempoDesdeFechas($set, $get);
-                                    static::calcularNumeroPagosDesdeTiempo($set, $get);
+                                    calcularNumeroPagosDesdeTiempo($set, $get);
                                     $set('campos_calculados', null);
                                     $set('resultados_calculados', null);
                                     $set('interes_generado_calculado', null);
@@ -309,7 +309,7 @@ class AnualidadSchema
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                     static::calcularTiempoDesdeFechas($set, $get);
-                                    static::calcularNumeroPagosDesdeTiempo($set, $get);
+                                    calcularNumeroPagosDesdeTiempo($set, $get);
                                     $set('campos_calculados', null);
                                     $set('resultados_calculados', null);
                                     $set('interes_generado_calculado', null);
@@ -344,7 +344,7 @@ class AnualidadSchema
                                 ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia')
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get) {
-                                    static::calcularNumeroPagosDesdeTiempo($set, $get);
+                                    calcularNumeroPagosDesdeTiempo($set, $get);
                                     $set('campos_calculados', null);
                                     $set('resultados_calculados', null);
                                     $set('interes_generado_calculado', null);
@@ -717,4 +717,6 @@ class AnualidadSchema
         // Recalcular número de pagos después de actualizar el tiempo
         calcularNumeroPagosDesdeTiempo($set, $get);
     }
+
+
 }
