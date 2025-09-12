@@ -250,7 +250,7 @@ class InteresSimpleSchema
                                 $emptyFields = [];
                                 foreach (['capital', 'monto_final', 'tasa_interes', 'tiempo'] as $field) {
                                     $value = $get($field);
-                                    if ($value === null || $value === '' ) {
+                                    if ($value === null || $value === '') {
                                         $emptyFields[] = $field;
                                     }
                                 }
@@ -276,6 +276,7 @@ class InteresSimpleSchema
                                     $errorMessage = count($emptyFields) === 0
                                         ? 'Debes dejar exactamente un campo vacío para calcular.'
                                         : 'Solo un campo puede estar vacío. Actualmente hay '.count($emptyFields).' campos vacíos.';
+
                                     return new HtmlString('<div class="p-5 bg-red-50 dark:bg-red-900/50 rounded-lg text-red-800">'.$errorMessage.'</div>');
                                 }
 
@@ -376,6 +377,7 @@ class InteresSimpleSchema
         if (abs($value - $oneDecimal) < 0.05) {
             return $oneDecimal;
         }
+
         return round($value, 2);
     }
 }

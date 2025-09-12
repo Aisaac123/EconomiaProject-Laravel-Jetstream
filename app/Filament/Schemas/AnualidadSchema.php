@@ -403,12 +403,12 @@ class AnualidadSchema
                                     }
 
                                     // Verificar si el número de pagos está vacío
-                                    if (!$numeroPagosInput) {
+                                    if (! $numeroPagosInput) {
                                         $emptyFields[] = 'numero_pagos';
                                     }
 
                                     // Si hay un cálculo exitoso, mostrar resultados
-                                    if (!empty($camposCalculadosArray) && !empty($resultadosArray)) {
+                                    if (! empty($camposCalculadosArray) && ! empty($resultadosArray)) {
                                         return static::buildResultHtml(
                                             $pagoPeriodicoInput, $valorPresenteInput, $valorFuturoInput,
                                             $tasaInteresInput, $numeroPagosInput,
@@ -502,8 +502,8 @@ class AnualidadSchema
         $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
 
         $displayValue = $isCalculated
-            ? '$' . number_format($resultadosArray['pago_periodico'] ?? 0, 2)
-            : (is_numeric($pagoPeriodicoInput) ? '$' . number_format($pagoPeriodicoInput, 2) : '--');
+            ? '$'.number_format($resultadosArray['pago_periodico'] ?? 0, 2)
+            : (is_numeric($pagoPeriodicoInput) ? '$'.number_format($pagoPeriodicoInput, 2) : '--');
 
         $html .= "
             <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
@@ -526,8 +526,8 @@ class AnualidadSchema
         $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
 
         $displayValue = $isCalculated
-            ? '$' . number_format($resultadosArray['valor_presente'] ?? 0, 2)
-            : (is_numeric($valorPresenteInput) ? '$' . number_format($valorPresenteInput, 2) : '--');
+            ? '$'.number_format($resultadosArray['valor_presente'] ?? 0, 2)
+            : (is_numeric($valorPresenteInput) ? '$'.number_format($valorPresenteInput, 2) : '--');
 
         $html .= "
             <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
@@ -550,8 +550,8 @@ class AnualidadSchema
         $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
 
         $displayValue = $isCalculated
-            ? '$' . number_format($resultadosArray['valor_futuro'] ?? 0, 2)
-            : (is_numeric($valorFuturoInput) ? '$' . number_format($valorFuturoInput, 2) : '--');
+            ? '$'.number_format($resultadosArray['valor_futuro'] ?? 0, 2)
+            : (is_numeric($valorFuturoInput) ? '$'.number_format($valorFuturoInput, 2) : '--');
 
         $html .= "
             <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
@@ -574,8 +574,8 @@ class AnualidadSchema
         $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
 
         $displayValue = $isCalculated
-            ? $resultadosArray['tasa_interes'] . '%'
-            : (is_numeric($tasaInteresInput) ? $tasaInteresInput . '%' : '--');
+            ? $resultadosArray['tasa_interes'].'%'
+            : (is_numeric($tasaInteresInput) ? $tasaInteresInput.'%' : '--');
 
         $html .= "
             <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
@@ -633,7 +633,7 @@ class AnualidadSchema
                     52 => 'Semanal',
                     360 => 'Diaria Comercial',
                     365 => 'Diaria',
-                    default => $periodicidadTasa . ' veces/año'
+                    default => $periodicidadTasa.' veces/año'
                 };
 
                 $html .= "

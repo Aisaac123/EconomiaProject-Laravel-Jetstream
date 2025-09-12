@@ -5,6 +5,7 @@ namespace App\Traits;
 trait AnualidadFormula
 {
     use HelpersFormula;
+
     private function calculateAnualidad(array $data): array
     {
         $emptyFields = [];
@@ -32,11 +33,11 @@ trait AnualidadFormula
 
         // Inicializar valores de trabajo (mayor precisión)
         $values = [
-            'pago_periodico' => !empty($data['pago_periodico']) ? (float)$data['pago_periodico'] : null,
-            'valor_presente' => !empty($data['valor_presente']) ? (float)$data['valor_presente'] : null,
-            'valor_futuro' => !empty($data['valor_futuro']) ? (float)$data['valor_futuro'] : null,
-            'tasa_interes' => !empty($data['tasa_interes']) ? (float)$data['tasa_interes'] : null,
-            'numero_pagos' => !empty($data['numero_pagos']) ? (int)$data['numero_pagos'] : null,
+            'pago_periodico' => ! empty($data['pago_periodico']) ? (float) $data['pago_periodico'] : null,
+            'valor_presente' => ! empty($data['valor_presente']) ? (float) $data['valor_presente'] : null,
+            'valor_futuro' => ! empty($data['valor_futuro']) ? (float) $data['valor_futuro'] : null,
+            'tasa_interes' => ! empty($data['tasa_interes']) ? (float) $data['tasa_interes'] : null,
+            'numero_pagos' => ! empty($data['numero_pagos']) ? (int) $data['numero_pagos'] : null,
         ];
 
         // Convertir tasa a decimal anual si existe
@@ -146,7 +147,7 @@ trait AnualidadFormula
                     $ratio = ($values['valor_futuro'] * $rate) / $values['pago_periodico'] + 1;
                     if ($ratio > 0) {
                         $values['numero_pagos'] = round(log($ratio) / log(1 + $rate), 0);
-                        $resultados['numero_pagos'] = (int)$values['numero_pagos'];
+                        $resultados['numero_pagos'] = (int) $values['numero_pagos'];
                         $camposCalculados[] = 'numero_pagos';
                         $messages[] = 'Número de pagos calculado (desde VF): '.$resultados['numero_pagos'];
                         $calculated = true;
@@ -163,7 +164,7 @@ trait AnualidadFormula
                     $ratio = 1 - ($values['valor_presente'] * $rate) / $values['pago_periodico'];
                     if ($ratio > 0) {
                         $values['numero_pagos'] = round(-log($ratio) / log(1 + $rate), 0);
-                        $resultados['numero_pagos'] = (int)$values['numero_pagos'];
+                        $resultados['numero_pagos'] = (int) $values['numero_pagos'];
                         $camposCalculados[] = 'numero_pagos';
                         $messages[] = 'Número de pagos calculado (desde VP): '.$resultados['numero_pagos'];
                         $calculated = true;
@@ -191,9 +192,9 @@ trait AnualidadFormula
                             $factor = pow(1 + $r, -$values['numero_pagos']);
                             $f = $values['pago_periodico'] * ((1 - $factor) / $r) - $values['valor_presente'];
                             $fprime = $values['pago_periodico'] * (
-                                    (($values['numero_pagos'] * $factor) / (1 + $r)) / $r -
-                                    ((1 - $factor) / ($r * $r))
-                                );
+                                (($values['numero_pagos'] * $factor) / (1 + $r)) / $r -
+                                ((1 - $factor) / ($r * $r))
+                            );
 
                             if (abs($fprime) < 1e-12) {
                                 break;
@@ -209,8 +210,12 @@ trait AnualidadFormula
                             $r = $r_new;
 
                             // Mantener r en rango razonable
-                            if ($r < -0.99) $r = -0.99;
-                            if ($r > 10) $r = 10;
+                            if ($r < -0.99) {
+                                $r = -0.99;
+                            }
+                            if ($r > 10) {
+                                $r = 10;
+                            }
                         }
                     } elseif ($values['valor_futuro'] !== null) {
                         // Iteración usando VF: PMT * [((1+r)^n - 1)/r] - VF = 0
@@ -222,9 +227,9 @@ trait AnualidadFormula
                             $factor = pow(1 + $r, $values['numero_pagos']);
                             $f = $values['pago_periodico'] * (($factor - 1) / $r) - $values['valor_futuro'];
                             $fprime = $values['pago_periodico'] * (
-                                    (($values['numero_pagos'] * pow(1 + $r, $values['numero_pagos'] - 1)) / $r) -
-                                    (($factor - 1) / ($r * $r))
-                                );
+                                (($values['numero_pagos'] * pow(1 + $r, $values['numero_pagos'] - 1)) / $r) -
+                                (($factor - 1) / ($r * $r))
+                            );
 
                             if (abs($fprime) < 1e-12) {
                                 break;
@@ -240,8 +245,12 @@ trait AnualidadFormula
                             $r = $r_new;
 
                             // Mantener r en rango razonable
-                            if ($r < -0.99) $r = -0.99;
-                            if ($r > 10) $r = 10;
+                            if ($r < -0.99) {
+                                $r = -0.99;
+                            }
+                            if ($r > 10) {
+                                $r = 10;
+                            }
                         }
                     }
 
@@ -276,6 +285,7 @@ trait AnualidadFormula
                 'message' => 'Error en cálculo: '.$e->getMessage(),
             ];
         }
+
         // Retornar SOLO los campos ocultos, NO modificar los campos principales
         return [
             'error' => false,

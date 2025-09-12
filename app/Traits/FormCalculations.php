@@ -8,8 +8,8 @@ use Filament\Notifications\Notification;
 trait FormCalculations
 {
     use AnualidadFormula;
-    use InteresSimpleFormula;
     use InteresCompuestoFormula;
+    use InteresSimpleFormula;
 
     /**
      * Public Properties
@@ -80,6 +80,7 @@ trait FormCalculations
             ->body($result['message'])
             ->send();
     }
+
     public function limpiar(): void
     {
         $this->form->fill([]);

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Enums\CalculationType;
 use App\Filament\Schemas\InteresSimpleSchema;
 use App\Traits\FormCalculations;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -41,7 +40,6 @@ class InteresSimple extends Page implements HasForms
      * Método invocado por la operación `calculate`.
      * Llama al trait para ejecutar el cálculo de interés simple.
      */
-
     public static function getNavigationSort(): ?int
     {
         return 2;

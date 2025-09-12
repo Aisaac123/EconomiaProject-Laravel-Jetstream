@@ -5,6 +5,7 @@ namespace App\Traits;
 trait InteresSimpleFormula
 {
     use HelpersFormula;
+
     private function calculateInteresSimple(array $data): array
     {
         $emptyFields = [];
