@@ -30,6 +30,7 @@ class AnualidadSchema
 
                 Section::make('Calculadora de Anualidades')
                     ->description('Complete los campos conocidos. Pueden calcularse 1 o 2 campos automáticamente según las fórmulas.')
+                    ->collapsible()
                     ->icon('heroicon-o-banknotes')
                     ->schema([
                         Grid::make(2)->schema([

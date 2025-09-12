@@ -29,6 +29,7 @@ class InteresCompuestoSchema {
                 Section::make('Calculadora de Interés Compuesto')
                     ->description('Complete los campos conocidos. El campo vacío será calculado automáticamente.')
                     ->icon('heroicon-o-calculator')
+                    ->collapsible()
                     ->schema([
                         Grid::make(2)->schema([
                             TextInput::make('capital')
@@ -178,6 +179,12 @@ class InteresCompuestoSchema {
                                     $set('resultado_calculado', null);
                                     $set('interes_generado_calculado', null);
                                     $set('mensaje_calculado', null);
+                                    $set('tiempo', null);
+                                    $set('fecha_inicio', null);
+                                    $set('fecha_final', null);
+                                    $set('anio', null);
+                                    $set('mes', null);
+                                    $set('dia', null);
                                 }),
 
                             TextInput::make('anio')
@@ -200,6 +207,7 @@ class InteresCompuestoSchema {
                                     $set('interes_generado_calculado', null);
                                     $set('mensaje_calculado', null);
                                 }),
+
                             TextInput::make('mes')
                                 ->rules(['nullable', 'numeric', 'min:0'])
                                 ->validationMessages([
@@ -220,6 +228,7 @@ class InteresCompuestoSchema {
                                     $set('interes_generado_calculado', null);
                                     $set('mensaje_calculado', null);
                                 }),
+
                             TextInput::make('dia')
                                 ->rules(['nullable', 'numeric', 'min:0'])
                                 ->validationMessages([
@@ -240,23 +249,10 @@ class InteresCompuestoSchema {
                                     $set('interes_generado_calculado', null);
                                     $set('mensaje_calculado', null);
                                 }),
-                            TextInput::make('tiempo')
-                                ->rules(['nullable', 'numeric', 'min:0'])
-                                ->validationMessages([
-                                    'min' => 'El tiempo debe ser mayor o igual a 0',
-                                ])
-                                ->disabled()
-                                ->label('Tiempo en años')
-                                ->numeric()
-                                ->suffix('años')
-                                ->columnSpan(6)
-                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
-                                ->live(),
-                        ]),
 
-                        Grid::make(2)->schema([
                             DatePicker::make('fecha_inicio')
                                 ->label('Fecha de Inicio')
+                                ->columnSpan(6)
                                 ->placeholder('Seleccione la fecha inicial')
                                 ->hint('Fecha de inicio de la inversión')
                                 ->live()
@@ -271,6 +267,7 @@ class InteresCompuestoSchema {
 
                             DatePicker::make('fecha_final')
                                 ->label('Fecha Final')
+                                ->columnSpan(6)
                                 ->placeholder('Seleccione la fecha final')
                                 ->hint('Fecha de vencimiento de la inversión')
                                 ->live()
@@ -282,15 +279,12 @@ class InteresCompuestoSchema {
                                     $set('mensaje_calculado', null);
                                 })
                                 ->visible(fn (callable $get) => $get('usar_fechas_tiempo')),
-                        ]),
 
-                        Grid::make(1)->schema([
                             TextInput::make('tiempo')
-                                ->label('Tiempo Calculado')
+                                ->label('Tiempo en Años')
                                 ->suffix('años')
+                                ->columnSpan(6)
                                 ->disabled()
-                                ->hint('Calculado automáticamente desde las fechas seleccionadas')
-                                ->visible(fn (callable $get) => $get('usar_fechas_tiempo') && $get('tiempo')),
                         ]),
                     ]),
 

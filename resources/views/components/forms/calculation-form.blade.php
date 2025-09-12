@@ -8,7 +8,7 @@
                 ¿Cómo usar la calculadora?
             </p>
             <p class="text-gray-700 dark:text-gray-300 mt-1">
-                Complete todos los campos conocidos y deje vacío <strong>exactamente uno</strong> que desee calcular.
+                Complete todos los campos conocidos<strong> y deje vacío</strong> los campos que desee calcular.
             </p>
         </div>
     </div>
