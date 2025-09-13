@@ -59,7 +59,7 @@ if (! function_exists('calcularNumeroPagosDesdeTiempo')) {
         $modoTiempoPagos = $get('modo_tiempo_pagos');
 
         if ($modoTiempoPagos === 'anios_frecuencia') {
-            $tiempoAnios = $get('tiempo_anios');
+            $tiempoAnios = $get('tiempo');
             $frecuencia = $get('frecuencia_anios') ?: 1;
             if (is_numeric($tiempoAnios) && is_numeric($frecuencia)) {
                 $n = $tiempoAnios * $frecuencia;
@@ -67,8 +67,8 @@ if (! function_exists('calcularNumeroPagosDesdeTiempo')) {
                 $set('numero_pagos', round($n));
             }
         } elseif ($modoTiempoPagos === 'fechas_frecuencia') {
-            $tiempoCalculado = $get('tiempo_calculado_fechas');
-            $frecuencia = $get('frecuencia_fechas') ?: 1;
+            $tiempoCalculado = $get('tiempo');
+            $frecuencia = $get('frecuencia_anios') ?: 1;
             if (is_numeric($tiempoCalculado) && is_numeric($frecuencia)) {
                 $n = $tiempoCalculado * $frecuencia;
                 $set('numero_pagos_calculado_fechas', round($n));

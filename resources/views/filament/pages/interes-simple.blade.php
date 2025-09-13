@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="space-y-6">
+    <div class="space-y-6 min-h-[1650px]">
         <x-sections.heading-title
             title="Interés Simple"
             quote='"La simplicidad es la máxima sofisticación." — Leonardo da Vinci'

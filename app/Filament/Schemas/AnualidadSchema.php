@@ -2,6 +2,7 @@
 
 namespace App\Filament\Schemas;
 
+use Blade;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
@@ -11,6 +12,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
@@ -20,451 +23,683 @@ class AnualidadSchema
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->components([
-                // Campos ocultos para almacenar resultados sin afectar los campos principales
+            ->schema([
+                // Campos ocultos para almacenar resultados
                 Hidden::make('campos_calculados'),
                 Hidden::make('resultados_calculados'),
                 Hidden::make('interes_generado_calculado'),
                 Hidden::make('mensaje_calculado'),
-                Hidden::make('numero_pagos'), // Campo oculto para el cálculo
+                Hidden::make('numero_pagos'),
+                Hidden::make('tiempo'),
 
-                Section::make('Calculadora de Anualidades')
-                    ->description('Complete los campos conocidos. Pueden calcularse 1 o 2 campos automáticamente según las fórmulas.')
-                    ->collapsible()
-                    ->icon('heroicon-o-banknotes')
-                    ->schema([
-                        Grid::make(2)->schema([
-                            TextInput::make('pago_periodico')
-                                ->rules(['nullable', 'numeric', 'min:0'])
-                                ->validationMessages([
-                                    'min' => 'El pago periódico debe ser mayor o igual a 0',
-                                ])
-                                ->label('Pago Periódico (PMT)')
-                                ->numeric()
-                                ->prefix('$')
-                                ->placeholder('Ejemplo: 1000')
-                                ->hint('Pago fijo en cada período')
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
+                // Wizard con los diferentes pasos
+                Wizard::make([
+                    // Paso 1: Información básica
+                    Step::make('Información Básica')
+                        ->icon('heroicon-o-banknotes')
+                        ->completedIcon('heroicon-s-banknotes')
+                        ->schema([
+                            Section::make('Información Básica de Anualidad')
+                                ->icon('heroicon-o-banknotes')
+                                ->description('Complete los campos conocidos. Pueden calcularse 1 o 2 campos automáticamente según las fórmulas.')
+                                ->schema([
+                                    Grid::make(3)->schema([
+                                        TextInput::make('pago_periodico')
+                                            ->rules(['nullable', 'numeric', 'min:0'])
+                                            ->validationMessages([
+                                                'min' => 'El pago periódico debe ser mayor o igual a 0',
+                                            ])
+                                            ->label('Pago Periódico (PMT)')
+                                            ->numeric()
+                                            ->prefix('$')
+                                            ->placeholder('Ejemplo: 1000')
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                            TextInput::make('valor_presente')
-                                ->rules(['nullable', 'numeric', 'min:0'])
-                                ->validationMessages([
-                                    'min' => 'El valor presente debe ser mayor o igual a 0',
-                                ])
-                                ->label('Valor Presente (VP)')
-                                ->numeric()
-                                ->prefix('$')
-                                ->placeholder('Ejemplo: 50000')
-                                ->hint('Valor actual de la anualidad')
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
+                                        TextInput::make('valor_presente')
+                                            ->rules(['nullable', 'numeric', 'min:0'])
+                                            ->validationMessages([
+                                                'min' => 'El valor presente debe ser mayor o igual a 0',
+                                            ])
+                                            ->label('Valor Presente (VP)')
+                                            ->numeric()
+                                            ->prefix('$')
+                                            ->placeholder('Ejemplo: 50000')
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                            TextInput::make('valor_futuro')
-                                ->rules(['nullable', 'numeric', 'min:0'])
-                                ->validationMessages([
-                                    'min' => 'El valor futuro debe ser mayor o igual a 0',
-                                ])
-                                ->label('Valor Futuro (VF)')
-                                ->numeric()
-                                ->prefix('$')
-                                ->placeholder('Ejemplo: 100000')
-                                ->hint('Valor acumulado de la anualidad')
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
+                                        TextInput::make('valor_futuro')
+                                            ->rules(['nullable', 'numeric', 'min:0'])
+                                            ->validationMessages([
+                                                'min' => 'El valor futuro debe ser mayor o igual a 0',
+                                            ])
+                                            ->label('Valor Futuro (VF)')
+                                            ->numeric()
+                                            ->prefix('$')
+                                            ->placeholder('Ejemplo: 100000')
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
+                                    ]),
+                                ]),
                         ]),
-                    ]),
 
-                // Sección de Tasa de Interés
-                Section::make('Configuración de Tasa de Interés')
-                    ->description('Configure la tasa de interés y su periodicidad')
-                    ->icon('heroicon-o-percent-badge')
-                    ->collapsible()
-                    ->collapsed()
-                    ->schema([
-                        Grid::make(12)->schema([
-                            Toggle::make('usar_select_periodicidad_tasa')
-                                ->label('Selector de periodicidad')
-                                ->default(true)
-                                ->live()
-                                ->inline(false)
-                                ->columnSpan(3)
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campo_calculado', null);
-                                    $set('resultado_calculado', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
+                    // Paso 2: Tasa de interés
+                    Step::make('Tasa de Interés')
+                        ->icon('heroicon-o-percent-badge')
+                        ->completedIcon('heroicon-s-percent-badge')
+                        ->schema([
+                            Section::make('Configuración de Tasa de Interés')
+                                ->icon('heroicon-o-percent-badge')
+                                ->description('Configure la tasa de interés y su periodicidad')
+                                ->schema([
+                                    Grid::make(12)->schema([
+                                        TextInput::make('tasa_interes')
+                                            ->rules(['nullable', 'numeric', 'min:0'])
+                                            ->validationMessages([
+                                                'min' => 'La tasa de interes debe ser mayor o igual a 0',
+                                            ])
+                                            ->label('Tasa de Interés')
+                                            ->numeric()
+                                            ->suffix('%')
+                                            ->placeholder('Ejemplo: 5.5')
+                                            ->step(0.01)
+                                            ->hint('Tasa en porcentaje')
+                                            ->columnSpan(4)
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                            TextInput::make('periodicidad_tasa')
-                                ->rules(['nullable', 'numeric', 'min:1'])
-                                ->validationMessages([
-                                    'min' => 'La periodicidad debe ser mayor o igual a 1',
-                                ])
-                                ->label('Periodicidad (numérica)')
-                                ->numeric()
-                                ->placeholder('12 para mensual')
-                                ->hint('Períodos por año')
-                                ->default(1)
-                                ->columnSpan(5)
-                                ->visible(fn (callable $get) => ! $get('usar_select_periodicidad_tasa'))
-                                ->live()
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campo_calculado', null);
-                                    $set('resultado_calculado', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
+                                        TextInput::make('periodicidad_tasa')
+                                            ->rules(['nullable', 'numeric', 'min:1'])
+                                            ->validationMessages([
+                                                'min' => 'La periodicidad debe ser mayor o igual a 1',
+                                            ])
+                                            ->label('Periodicidad (numérica)')
+                                            ->numeric()
+                                            ->placeholder('12 para mensual')
+                                            ->hint('Períodos por año')
+                                            ->default(1)
+                                            ->columnSpan(5)
+                                            ->visible(fn(callable $get) => !$get('usar_select_periodicidad_tasa'))
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                            Select::make('periodicidad_tasa')
-                                ->label('Periodicidad de la Tasa')
-                                ->options([
-                                    1 => 'Anual (1 vez/año)',
-                                    2 => 'Semestral (2 veces/año)',
-                                    4 => 'Trimestral (4 veces/año)',
-                                    6 => 'Bimestral (6 veces/año)',
-                                    12 => 'Mensual (12 veces/año)',
-                                    24 => 'Quincenal (24 veces/año)',
-                                    52 => 'Semanal (52 veces/año)',
-                                    365 => 'Diaria (365 veces/año)',
-                                    360 => 'Diaria Comercial (360 veces/año)',
-                                ])
-                                ->default(1)
-                                ->searchable()
-                                ->columnSpan(5)
-                                ->visible(fn (callable $get) => $get('usar_select_periodicidad_tasa'))
-                                ->live()
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campo_calculado', null);
-                                    $set('resultado_calculado', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
+                                        Select::make('periodicidad_tasa')
+                                            ->label('Periodicidad de la Tasa')
+                                            ->options([
+                                                1 => 'Anual (1 vez/año)',
+                                                2 => 'Semestral (2 veces/año)',
+                                                4 => 'Trimestral (4 veces/año)',
+                                                6 => 'Bimestral (6 veces/año)',
+                                                12 => 'Mensual (12 veces/año)',
+                                                24 => 'Quincenal (24 veces/año)',
+                                                52 => 'Semanal (52 veces/año)',
+                                                365 => 'Diaria (365 veces/año)',
+                                                360 => 'Diaria Comercial (360 veces/año)',
+                                            ])
+                                            ->default(1)
+                                            ->searchable()
+                                            ->columnSpan(5)
+                                            ->visible(fn(callable $get) => $get('usar_select_periodicidad_tasa'))
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                            TextInput::make('tasa_interes')
-                                ->rules(['nullable', 'numeric', 'min:0'])
-                                ->validationMessages([
-                                    'min' => 'La tasa de interes debe ser mayor o igual a 0',
-                                ])
-                                ->label('Tasa de Interés')
-                                ->numeric()
-                                ->suffix('%')
-                                ->placeholder('Ejemplo: 5.5')
-                                ->step(0.01)
-                                ->hint('Tasa en porcentaje')
-                                ->columnSpan(4)
-                                ->live()
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campo_calculado', null);
-                                    $set('resultado_calculado', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
+                                        Toggle::make('usar_select_periodicidad_tasa')
+                                            ->label('Selector de periodicidad')
+                                            ->default(true)
+                                            ->live()
+                                            ->inline(false)
+                                            ->columnSpan(3)
+                                            ->extraAttributes(['class' => 'text-center items-center ml-14 mt-1'])
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
+                                    ]),
+                                ]),
                         ]),
-                    ]),
 
-                // Sección de Configuración de Tiempo y Pagos - REORGANIZADA
-                Section::make('Configuración de Tiempo y Pagos')
-                    ->description('Configure el período de tiempo y el número de pagos')
-                    ->icon('heroicon-o-clock')
-                    ->collapsible()
-                    ->collapsed()
-                    ->schema([
-                        Select::make('modo_tiempo_pagos')
-                            ->label('Método para determinar número de pagos')
-                            ->options([
-                                'manual' => 'Ingresar número de pagos directamente',
-                                'anios_frecuencia' => 'Calcular desde años y frecuencia',
-                                'fechas_frecuencia' => 'Calcular desde fechas y frecuencia',
-                            ])
-                            ->default('manual')
-                            ->live()
-                            ->searchable()
+                    // Paso 3: Configuración de tiempo y pagos
+                    Step::make('Numero de pagos')
+                        ->icon('heroicon-o-clock')
+                        ->completedIcon('heroicon-s-clock')
+                        ->schema([
+                            Section::make('Configuración de Tiempo y Pagos')
+                                ->icon('heroicon-o-clock')
+                                ->description('Configure el período de tiempo y el número de pagos')
+                                ->schema([
+                                    Select::make('modo_tiempo_pagos')
+                                        ->label('Método para determinar número de pagos')
+                                        ->options([
+                                            'manual' => 'Ingresar número de pagos directamente',
+                                            'anios_frecuencia' => 'Calcular con tiempo y frecuencia',
+                                            'fechas_frecuencia' => 'Calcular desde fechas y frecuencia',
+                                        ])
+                                        ->default('manual')
+                                        ->live()
+                                        ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === null)
+                                        ->searchable()
+                                        ->afterStateUpdated(function (callable $set) {
+                                            $set('tiempo', null);
+                                            $set('fecha_inicio', null);
+                                            $set('fecha_final', null);
+                                            $set('anio', null);
+                                            $set('mes', null);
+                                            $set('dia', null);
+                                            $set('numero_pagos', null);
+                                            $set('campos_calculados', null);
+                                            $set('resultados_calculados', null);
+                                            $set('interes_generado_calculado', null);
+                                            $set('mensaje_calculado', null);
+                                        }),
+                                    // MODO MANUAL: Ingresar número de pagos directamente
+                                    Grid::make(2)->schema([
+                                        Select::make('modo_tiempo_pagos')
+                                            ->label('Método para determinar número de pagos')
+                                            ->options([
+                                                'manual' => 'Ingresar número de pagos directamente',
+                                                'anios_frecuencia' => 'Calcular con tiempo y frecuencia',
+                                                'fechas_frecuencia' => 'Calcular desde fechas y frecuencia',
+                                            ])
+                                            ->default('manual')
+                                            ->live()
+                                            ->searchable()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('tiempo', null);
+                                                $set('fecha_inicio', null);
+                                                $set('fecha_final', null);
+                                                $set('anio', null);
+                                                $set('mes', null);
+                                                $set('dia', null);
+                                                $set('numero_pagos', null);
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                            ->afterStateUpdated(function (callable $set) {
-                                $set('campos_calculados', null);
-                                $set('resultados_calculados', null);
-                                $set('interes_generado_calculado', null);
-                                $set('mensaje_calculado', null);
-                            }),
+                                        TextInput::make('numero_pagos')
+                                            ->rules(['nullable', 'integer', 'min:1'])
+                                            ->validationMessages([
+                                                'min' => 'El número de pagos debe ser mayor o igual a 1',
+                                            ])
+                                            ->label('Número de Pagos (n)')
+                                            ->numeric()
+                                            ->placeholder('Ejemplo: 60')
+                                            ->hint('Total de pagos a realizar')
+                                            ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'manual')
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set, callable $get) {
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
+                                    ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'manual'),
 
-                        // MODO MANUAL: Ingresar número de pagos directamente
-                        Grid::make(1)->schema([
-                            TextInput::make('numero_pagos')
-                                ->rules(['nullable', 'integer', 'min:1'])
-                                ->validationMessages([
-                                    'min' => 'El número de pagos debe ser mayor o igual a 1',
-                                ])
-                                ->label('Número de Pagos (n)')
-                                ->numeric()
-                                ->placeholder('Ejemplo: 60')
-                                ->hint('Total de pagos a realizar')
-                                ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'manual')
-                                ->live()
-                                ->afterStateUpdated(function (callable $set, callable $get) {
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
-                        ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'manual'),
+                                    // MODO AÑOS + FRECUENCIA
+                                    Grid::make(12)->schema([
+                                        Select::make('modo_tiempo_pagos')
+                                            ->label('Método para determinar número de pagos')
+                                            ->options([
+                                                'manual' => 'Ingresar número de pagos directamente',
+                                                'anios_frecuencia' => 'Calcular con tiempo y frecuencia',
+                                                'fechas_frecuencia' => 'Calcular desde fechas y frecuencia',
+                                            ])
+                                            ->default('manual')
+                                            ->live()
+                                            ->columnSpan(6)
+                                            ->searchable()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('tiempo', null);
+                                                $set('fecha_inicio', null);
+                                                $set('fecha_final', null);
+                                                $set('anio', null);
+                                                $set('mes', null);
+                                                $set('dia', null);
+                                                $set('numero_pagos', null);
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
+                                        TextInput::make('numero_pagos_calculado_anios')
+                                            ->label('Número de Pagos Calculado')
+                                            ->disabled()
+                                            ->columnSpan(6)
+                                            ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia')
+                                            ->hint('Tiempo x Frecuencia de pagos'),
 
-                        // MODO AÑOS + FRECUENCIA
-                        Grid::make(2)->schema([
-                            TextInput::make('tiempo_anios')
-                                ->rules(['nullable', 'numeric', 'min:0'])
-                                ->validationMessages([
-                                    'min' => 'El tiempo debe ser mayor o igual a 0',
-                                ])
-                                ->label('Tiempo en años')
-                                ->numeric()
-                                ->suffix('años')
-                                ->placeholder('Ejemplo: 5.5')
-                                ->step(0.01)
-                                ->hint('Duración en años')
-                                ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia')
-                                ->live()
-                                ->afterStateUpdated(function (callable $set, callable $get) {
-                                    calcularNumeroPagosDesdeTiempo($set, $get);
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
+                                        TextInput::make('anio')
+                                            ->rules(['nullable', 'numeric', 'min:0'])
+                                            ->validationMessages([
+                                                'min' => 'El tiempo debe ser mayor o igual a 0',
+                                            ])
+                                            ->label('Años')
+                                            ->numeric()
+                                            ->suffix('años')
+                                            ->placeholder('Ejemplo: 5')
+                                            ->step(0.01)
+                                            ->columnSpan(3)
+                                            ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set, callable $get) {
+                                                calcularTiempo($set, $get);
+                                                calcularNumeroPagosDesdeTiempo($set, $get);
+                                                $set('campo_calculado', null);
+                                                $set('resultado_calculado', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                            // Nuevo campo de frecuencia para modo años
-                            Select::make('frecuencia_anios')
-                                ->label('Frecuencia de Pagos')
-                                ->options([
-                                    1 => 'Anual (1 vez/año)',
-                                    2 => 'Semestral (2 veces/año)',
-                                    4 => 'Trimestral (4 veces/año)',
-                                    6 => 'Bimestral (6 veces/año)',
-                                    12 => 'Mensual (12 veces/año)',
-                                    24 => 'Quincenal (24 veces/año)',
-                                    52 => 'Semanal (52 veces/año)',
-                                    365 => 'Diaria (365 veces/año)',
-                                    360 => 'Diaria Comercial (360 veces/año)',
-                                ])
-                                ->default(1)
-                                ->searchable()
-                                ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia')
-                                ->live()
-                                ->afterStateUpdated(function (callable $set, callable $get) {
-                                    calcularNumeroPagosDesdeTiempo($set, $get);
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
-                        ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia'),
+                                        TextInput::make('mes')
+                                            ->rules(['nullable', 'numeric', 'min:0'])
+                                            ->validationMessages([
+                                                'min' => 'El tiempo debe ser mayor o igual a 0',
+                                            ])
+                                            ->label('Meses')
+                                            ->numeric()
+                                            ->suffix('meses')
+                                            ->placeholder('Ejemplo: 7')
+                                            ->step(0.01)
+                                            ->columnSpan(3)
+                                            ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set, callable $get) {
+                                                calcularTiempo($set, $get);
+                                                calcularNumeroPagosDesdeTiempo($set, $get);
+                                                $set('campo_calculado', null);
+                                                $set('resultado_calculado', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                        // Mostrar el número de pagos calculado para modo años
-                        Grid::make(1)->schema([
-                            TextInput::make('numero_pagos_calculado_anios')
-                                ->label('Número de Pagos Calculado')
-                                ->disabled()
-                                ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia')
-                                ->hint('Tiempo x Frecuencia de pagos'),
-                        ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia'),
+                                        TextInput::make('dia')
+                                            ->rules(['nullable', 'numeric', 'min:0'])
+                                            ->validationMessages([
+                                                'min' => 'El tiempo debe ser mayor o igual a 0',
+                                            ])
+                                            ->label('Dias')
+                                            ->numeric()
+                                            ->suffix('dias')
+                                            ->placeholder('Ejemplo: 21')
+                                            ->step(0.01)
+                                            ->columnSpan(3)
+                                            ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set, callable $get) {
+                                                calcularTiempo($set, $get);
+                                                calcularNumeroPagosDesdeTiempo($set, $get);
+                                                $set('campo_calculado', null);
+                                                $set('resultado_calculado', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                        // MODO FECHAS + FRECUENCIA
-                        Grid::make(2)->schema([
-                            DatePicker::make('fecha_inicio')
-                                ->label('Fecha de Inicio')
-                                ->placeholder('Seleccione la fecha inicial')
-                                ->hint('Fecha de inicio de la anualidad')
-                                ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia')
-                                ->live()
-                                ->afterStateUpdated(function (callable $set, callable $get) {
-                                    static::calcularTiempoDesdeFechas($set, $get);
-                                    calcularNumeroPagosDesdeTiempo($set, $get);
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
+                                        TextInput::make('tiempo')
+                                            ->label('Tiempo calculado')
+                                            ->suffix('años')
+                                            ->columnSpan(3)
+                                            ->disabled(),
 
-                            DatePicker::make('fecha_final')
-                                ->label('Fecha Final')
-                                ->placeholder('Seleccione la fecha final')
-                                ->hint('Fecha de finalización de la anualidad')
-                                ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia')
-                                ->live()
-                                ->afterStateUpdated(function (callable $set, callable $get) {
-                                    static::calcularTiempoDesdeFechas($set, $get);
-                                    calcularNumeroPagosDesdeTiempo($set, $get);
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
-                        ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia'),
+                                        // Nuevo campo de frecuencia para modo años
+                                        Select::make('frecuencia_anios')
+                                            ->label('Frecuencia de Pagos')
+                                            ->options([
+                                                1 => 'Anual (1 vez/año)',
+                                                2 => 'Semestral (2 veces/año)',
+                                                4 => 'Trimestral (4 veces/año)',
+                                                6 => 'Bimestral (6 veces/año)',
+                                                12 => 'Mensual (12 veces/año)',
+                                                24 => 'Quincenal (24 veces/año)',
+                                                52 => 'Semanal (52 veces/año)',
+                                                365 => 'Diaria (365 veces/año)',
+                                                360 => 'Diaria Comercial (360 veces/año)',
+                                            ])
+                                            ->default(1)
+                                            ->searchable()
+                                            ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia')
+                                            ->live()
+                                            ->columnSpan(6)
+                                            ->afterStateUpdated(function (callable $set, callable $get) {
+                                                calcularTiempo($set, $get);
+                                                calcularNumeroPagosDesdeTiempo($set, $get);
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            })->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia' && $get('usar_select_frecuencia')),
 
-                        // Mostrar el tiempo y número de pagos calculado para modo fechas
-                        Grid::make(2)->schema([
-                            TextInput::make('tiempo_calculado_fechas')
-                                ->label('Tiempo Calculado')
-                                ->suffix('años')
-                                ->disabled()
-                                ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia')
-                                ->hint('Fecha Final - Fecha Inicial'),
+                                        TextInput::make('frecuencia_anios')
+                                            ->rules(['nullable', 'integer', 'min:1'])
+                                            ->validationMessages([
+                                                'min' => 'La frecuencia debe ser mayor o igual a 1',
+                                            ])
+                                            ->label('Frecuencia (numérica)')
+                                            ->numeric()
+                                            ->placeholder('12 para mensual')
+                                            ->hint('Veces por año')
+                                            ->default(1)
+                                            ->columnSpan(6)
+                                            ->visible(fn(callable $get) => !$get('usar_select_frecuencia'))
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set, callable $get) {
+                                                calcularTiempo($set, $get);
+                                                calcularNumeroPagosDesdeTiempo($set, $get);
+                                                $set('campo_calculado', null);
+                                                $set('resultado_calculado', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            })->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia' && !$get('usar_select_frecuencia')),
 
-                            Select::make('frecuencia_fechas')
-                                ->label('Frecuencia de Pagos')
-                                ->options([
-                                    1 => 'Anual (1 vez/año)',
-                                    2 => 'Semestral (2 veces/año)',
-                                    4 => 'Trimestral (4 veces/año)',
-                                    6 => 'Bimestral (6 veces/año)',
-                                    12 => 'Mensual (12 veces/año)',
-                                    24 => 'Quincenal (24 veces/año)',
-                                    52 => 'Semanal (52 veces/año)',
-                                    365 => 'Diaria (365 veces/año)',
-                                    360 => 'Diaria Comercial (360 veces/año)',
-                                ])
-                                ->default(1)
-                                ->searchable()
-                                ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia')
-                                ->live()
-                                ->afterStateUpdated(function (callable $set, callable $get) {
-                                    calcularNumeroPagosDesdeTiempo($set, $get);
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
-                        ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia'),
+                                        Toggle::make('usar_select_frecuencia')
+                                            ->label('Seleccionar frecuencia')
+                                            ->default(true)
+                                            ->live()
+                                            ->extraAttributes(['class' => 'text-center items-center ml-12 mt-1'])
+                                            ->inline(false)
+                                            ->columnSpan(6)
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campo_calculado', null);
+                                                $set('resultado_calculado', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
+                                    ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia'),
 
-                        // Mostrar el número de pagos calculado para modo fechas
-                        Grid::make(1)->schema([
-                            TextInput::make('numero_pagos_calculado_fechas')
-                                ->label('Número de Pagos Calculado')
-                                ->disabled()
-                                ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia')
-                                ->hint('Tiempo x Frecuencia de pagos'),
-                        ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia'),
-                    ]),
+                                    // MODO FECHAS + FRECUENCIA
+                                    Grid::make(12)->schema([
+                                        Select::make('modo_tiempo_pagos')
+                                            ->label('Método para determinar número de pagos')
+                                            ->options([
+                                                'manual' => 'Ingresar número de pagos directamente',
+                                                'anios_frecuencia' => 'Calcular con tiempo y frecuencia',
+                                                'fechas_frecuencia' => 'Calcular desde fechas y frecuencia',
+                                            ])
+                                            ->default('manual')
+                                            ->columnSpan(6)
+                                            ->live()
+                                            ->searchable()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('tiempo', null);
+                                                $set('fecha_inicio', null);
+                                                $set('fecha_final', null);
+                                                $set('anio', null);
+                                                $set('mes', null);
+                                                $set('dia', null);
+                                                $set('numero_pagos', null);
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                // Sección de detalles de resultado
-                Section::make('Detalles del Cálculo')
-                    ->description('Resumen completo de los valores calculados de anualidades')
-                    ->icon('heroicon-o-chart-bar-square')
-                    ->collapsed()
-                    ->collapsible()
-                    ->schema([
-                        Grid::make(1)->schema([
-                            Placeholder::make('detalles_resultado')
-                                ->label('')
-                                ->content(function (callable $get): Htmlable {
-                                    // Obtener valores de campos principales
-                                    $pagoPeriodicoInput = $get('pago_periodico');
-                                    $valorPresenteInput = $get('valor_presente');
-                                    $valorFuturoInput = $get('valor_futuro');
-                                    $tasaInteresInput = $get('tasa_interes');
-                                    $numeroPagosInput = $get('numero_pagos');
+                                        TextInput::make('numero_pagos')
+                                            ->label('Número de Pagos Calculado')
+                                            ->disabled()
+                                            ->columnSpan(6)
+                                            ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia')
+                                            ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia')
+                                            ->hint('Tiempo x Frecuencia de pagos'),
 
-                                    // Obtener valores de resultados calculados (campos ocultos)
-                                    $camposCalculados = $get('campos_calculados');
-                                    $resultados = $get('resultados_calculados');
-                                    $interesGenerado = $get('interes_generado_calculado');
-                                    $mensaje = $get('mensaje_calculado');
+                                        DatePicker::make('fecha_inicio')
+                                            ->label('Fecha de Inicio')
+                                            ->placeholder('Seleccione la fecha inicial')
+                                            ->columnSpan(4)
+                                            ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia')
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set, callable $get) {
+                                                static::calcularTiempoDesdeFechas($set, $get);
+                                                calcularNumeroPagosDesdeTiempo($set, $get);
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                                    $periodicidadTasa = $get('periodicidad_tasa') ?: 12;
+                                        DatePicker::make('fecha_final')
+                                            ->label('Fecha Final')
+                                            ->placeholder('Seleccione la fecha final')
+                                            ->columnSpan(4)
+                                            ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia')
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set, callable $get) {
+                                                static::calcularTiempoDesdeFechas($set, $get);
+                                                calcularNumeroPagosDesdeTiempo($set, $get);
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
 
-                                    // Decodificar resultados si existen
-                                    $camposCalculadosArray = $camposCalculados ? json_decode($camposCalculados, true) : [];
-                                    $resultadosArray = $resultados ? json_decode($resultados, true) : [];
+                                        TextInput::make('tiempo')
+                                            ->label('Tiempo Calculado')
+                                            ->suffix('años')
+                                            ->disabled()
+                                            ->columnSpan(4)
+                                            ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia'),
 
-                                    // Contar campos vacíos (solo los principales)
-                                    $emptyFields = [];
-                                    $fieldsToCheck = ['pago_periodico', 'valor_presente', 'valor_futuro', 'tasa_interes'];
-                                    foreach ($fieldsToCheck as $field) {
-                                        $value = $get($field);
-                                        if ($value === null || $value === '' || $value === 0) {
-                                            $emptyFields[] = $field;
-                                        }
-                                    }
+                                        Select::make('frecuencia_anios')
+                                            ->label('Frecuencia de Pagos')
+                                            ->options([
+                                                1 => 'Anual (1 vez/año)',
+                                                2 => 'Semestral (2 veces/año)',
+                                                4 => 'Trimestral (4 veces/año)',
+                                                6 => 'Bimestral (6 veces/año)',
+                                                12 => 'Mensual (12 veces/año)',
+                                                24 => 'Quincenal (24 veces/año)',
+                                                52 => 'Semanal (52 veces/año)',
+                                                365 => 'Diaria (365 veces/año)',
+                                                360 => 'Diaria Comercial (360 veces/año)',
+                                            ])
+                                            ->default(1)
+                                            ->searchable()
+                                            ->live()
+                                            ->columnSpan(6)
+                                            ->afterStateUpdated(function (callable $set, callable $get) {
+                                                static::calcularTiempoDesdeFechas($set, $get);
+                                                calcularNumeroPagosDesdeTiempo($set, $get);
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            })->visible(fn (callable $get) => $get('usar_select_frecuencia')),
 
-                                    // Verificar si el número de pagos está vacío
-                                    if (! $numeroPagosInput) {
-                                        $emptyFields[] = 'numero_pagos';
-                                    }
+                                        TextInput::make('frecuencia_anios')
+                                            ->rules(['nullable', 'integer', 'min:1'])
+                                            ->validationMessages([
+                                                'min' => 'La frecuencia debe ser mayor o igual a 1',
+                                            ])
+                                            ->label('Frecuencia (numérica)')
+                                            ->numeric()
+                                            ->placeholder('12 para mensual')
+                                            ->hint('Veces por año')
+                                            ->default(1)
+                                            ->columnSpan(6)
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set, callable $get) {
+                                                static::calcularTiempoDesdeFechas($set, $get);
+                                                calcularNumeroPagosDesdeTiempo($set, $get);
+                                                $set('campo_calculado', null);
+                                                $set('resultado_calculado', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            })->visible(fn (callable $get) => !$get('usar_select_frecuencia')),
 
-                                    // Si hay un cálculo exitoso, mostrar resultados
-                                    if (! empty($camposCalculadosArray) && ! empty($resultadosArray)) {
-                                        return static::buildResultHtml(
-                                            $pagoPeriodicoInput, $valorPresenteInput, $valorFuturoInput,
-                                            $tasaInteresInput, $numeroPagosInput,
-                                            $periodicidadTasa, $camposCalculadosArray,
-                                            $resultadosArray, $interesGenerado, $mensaje
-                                        );
-                                    }
+                                        Toggle::make('usar_select_frecuencia')
+                                            ->label('Seleccionar frecuencia')
+                                            ->default(true)
+                                            ->live()
+                                            ->extraAttributes(['class' => 'text-center items-center ml-12 mt-1'])
+                                            ->inline(false)
+                                            ->columnSpan(6)
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campo_calculado', null);
+                                                $set('resultado_calculado', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            })
+                                    ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia'),
+                                ]),
+                        ]),
 
-                                    // Si no hay datos suficientes, mostrar mensaje inicial
-                                    if (empty($pagoPeriodicoInput) && empty($valorPresenteInput) && empty($valorFuturoInput) &&
-                                        empty($tasaInteresInput) && empty($numeroPagosInput)) {
-                                        return new HtmlString('
-                                            <div class="text-center py-12 text-gray-500 dark:text-gray-400">
-                                                <div class="text-5xl mb-4">💰</div>
-                                                <h3 class="text-xl font-semibold mb-2">Complete los campos para ver los detalles</h3>
-                                                <p class="text-sm text-gray-400">Los resultados de anualidades aparecerán aquí después del cálculo</p>
-                                            </div>
-                                        ');
-                                    }
+                    // Paso 4: Resultados
+                    Step::make('Resultados')
+                        ->icon('heroicon-o-chart-bar')
+                        ->completedIcon('heroicon-s-chart-bar')
+                        ->schema([
+                            Section::make('Detalles del Cálculo')
+                                ->collapsible()
+                                ->icon('heroicon-o-chart-bar')
+                                ->description('Resumen completo de los valores calculados de anualidades')
+                                ->schema([
+                                    Grid::make(1)->schema([
+                                        Placeholder::make('_')
+                                            ->label('')
+                                            ->content(function (callable $get): Htmlable {
+                                                // Obtener valores de campos principales
+                                                $pagoPeriodicoInput = $get('pago_periodico');
+                                                $valorPresenteInput = $get('valor_presente');
+                                                $valorFuturoInput = $get('valor_futuro');
+                                                $tasaInteresInput = $get('tasa_interes');
+                                                $numeroPagosInput = $get('numero_pagos');
 
-                                    // Validación: debe haber entre 1 y 2 campos vacíos
-                                    if (count($emptyFields) === 0 || count($emptyFields) > 2) {
-                                        $errorMessage = count($emptyFields) === 0
-                                            ? 'Debes dejar entre 1 y 2 campos vacíos para calcular anualidades.'
-                                            : 'Solo puedes dejar máximo 2 campos vacíos. Actualmente hay '.count($emptyFields).' campos vacíos.';
+                                                // Obtener valores de resultados calculados (campos ocultos)
+                                                $camposCalculados = $get('campos_calculados');
+                                                $resultados = $get('resultados_calculados');
+                                                $interesGenerado = $get('interes_generado_calculado');
+                                                $mensaje = $get('mensaje_calculado');
 
-                                        return new HtmlString('
-                                            <div class="text-center py-12">
-                                                <div class="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/50 dark:to-orange-950/50 rounded-xl p-8 border border-red-200 dark:border-red-800">
-                                                    <div class="text-6xl mb-4">⚠️</div>
-                                                    <h3 class="text-xl font-bold text-red-900 dark:text-red-100 mb-3">Error de Validación</h3>
-                                                    <p class="text-red-700 dark:text-red-300 mb-4 text-lg">'.$errorMessage.'</p>
-                                                    <div class="bg-red-100 dark:bg-red-900/50 rounded-lg p-4 border border-red-300 dark:border-red-700">
-                                                        <p class="text-sm text-red-800 dark:text-red-200">
-                                                            <strong>Instrucciones:</strong><br>
-                                                            • Completa al menos 3 campos conocidos<br>
-                                                            • Deja vacíos 1 o 2 campos que deseas calcular<br>
-                                                            • Las anualidades pueden calcular múltiples valores automáticamente<br>
-                                                            • Presiona el botón "Calcular" para obtener los resultados
-                                                        </p>
+                                                $periodicidadTasa = $get('periodicidad_tasa') ?: 12;
+
+                                                // Decodificar resultados si existen
+                                                $camposCalculadosArray = $camposCalculados ? json_decode($camposCalculados, true) : [];
+                                                $resultadosArray = $resultados ? json_decode($resultados, true) : [];
+
+                                                // Contar campos vacíos (solo los principales)
+                                                $emptyFields = [];
+                                                $fieldsToCheck = ['pago_periodico', 'valor_presente', 'valor_futuro', 'tasa_interes'];
+                                                foreach ($fieldsToCheck as $field) {
+                                                    $value = $get($field);
+                                                    if ($value === null || $value === '' || $value === 0) {
+                                                        $emptyFields[] = $field;
+                                                    }
+                                                }
+
+                                                // Verificar si el número de pagos está vacío
+                                                if (! $numeroPagosInput) {
+                                                    $emptyFields[] = 'numero_pagos';
+                                                }
+
+                                                // Si hay un cálculo exitoso, mostrar resultados
+                                                if (! empty($camposCalculadosArray) && ! empty($resultadosArray)) {
+                                                    return static::buildResultHtml(
+                                                        $pagoPeriodicoInput, $valorPresenteInput, $valorFuturoInput,
+                                                        $tasaInteresInput, $numeroPagosInput,
+                                                        $periodicidadTasa, $camposCalculadosArray,
+                                                        $resultadosArray, $interesGenerado, $mensaje
+                                                    );
+                                                }
+
+                                                // Si no hay datos suficientes, mostrar mensaje inicial
+                                                if (empty($pagoPeriodicoInput) && empty($valorPresenteInput) && empty($valorFuturoInput) &&
+                                                    empty($tasaInteresInput) && empty($numeroPagosInput)) {
+                                                    return new HtmlString('
+                                                        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                                                            <div class="text-5xl mb-4">💰</div>
+                                                            <h3 class="text-xl font-semibold mb-2">Complete los campos para ver los detalles</h3>
+                                                            <p class="text-sm text-gray-400">Los resultados de anualidades aparecerán aquí después del cálculo</p>
+                                                        </div>
+                                                    ');
+                                                }
+
+                                                // Validación: debe haber entre 1 y 2 campos vacíos
+                                                if (count($emptyFields) === 0 || count($emptyFields) > 2) {
+                                                    $errorMessage = count($emptyFields) === 0
+                                                        ? 'Debes dejar entre 1 y 2 campos vacíos para calcular anualidades.'
+                                                        : 'Solo puedes dejar máximo 2 campos vacíos. Actualmente hay '.count($emptyFields).' campos vacíos.';
+
+                                                    return new HtmlString('
+                                                        <div class="text-center py-12">
+                                                            <div class="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/50 dark:to-orange-950/50 rounded-xl p-8 border border-red-200 dark:border-red-800">
+                                                                <div class="text-6xl mb-4">⚠️</div>
+                                                                <h3 class="text-xl font-bold text-red-900 dark:text-red-100 mb-3">Error de Validación</h3>
+                                                                <p class="text-red-700 dark:text-red-300 mb-4 text-lg">'.$errorMessage.'</p>
+                                                                <div class="bg-red-100 dark:bg-red-900/50 rounded-lg p-4 border border-red-300 dark:border-red-700">
+                                                                    <p class="text-sm text-red-800 dark:text-red-200">
+                                                                        <strong>Instrucciones:</strong><br>
+                                                                        • Completa al menos 3 campos conocidos<br>
+                                                                        • Deja vacíos 1 o 2 campos que deseas calcular<br>
+                                                                        • Las anualidades pueden calcular múltiples valores automáticamente<br>
+                                                                        • Presiona el botón "Calcular" para obtener los resultados
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ');
+                                                }
+
+                                                // Si hay entre 1 y 2 campos vacíos pero aún no se ha calculado
+                                                return new HtmlString('
+                                                    <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                                                        <div class="text-5xl mb-4">⏳</div>
+                                                        <h3 class="text-xl font-semibold mb-2">Listo para calcular anualidades</h3>
+                                                        <p class="text-sm text-gray-400">Presiona el botón "Calcular" para ver los resultados</p>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        ');
-                                    }
-
-                                    // Si hay entre 1 y 2 campos vacíos pero aún no se ha calculado
-                                    return new HtmlString('
-                                        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
-                                            <div class="text-5xl mb-4">⏳</div>
-                                            <h3 class="text-xl font-semibold mb-2">Listo para calcular anualidades</h3>
-                                            <p class="text-sm text-gray-400">Presiona el botón "Calcular" para ver los resultados</p>
-                                        </div>
-                                    ');
-                                }),
-                        ]),
-                    ]),
+                                                ');
+                                            }),
+                                    ]),
+                                ]),
+                        ])
+                ])
+                    ->skippable()
+                    ->startOnStep(1)
+                    ->contained(false)
+                    ->submitAction(new HtmlString(Blade::render(<<<'BLADE'
+                    <div class="items-center space-x-4">
+                        <x-filament::button
+                            type="submit"
+                            color="primary"
+                            class="text-white"
+                        >
+                            <x-slot:icon>
+                                <x-heroicon-o-calculator class="size-5 text-white" />
+                            </x-slot:icon>
+                            Calcular
+                        </x-filament::button>
+                    </div>
+                BLADE))),
             ]);
     }
 
@@ -702,15 +937,15 @@ class AnualidadSchema
                     $diasTotales = $inicio->diffInDays($final);
                     $anios = $diasTotales / 365.25; // Usamos 365.25 para considerar años bisiestos
 
-                    $set('tiempo_calculado_fechas', smartRound($anios));
+                    $set('tiempo', smartRound($anios));
                 } else {
-                    $set('tiempo_calculado_fechas', null);
+                    $set('tiempo', null);
                 }
             } catch (\Exception $e) {
-                $set('tiempo_calculado_fechas', null);
+                $set('tiempo', null);
             }
         } else {
-            $set('tiempo_calculado_fechas', null);
+            $set('tiempo', null);
         }
 
         // Recalcular número de pagos después de actualizar el tiempo
