@@ -79,7 +79,7 @@ class InteresSimpleSchema
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        Grid::make(2)->schema([
+                        Grid::make(12)->schema([
                             TextInput::make('tasa_interes')
                                 ->rules(['nullable', 'numeric', 'min:0'])
                                 ->validationMessages([
@@ -91,23 +91,8 @@ class InteresSimpleSchema
                                 ->placeholder('Ejemplo: 5.5')
                                 ->step(0.01)
                                 ->hint('Tasa en porcentaje')
-                                ->columnSpan(2)
+                                ->columnSpan(4)
                                 ->live()
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campo_calculado', null);
-                                    $set('resultado_calculado', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
-                        ]),
-
-                        Grid::make(12)->schema([
-                            Toggle::make('usar_select_periodicidad_tasa')
-                                ->label('Selector de periodicidad')
-                                ->default(true)
-                                ->live()
-                                ->inline(false)
-                                ->columnSpan(3)
                                 ->afterStateUpdated(function (callable $set) {
                                     $set('campo_calculado', null);
                                     $set('resultado_calculado', null);
@@ -125,7 +110,7 @@ class InteresSimpleSchema
                                 ->placeholder('12 para mensual')
                                 ->hint('Períodos por año')
                                 ->default(1)
-                                ->columnSpan(9)
+                                ->columnSpan(5)
                                 ->visible(fn (callable $get) => ! $get('usar_select_periodicidad_tasa'))
                                 ->live()
                                 ->afterStateUpdated(function (callable $set) {
@@ -150,7 +135,7 @@ class InteresSimpleSchema
                                 ])
                                 ->default(1)
                                 ->searchable()
-                                ->columnSpan(9)
+                                ->columnSpan(5)
                                 ->visible(fn (callable $get) => $get('usar_select_periodicidad_tasa'))
                                 ->live()
                                 ->afterStateUpdated(function (callable $set) {
@@ -159,6 +144,21 @@ class InteresSimpleSchema
                                     $set('interes_generado_calculado', null);
                                     $set('mensaje_calculado', null);
                                 }),
+
+                            Toggle::make('usar_select_periodicidad_tasa')
+                                ->label('Selector de periodicidad')
+                                ->default(true)
+                                ->live()
+                                ->inline(false)
+                                ->columnSpan(3)
+                                ->extraAttributes(['class' => 'text-center items-center ml-14 mt-1'])
+                                ->afterStateUpdated(function (callable $set) {
+                                    $set('campo_calculado', null);
+                                    $set('resultado_calculado', null);
+                                    $set('interes_generado_calculado', null);
+                                    $set('mensaje_calculado', null);
+                                }),
+
                         ]),
                     ]),
 
@@ -170,24 +170,6 @@ class InteresSimpleSchema
                     ->collapsed()
                     ->schema([
                         Grid::make(12)->schema([
-                            Toggle::make('usar_fechas_tiempo')
-                                ->label('Usar fechas para calcular')
-                                ->default(false)
-                                ->live()
-                                ->inline(false)
-                                ->columnSpan(12)
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campo_calculado', null);
-                                    $set('resultado_calculado', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                    $set('tiempo', null);
-                                    $set('fecha_inicio', null);
-                                    $set('fecha_final', null);
-                                    $set('anio', null);
-                                    $set('mes', null);
-                                    $set('dia', null);
-                                }),
 
                             TextInput::make('anio')
                                 ->rules(['nullable', 'numeric', 'min:0'])
@@ -199,7 +181,7 @@ class InteresSimpleSchema
                                 ->suffix('años')
                                 ->placeholder('Ejemplo: 5')
                                 ->step(0.01)
-                                ->columnSpan(4)
+                                ->columnSpan(3)
                                 ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get) {
@@ -220,7 +202,7 @@ class InteresSimpleSchema
                                 ->suffix('meses')
                                 ->placeholder('Ejemplo: 7')
                                 ->step(0.01)
-                                ->columnSpan(4)
+                                ->columnSpan(3)
                                 ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get) {
@@ -241,7 +223,7 @@ class InteresSimpleSchema
                                 ->suffix('dias')
                                 ->placeholder('Ejemplo: 21')
                                 ->step(0.01)
-                                ->columnSpan(4)
+                                ->columnSpan(3)
                                 ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get) {
@@ -254,9 +236,8 @@ class InteresSimpleSchema
 
                             DatePicker::make('fecha_inicio')
                                 ->label('Fecha de Inicio')
-                                ->columnSpan(6)
+                                ->columnSpan(4)
                                 ->placeholder('Seleccione la fecha inicial')
-                                ->hint('Fecha de inicio de la inversión')
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get, $state) {
                                     calcularTiempoDesdeFechas($set, $get);
@@ -269,9 +250,8 @@ class InteresSimpleSchema
 
                             DatePicker::make('fecha_final')
                                 ->label('Fecha Final')
-                                ->columnSpan(6)
+                                ->columnSpan(4)
                                 ->placeholder('Seleccione la fecha final')
-                                ->hint('Fecha de vencimiento de la inversión')
                                 ->live()
                                 ->afterStateUpdated(function (callable $set, callable $get, $state) {
                                     calcularTiempoDesdeFechas($set, $get);
@@ -282,79 +262,54 @@ class InteresSimpleSchema
                                 })
                                 ->visible(fn (callable $get) => $get('usar_fechas_tiempo')),
 
+                            Toggle::make('usar_fechas_tiempo')
+                                ->label('Usar fechas para calcular')
+                                ->default(false)
+                                ->live()
+                                ->extraAttributes(['class' => 'text-center items-center ml-14 mt-1'])
+                                ->inline(false)
+                                ->columnSpan(3)
+                                ->visible(fn (callable $get) => !$get('usar_fechas_tiempo'))
+                                ->afterStateUpdated(function (callable $set) {
+                                    $set('campo_calculado', null);
+                                    $set('resultado_calculado', null);
+                                    $set('interes_generado_calculado', null);
+                                    $set('mensaje_calculado', null);
+                                    $set('tiempo', null);
+                                    $set('fecha_inicio', null);
+                                    $set('fecha_final', null);
+                                    $set('anio', null);
+                                    $set('mes', null);
+                                    $set('dia', null);
+                                }),
+
+                            Toggle::make('usar_fechas_tiempo')
+                                ->label('Usar fechas para calcular')
+                                ->default(false)
+                                ->live()
+                                ->extraAttributes(['class' => 'text-center items-center ml-14 mt-1'])
+                                ->inline(false)
+                                ->columnSpan(3)
+                                ->columnStart(10)
+                                ->visible(fn (callable $get) => $get('usar_fechas_tiempo'))
+                                ->afterStateUpdated(function (callable $set) {
+                                    $set('campo_calculado', null);
+                                    $set('resultado_calculado', null);
+                                    $set('interes_generado_calculado', null);
+                                    $set('mensaje_calculado', null);
+                                    $set('tiempo', null);
+                                    $set('fecha_inicio', null);
+                                    $set('fecha_final', null);
+                                    $set('anio', null);
+                                    $set('mes', null);
+                                    $set('dia', null);
+                                }),
+
                             TextInput::make('tiempo')
                                 ->label('Tiempo en Años')
                                 ->suffix('años')
                                 ->columnSpan(6)
                                 ->disabled()
-                        ]),
-                    ]),
-
-                // Sección de Frecuencia de Capitalización
-                Section::make('Frecuencia de Capitalización')
-                    ->description('Solo para mostrar en los resultados. (No afecta en los cálculos)')
-                    ->icon('heroicon-o-arrow-path')
-                    ->collapsible()
-                    ->collapsed()
-                    ->schema([
-                        Grid::make(12)->schema([
-                            Toggle::make('usar_select_frecuencia')
-                                ->label('Selector de frecuencia')
-                                ->default(true)
-                                ->live()
-                                ->inline(false)
-                                ->columnSpan(3)
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campo_calculado', null);
-                                    $set('resultado_calculado', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
-
-                            TextInput::make('frecuencia')
-                                ->rules(['nullable', 'integer', 'min:1'])
-                                ->validationMessages([
-                                    'min' => 'La frecuencia debe ser mayor o igual a 1',
-                                ])
-                                ->label('Frecuencia (numérica)')
-                                ->numeric()
-                                ->placeholder('12 para mensual')
-                                ->hint('Veces por año')
-                                ->default(1)
-                                ->columnSpan(9)
-                                ->visible(fn (callable $get) => ! $get('usar_select_frecuencia'))
-                                ->live()
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campo_calculado', null);
-                                    $set('resultado_calculado', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
-
-                            Select::make('frecuencia')
-                                ->label('Frecuencia de Capitalización')
-                                ->options([
-                                    1 => 'Anual (1 vez/año)',
-                                    2 => 'Semestral (2 veces/año)',
-                                    4 => 'Trimestral (4 veces/año)',
-                                    6 => 'Bimestral (6 veces/año)',
-                                    12 => 'Mensual (12 veces/año)',
-                                    24 => 'Quincenal (24 veces/año)',
-                                    52 => 'Semanal (52 veces/año)',
-                                    365 => 'Diaria (365 veces/año)',
-                                    360 => 'Diaria Comercial (360 veces/año)',
-                                ])
-                                ->default(12)
-                                ->searchable()
-                                ->columnSpan(9)
-                                ->visible(fn (callable $get) => $get('usar_select_frecuencia'))
-                                ->live()
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campo_calculado', null);
-                                    $set('resultado_calculado', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
                         ]),
                     ]),
 
@@ -579,8 +534,8 @@ class InteresSimpleSchema
         $html .= '</div>'; // Fin del grid principal
 
         // Información adicional si hay datos
-        if ($periodicidadTasa || $frecuencia || $interesGenerado) {
-            $html .= '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
+        if ($periodicidadTasa || $interesGenerado) {
+            $html .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
 
             // Periodicidad de la tasa
             if ($periodicidadTasa) {
@@ -605,33 +560,6 @@ class InteresSimpleSchema
                         </div>
                         <p class='text-lg font-bold text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</p>
                         <p class='text-xs text-indigo-600 dark:text-indigo-400'>{$periodicidadTasa} períodos/año</p>
-                    </div>
-                ";
-            }
-
-            // Frecuencia de capitalización
-            if ($frecuencia) {
-                $frecuenciaTexto = match ((int) $frecuencia) {
-                    1 => 'Anual',
-                    2 => 'Semestral',
-                    4 => 'Trimestral',
-                    6 => 'Bimestral',
-                    12 => 'Mensual',
-                    24 => 'Quincenal',
-                    52 => 'Semanal',
-                    365 => 'Diaria',
-                    360 => 'Diaria Comercial',
-                    default => $frecuencia.' veces/año'
-                };
-
-                $html .= "
-                    <div class='rounded-lg p-4 border bg-purple-50 border-purple-200 dark:bg-purple-950/50 dark:border-purple-700 shadow-sm'>
-                        <div class='flex items-center gap-2 mb-2'>
-                            <span class='text-purple-600 dark:text-purple-400'>🔄</span>
-                            <h4 class='font-semibold text-purple-900 dark:text-purple-100 text-sm'>Capitalización</h4>
-                        </div>
-                        <p class='text-lg font-bold text-purple-900 dark:text-purple-100'>{$frecuenciaTexto}</p>
-                        <p class='text-xs text-purple-600 dark:text-purple-400'>{$frecuencia} veces/año</p>
                     </div>
                 ";
             }

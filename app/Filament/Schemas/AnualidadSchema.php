@@ -97,28 +97,6 @@ class AnualidadSchema
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        Grid::make(2)->schema([
-                            TextInput::make('tasa_interes')
-                                ->rules(['nullable', 'numeric', 'min:0'])
-                                ->validationMessages([
-                                    'min' => 'La tasa de interés debe ser mayor o igual a 0',
-                                ])
-                                ->label('Tasa de Interés')
-                                ->numeric()
-                                ->suffix('%')
-                                ->placeholder('Ejemplo: 8.5')
-                                ->step(0.01)
-                                ->hint('Tasa en porcentaje')
-                                ->columnSpan(2)
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(function (callable $set) {
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
-                                    $set('interes_generado_calculado', null);
-                                    $set('mensaje_calculado', null);
-                                }),
-                        ]),
-
                         Grid::make(12)->schema([
                             Toggle::make('usar_select_periodicidad_tasa')
                                 ->label('Selector de periodicidad')
@@ -127,8 +105,8 @@ class AnualidadSchema
                                 ->inline(false)
                                 ->columnSpan(3)
                                 ->afterStateUpdated(function (callable $set) {
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
+                                    $set('campo_calculado', null);
+                                    $set('resultado_calculado', null);
                                     $set('interes_generado_calculado', null);
                                     $set('mensaje_calculado', null);
                                 }),
@@ -143,12 +121,12 @@ class AnualidadSchema
                                 ->placeholder('12 para mensual')
                                 ->hint('Períodos por año')
                                 ->default(1)
-                                ->columnSpan(9)
+                                ->columnSpan(5)
                                 ->visible(fn (callable $get) => ! $get('usar_select_periodicidad_tasa'))
                                 ->live()
                                 ->afterStateUpdated(function (callable $set) {
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
+                                    $set('campo_calculado', null);
+                                    $set('resultado_calculado', null);
                                     $set('interes_generado_calculado', null);
                                     $set('mensaje_calculado', null);
                                 }),
@@ -168,12 +146,32 @@ class AnualidadSchema
                                 ])
                                 ->default(1)
                                 ->searchable()
-                                ->columnSpan(9)
+                                ->columnSpan(5)
                                 ->visible(fn (callable $get) => $get('usar_select_periodicidad_tasa'))
                                 ->live()
                                 ->afterStateUpdated(function (callable $set) {
-                                    $set('campos_calculados', null);
-                                    $set('resultados_calculados', null);
+                                    $set('campo_calculado', null);
+                                    $set('resultado_calculado', null);
+                                    $set('interes_generado_calculado', null);
+                                    $set('mensaje_calculado', null);
+                                }),
+
+                            TextInput::make('tasa_interes')
+                                ->rules(['nullable', 'numeric', 'min:0'])
+                                ->validationMessages([
+                                    'min' => 'La tasa de interes debe ser mayor o igual a 0',
+                                ])
+                                ->label('Tasa de Interés')
+                                ->numeric()
+                                ->suffix('%')
+                                ->placeholder('Ejemplo: 5.5')
+                                ->step(0.01)
+                                ->hint('Tasa en porcentaje')
+                                ->columnSpan(4)
+                                ->live()
+                                ->afterStateUpdated(function (callable $set) {
+                                    $set('campo_calculado', null);
+                                    $set('resultado_calculado', null);
                                     $set('interes_generado_calculado', null);
                                     $set('mensaje_calculado', null);
                                 }),

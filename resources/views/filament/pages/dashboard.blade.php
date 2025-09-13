@@ -2,17 +2,21 @@
     <!-- Hero Section Mejorada -->
     <x-sections.heading-title
         title="Calculadora Financiera Académica"
-        quote="Herramienta educativa avanzada para el análisis de modelos financieros y tasas de interés"
         button-text="Comenzar"
         href="#conceptos"
     >
+        <x-slot:quote>
+            <p class="text-xl text-white/90 max-w-3xl mx-auto">Herramienta educativa para el análisis de modelos financieros y tasas de interés.</p>
+            <p class="text-base text-white/90 max-w-3xl mx-auto">— Isaac David Jacome Garcia</p>
+            <p class="text-base text-white/90 max-w-3xl mx-auto -mb-4">— Brayan Isaac Caro Bolaño</p>
+        </x-slot:quote>
         <x-slot:icon>
             <x-heroicon-c-calculator class="size-16 text-white" aria-hidden="true" />
         </x-slot:icon>
     </x-sections.heading-title>
 
     <!-- Temas expuestos -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 -mt-8">
         <h2 class="text-2xl font-bold text-gray-800 dark:text-white flex justify-center">
             Temas expuestos
         </h2>
