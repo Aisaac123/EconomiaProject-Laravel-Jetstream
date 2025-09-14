@@ -7,8 +7,6 @@
     >
         <x-slot:quote>
             <p class="text-xl text-white/90 max-w-3xl mx-auto">Herramienta educativa para el análisis de modelos financieros y tasas de interés.</p>
-            <p class="text-base text-white/90 max-w-3xl mx-auto">— Isaac David Jacome Garcia</p>
-            <p class="text-base text-white/90 max-w-3xl mx-auto -mb-4">— Brayan Isaac Caro Bolaño</p>
         </x-slot:quote>
         <x-slot:icon>
             <x-heroicon-c-calculator class="size-16 text-white" aria-hidden="true" />
@@ -207,39 +205,51 @@
                 </x-slot>
 
                 <div class="space-y-2">
-                    <a href="#" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
+                    <a target="_blank" rel="noopener noreferrer" href="https://www.centro-virtual.com/recursos/glosarios/Matematicas_financieras.pdf" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
                         <span class="mr-2">→</span> Glosario de términos financieros
                     </a>
-                    <a href="#" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
+                    <a target="_blank" rel="noopener noreferrer" href="https://www.rankia.cl/blog/analisis-ipsa/3513617-matematicas-financieras-definicion-formulas-ejemplos-aplicadas-inversion" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
                         <span class="mr-2">→</span> Fórmulas financieras esenciales
                     </a>
-                    <a href="#" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
+                    <a target="_blank" rel="noopener noreferrer" href="https://www.superprof.es/apuntes/escolar/matematicas/aritmetica/proporcionalidad/ejercicios-y-problemas-resueltos-sobre-el-interes-compuesto.html" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
                         <span class="mr-2">→</span> Ejercicios prácticos resueltos
                     </a>
                 </div>
             </x-filament::section>
             <!-- Calculadora rápida -->
             <x-filament::section>
-                <x-slot name="heading" class="text-xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
-                    <span class="mr-2">🧮</span> Calculadora Rápida
+                <x-slot name="heading" class="text-xl font-bold text-success-600 dark:text-success-400 flex items-center">
+                    <span class="mr-2">💼</span> Casos de Uso
                 </x-slot>
 
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Capital inicial</label>
-                        <x-filament::input type="number" placeholder="$10,000" />
+                    <div class="bg-primary-50 dark:bg-primary-900/30 rounded-lg p-3">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">🏦</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-gray-200 text-sm">Préstamos Bancarios</h4>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Calcula pagos mensuales y intereses totales.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tasa de interés (%)</label>
-                        <x-filament::input type="number" placeholder="5%" />
+                    <div class="bg-success-50 dark:bg-success-900/30 rounded-lg p-3">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">📈</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-gray-200 text-sm">Inversiones</h4>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Proyecta el crecimiento de tu capital.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Período (años)</label>
-                        <x-filament::input type="number" placeholder="5" />
+                    <div class="bg-warning-50 dark:bg-warning-900/30 rounded-lg p-3">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">🏠</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-gray-200 text-sm">Hipotecas</h4>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Planifica la compra de tu vivienda.</p>
+                            </div>
+                        </div>
                     </div>
-                    <button class="w-full filament-button filament-button-size-md inline-flex items-center justify-center py-2 gap-2 font-medium rounded-lg border transition-colors focus:outline-none focus:ring-offset-2 focus:ring-2 focus:ring-inset dark:focus:ring-offset-0 min-h-[2.5rem] px-4 text-sm text-white bg-primary-600 hover:bg-primary-500 focus:bg-primary-700 focus:ring-offset-primary-700 focus:ring-white border-transparent">
-                        <span class="mr-2">🧮</span> Calcular
-                    </button>
                 </div>
             </x-filament::section>
         </div>

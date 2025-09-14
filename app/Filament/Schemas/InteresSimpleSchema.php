@@ -78,6 +78,7 @@ class InteresSimpleSchema
                                                 $set('interes_generado_calculado', null);
                                                 $set('mensaje_calculado', null);
                                             }),
+
                                     ]),
                                 ]),
                         ]),
@@ -104,7 +105,7 @@ class InteresSimpleSchema
                                             ->step(0.01)
                                             ->hint('Tasa en porcentaje')
                                             ->columnSpan(4)
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
@@ -124,7 +125,7 @@ class InteresSimpleSchema
                                             ->default(1)
                                             ->columnSpan(5)
                                             ->visible(fn(callable $get) => !$get('usar_select_periodicidad_tasa'))
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
@@ -149,7 +150,7 @@ class InteresSimpleSchema
                                             ->searchable()
                                             ->columnSpan(5)
                                             ->visible(fn(callable $get) => $get('usar_select_periodicidad_tasa'))
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);

@@ -27,7 +27,8 @@ class AnualidadSchema
                 // Campos ocultos para almacenar resultados
                 Hidden::make('campos_calculados'),
                 Hidden::make('resultados_calculados'),
-                Hidden::make('interes_generado_calculado'),
+                Hidden::make('interes_generado_calculado_VP'),
+                Hidden::make('interes_generado_calculado_VF'),
                 Hidden::make('mensaje_calculado'),
                 Hidden::make('numero_pagos'),
                 Hidden::make('tiempo'),
@@ -53,11 +54,12 @@ class AnualidadSchema
                                             ->numeric()
                                             ->prefix('$')
                                             ->placeholder('Ejemplo: 1000')
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -70,11 +72,12 @@ class AnualidadSchema
                                             ->numeric()
                                             ->prefix('$')
                                             ->placeholder('Ejemplo: 50000')
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);;
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -87,11 +90,12 @@ class AnualidadSchema
                                             ->numeric()
                                             ->prefix('$')
                                             ->placeholder('Ejemplo: 100000')
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
                                     ]),
@@ -120,11 +124,12 @@ class AnualidadSchema
                                             ->step(0.01)
                                             ->hint('Tasa en porcentaje')
                                             ->columnSpan(4)
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -140,11 +145,12 @@ class AnualidadSchema
                                             ->default(1)
                                             ->columnSpan(5)
                                             ->visible(fn(callable $get) => !$get('usar_select_periodicidad_tasa'))
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -165,25 +171,27 @@ class AnualidadSchema
                                             ->searchable()
                                             ->columnSpan(5)
                                             ->visible(fn(callable $get) => $get('usar_select_periodicidad_tasa'))
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
                                         Toggle::make('usar_select_periodicidad_tasa')
                                             ->label('Selector de periodicidad')
                                             ->default(true)
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->inline(false)
                                             ->columnSpan(3)
                                             ->extraAttributes(['class' => 'text-center items-center ml-14 mt-1'])
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
                                     ]),
@@ -220,7 +228,8 @@ class AnualidadSchema
                                             $set('numero_pagos', null);
                                             $set('campos_calculados', null);
                                             $set('resultados_calculados', null);
-                                            $set('interes_generado_calculado', null);
+                                            $set('interes_generado_calculado_VP', null);
+                                            $set('interes_generado_calculado_VF', null);
                                             $set('mensaje_calculado', null);
                                         }),
                                     // MODO MANUAL: Ingresar número de pagos directamente
@@ -245,7 +254,8 @@ class AnualidadSchema
                                                 $set('numero_pagos', null);
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -263,7 +273,8 @@ class AnualidadSchema
                                             ->afterStateUpdated(function (callable $set, callable $get) {
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
                                     ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'manual'),
@@ -291,7 +302,8 @@ class AnualidadSchema
                                                 $set('numero_pagos', null);
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
                                         TextInput::make('numero_pagos_calculado_anios')
@@ -319,7 +331,8 @@ class AnualidadSchema
                                                 calcularNumeroPagosDesdeTiempo($set, $get);
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -341,7 +354,8 @@ class AnualidadSchema
                                                 calcularNumeroPagosDesdeTiempo($set, $get);
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -363,7 +377,8 @@ class AnualidadSchema
                                                 calcularNumeroPagosDesdeTiempo($set, $get);
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -397,7 +412,8 @@ class AnualidadSchema
                                                 calcularNumeroPagosDesdeTiempo($set, $get);
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $$set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             })->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia' && $get('usar_select_frecuencia')),
 
@@ -419,7 +435,8 @@ class AnualidadSchema
                                                 calcularNumeroPagosDesdeTiempo($set, $get);
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             })->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia' && !$get('usar_select_frecuencia')),
 
@@ -433,7 +450,8 @@ class AnualidadSchema
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
                                     ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia'),
@@ -461,7 +479,8 @@ class AnualidadSchema
                                                 $set('numero_pagos', null);
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -484,7 +503,8 @@ class AnualidadSchema
                                                 calcularNumeroPagosDesdeTiempo($set, $get);
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -499,7 +519,8 @@ class AnualidadSchema
                                                 calcularNumeroPagosDesdeTiempo($set, $get);
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -532,7 +553,8 @@ class AnualidadSchema
                                                 calcularNumeroPagosDesdeTiempo($set, $get);
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             })->visible(fn (callable $get) => $get('usar_select_frecuencia')),
 
@@ -553,7 +575,8 @@ class AnualidadSchema
                                                 calcularNumeroPagosDesdeTiempo($set, $get);
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             })->visible(fn (callable $get) => !$get('usar_select_frecuencia')),
 
@@ -567,7 +590,8 @@ class AnualidadSchema
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
+                                                $set('interes_generado_calculado_VP', null);
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             })
                                     ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia'),
@@ -598,7 +622,8 @@ class AnualidadSchema
                                                 // Obtener valores de resultados calculados (campos ocultos)
                                                 $camposCalculados = $get('campos_calculados');
                                                 $resultados = $get('resultados_calculados');
-                                                $interesGenerado = $get('interes_generado_calculado');
+                                                $interesGeneradoVP = $get('interes_generado_calculado_VP');
+                                                $interesGeneradoVF = $get('interes_generado_calculado_VF');
                                                 $mensaje = $get('mensaje_calculado');
 
                                                 $periodicidadTasa = $get('periodicidad_tasa') ?: 12;
@@ -628,7 +653,7 @@ class AnualidadSchema
                                                         $pagoPeriodicoInput, $valorPresenteInput, $valorFuturoInput,
                                                         $tasaInteresInput, $numeroPagosInput,
                                                         $periodicidadTasa, $camposCalculadosArray,
-                                                        $resultadosArray, $interesGenerado, $mensaje
+                                                        $resultadosArray, $interesGeneradoVP, $interesGeneradoVF, $mensaje
                                                     );
                                                 }
 
@@ -682,24 +707,25 @@ class AnualidadSchema
                                     ]),
                                 ]),
                         ])
-                ])
-                    ->skippable()
+                ])->skippable()
                     ->startOnStep(1)
                     ->contained(false)
-                    ->submitAction(new HtmlString(Blade::render(<<<'BLADE'
-                    <div class="items-center space-x-4">
-                        <x-filament::button
-                            type="submit"
-                            color="primary"
-                            class="text-white"
-                        >
-                            <x-slot:icon>
-                                <x-heroicon-o-calculator class="size-5 text-white" />
-                            </x-slot:icon>
-                            Calcular
-                        </x-filament::button>
-                    </div>
-                BLADE))),
+                    ->submitAction(new HtmlString(Blade::render(
+                        <<<'BLADE'
+                            <div class="items-center space-x-4">
+                                <x-filament::button
+                                    type="submit"
+                                    color="primary"
+                                    class="text-white"
+                                >
+                                    <x-slot:icon>
+                                        <x-heroicon-o-calculator class="size-5 text-white" />
+                                    </x-slot:icon>
+                                    Calcular
+                                </x-filament::button>
+                            </div>
+                        BLADE
+                    ))),
             ]);
     }
 
@@ -709,7 +735,7 @@ class AnualidadSchema
     private static function buildResultHtml(
         $pagoPeriodicoInput, $valorPresenteInput, $valorFuturoInput,
         $tasaInteresInput, $numeroPagosInput, $periodicidadTasa,
-        $camposCalculadosArray, $resultadosArray, $interesGenerado, $mensaje
+        $camposCalculadosArray, $resultadosArray, $interesGeneradoVP, $interesGeneradoVF, $mensaje
     ): Htmlable {
         $html = '<div class="space-y-6">';
 
@@ -849,11 +875,7 @@ class AnualidadSchema
             </div>
         ";
 
-        $html .= '</div>'; // Fin del grid principal
-
-        // Información adicional de periodicidad e interés generado
-        if ($periodicidadTasa || $interesGenerado) {
-            $html .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+        if ($periodicidadTasa || $interesGeneradoVP || $interesGeneradoVF) {
 
             // Periodicidad de la tasa
             if ($periodicidadTasa) {
@@ -872,31 +894,43 @@ class AnualidadSchema
 
                 $html .= "
                     <div class='rounded-lg p-4 border bg-indigo-50 border-indigo-200 dark:bg-indigo-950/50 dark:border-indigo-700 shadow-sm'>
-                        <div class='flex items-center gap-2 mb-2'>
+                        <div class='flex items-center gap-2 mb-2 mt-2'>
                             <span class='text-indigo-600 dark:text-indigo-400'>📊</span>
                             <h4 class='font-semibold text-indigo-900 dark:text-indigo-100 text-sm'>Periodicidad de Tasa</h4>
                         </div>
-                        <p class='text-lg font-bold text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</p>
-                        <p class='text-xs text-indigo-600 dark:text-indigo-400'>{$periodicidadTasa} períodos/año</p>
+                        <p class='text-xl mt-5 font-bold text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</p>
+                        <p class='sm pt-2 text-indigo-600 dark:text-indigo-400'>{$periodicidadTasa} períodos/año</p>
                     </div>
                 ";
             }
 
-            // Interés generado
-            if ($interesGenerado) {
+            if ($interesGeneradoVP) {
+                $html .= "
+                    <div class='rounded-lg p-4 border bg-slate-50 border-slate-200 dark:bg-slate-950/50 dark:border-slate-700 shadow-sm'>
+                        <div class='flex items-center gap-2 mb-2'>
+                            <span class='text-slate-600 dark:text-slate-400'>💸</span>
+                            <h4 class='font-semibold text-slate-900 dark:text-slate-100 text-sm'>Interés Generado desde VP</h4>
+                        </div>
+                        <p class='text-lg font-bold text-slate-900 dark:text-slate-100'>$".number_format($interesGeneradoVP, 2)."</p>
+                        <p class='text-xs text-slate-600 dark:text-slate-400'>Ganancia total</p>
+                    </div>
+                ";
+            }
+            if ($interesGeneradoVF) {
                 $html .= "
                     <div class='rounded-lg p-4 border bg-amber-50 border-amber-200 dark:bg-amber-950/50 dark:border-amber-700 shadow-sm'>
                         <div class='flex items-center gap-2 mb-2'>
                             <span class='text-amber-600 dark:text-amber-400'>💎</span>
-                            <h4 class='font-semibold text-amber-900 dark:text-amber-100 text-sm'>Interés Generado</h4>
+                            <h4 class='font-semibold text-amber-900 dark:text-amber-100 text-sm'>Interés Generado desde VF</h4>
                         </div>
-                        <p class='text-lg font-bold text-amber-900 dark:text-amber-100'>$".number_format($interesGenerado, 2)."</p>
+                        <p class='text-lg font-bold text-amber-900 dark:text-amber-100'>$".number_format($interesGeneradoVF, 2)."</p>
                         <p class='text-xs text-amber-600 dark:text-amber-400'>Ganancia total</p>
                     </div>
                 ";
             }
 
-            $html .= '</div>';
+        $html .= '</div>'; // Fin del grid principal
+
         }
 
         // Mensaje de resultado si existe

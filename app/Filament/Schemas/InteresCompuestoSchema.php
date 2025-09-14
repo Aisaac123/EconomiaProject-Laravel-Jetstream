@@ -78,6 +78,7 @@ class InteresCompuestoSchema
                                                 $set('interes_generado_calculado', null);
                                                 $set('mensaje_calculado', null);
                                             }),
+
                                     ]),
                                 ]),
                         ]),
@@ -104,7 +105,7 @@ class InteresCompuestoSchema
                                             ->step(0.01)
                                             ->hint('Tasa en porcentaje')
                                             ->columnSpan(4)
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
@@ -124,7 +125,7 @@ class InteresCompuestoSchema
                                             ->default(1)
                                             ->columnSpan(5)
                                             ->visible(fn(callable $get) => !$get('usar_select_periodicidad_tasa'))
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
@@ -149,7 +150,7 @@ class InteresCompuestoSchema
                                             ->searchable()
                                             ->columnSpan(5)
                                             ->visible(fn(callable $get) => $get('usar_select_periodicidad_tasa'))
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
@@ -160,7 +161,7 @@ class InteresCompuestoSchema
                                         Toggle::make('usar_select_periodicidad_tasa')
                                             ->label('Selector de periodicidad')
                                             ->default(true)
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->inline(false)
                                             ->columnSpan(3)
                                             ->extraAttributes(['class' => 'text-center items-center ml-14 mt-1'])
@@ -343,7 +344,7 @@ class InteresCompuestoSchema
                                             ->default(1)
                                             ->columnSpan(8)
                                             ->visible(fn(callable $get) => !$get('usar_select_frecuencia'))
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
@@ -368,7 +369,7 @@ class InteresCompuestoSchema
                                             ->searchable()
                                             ->columnSpan(8)
                                             ->visible(fn(callable $get) => $get('usar_select_frecuencia'))
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
                                                 $set('resultado_calculado', null);
@@ -379,7 +380,7 @@ class InteresCompuestoSchema
                                         Toggle::make('usar_select_frecuencia')
                                             ->label('Seleccionar frecuencia')
                                             ->default(true)
-                                            ->live()
+                                            ->live(onBlur: true)
                                             ->columnStart(10)
                                             ->extraAttributes(['class' => 'text-center items-center ml-12 mt-1'])
                                             ->inline(false)

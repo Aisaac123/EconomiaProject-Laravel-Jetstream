@@ -151,6 +151,8 @@ trait AnualidadFormula
                         $camposCalculados[] = 'numero_pagos';
                         $messages[] = 'Número de pagos calculado (desde VF): '.$resultados['numero_pagos'];
                         $calculated = true;
+                    } else {
+                        throw new \Exception('Datos sin sentido. Por favor revisa los datos.');
                     }
                 }
 
@@ -168,7 +170,12 @@ trait AnualidadFormula
                         $camposCalculados[] = 'numero_pagos';
                         $messages[] = 'Número de pagos calculado (desde VP): '.$resultados['numero_pagos'];
                         $calculated = true;
+                    } else {
+                        throw new \Exception('Con los valores ingresados no es posible calcular un número
+                        de pagos válido, ya que el monto del pago periódico es insuficiente para alcanzar el
+                        valor presente/futuro indicado con la tasa dada.');
                     }
+
                 }
 
                 // 7. Calcular Tasa de interés (método Newton-Raphson mejorado)
@@ -266,17 +273,23 @@ trait AnualidadFormula
                     }
                 }
             }
+            $interesGeneradoFromVP = 0;
+            $interesGeneradoFromVF = 0;
             if (isset($values['pago_periodico']) && isset($values['numero_pagos'])) {
                 if (isset($values['valor_presente'])) {
-                    $interesGenerado = $values['pago_periodico'] * $values['numero_pagos'] - $values['valor_presente'];
-                } elseif (isset($values['valor_futuro'])) {
-                    $interesGenerado = $values['valor_futuro'] - $values['pago_periodico'] * $values['numero_pagos'];
+                    $interesGeneradoFromVP = $values['pago_periodico'] * $values['numero_pagos'] - $values['valor_presente'];
+                }
+                if (isset($values['valor_futuro'])) {
+                    $interesGeneradoFromVF = $values['valor_futuro'] - $values['pago_periodico'] * $values['numero_pagos'];
                 }
             }
-
-            if ($interesGenerado !== null) {
-                $resultados['interes_generado'] = round($interesGenerado, 2);
-                $messages[] = 'Interés generado calculado: '.number_format($resultados['interes_generado'], 2);
+            if ($interesGeneradoFromVP !== null) {
+                $resultados['interes_generadoVP'] = round($interesGeneradoFromVP, 2);
+                $messages[] = 'Interés generado calculado desde VP: '.number_format($resultados['interes_generadoVP'], 2);
+            }
+            if ($interesGeneradoFromVF !== null) {
+                $resultados['interes_generadoVF'] = round($interesGeneradoFromVF, 2);
+                $messages[] = 'Interés generado calculado desde VF: '.number_format($resultados['interes_generadoVF'], 2);
             }
 
         } catch (\Throwable $e) {
@@ -293,7 +306,8 @@ trait AnualidadFormula
                 // Campos ocultos para almacenar resultados
                 'campos_calculados' => json_encode($camposCalculados),
                 'resultados_calculados' => json_encode($resultados),
-                'interes_generado_calculado' => $interesGenerado ?? null,
+                'interes_generado_calculado_VP' => $interesGeneradoFromVP ?? null,
+                'interes_generado_calculado_VF' => $interesGeneradoFromVF ?? null,
                 'mensaje_calculado' => implode('. ', $messages),
             ]),
             'message' => implode('. ', $messages),
