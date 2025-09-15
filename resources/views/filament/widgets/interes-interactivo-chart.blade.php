@@ -302,19 +302,20 @@
         </div>
     </div>
 
-    <!-- Charts -->
+        <!-- Charts -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div
             class="bg-gray-100 dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-300 dark:border-gray-700 p-6 hover:scale-105 transform transition-transform duration-500 animate-slide-up">
-            <h3 class="text-2xl font-semibold text-gray-900 dark:text-gray-200 mb-4">Evolución del Capital</h3>
+            <h3 class="text-2xl font-semibold text-gray-900 dark:text-gray-200 mb-4">Interés Simple vs Compuesto</h3>
             <div x-ref="chartMain" class="h-96"></div>
         </div>
         <div
             class="bg-gray-100 dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-300 dark:border-gray-700 p-6 hover:scale-105 transform transition-transform duration-500 animate-slide-up">
-            <h3 class="text-2xl font-semibold text-gray-900 dark:text-gray-200 mb-4">Diferencia Compuesto vs Simple</h3>
+            <h3 class="text-2xl font-semibold text-gray-900 dark:text-gray-200 mb-4">Evolución del Diferencial</h3>
             <div x-ref="chartDiff" class="h-96"></div>
         </div>
     </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </div>
