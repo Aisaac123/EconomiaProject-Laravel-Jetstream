@@ -162,12 +162,12 @@
                 :collapsed="false">
 
                 <div class="space-y-6 text-gray-700 dark:text-gray-300">
-                    <p class="text-lg">
+                    <p class="text-base">
                         Aunque dos inversiones comiencen con el mismo capital y la misma tasa, su evolución puede ser sorprendentemente diferente.
                         La clave está en <span class="font-semibold text-primary-500">cómo se aplican los intereses a lo largo del tiempo</span>.
                     </p>
 
-                    <p class="mt-2 text-lg">
+                    <p class="mt-2 text-base">
                         En algunos casos, los intereses se suman de manera constante, produciendo un crecimiento predecible y lineal.
                         En otros, los intereses se reinvierten, generando un efecto acumulativo donde el capital se incrementa sobre lo ya acumulado,
                         ampliando con el tiempo la diferencia entre ambos métodos.
