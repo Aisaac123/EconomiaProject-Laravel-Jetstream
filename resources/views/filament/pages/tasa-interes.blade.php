@@ -155,8 +155,11 @@
             </div>
 
             {{-- 🚀 Nueva sección: Interacción --}}
-            <x-sections.contents.examples :has-bg="false" class="mt-8" title="Interacción: Interés Simple vs Compuesto"
-                                          :collapsed="false">
+            <x-sections.contents.examples
+                :has-bg="false"
+                class="mt-8"
+                title="Interacción: Interés Simple vs Compuesto"
+                :collapsed="false">
 
                 <div class="space-y-6 text-gray-700 dark:text-gray-300">
                     <p class="text-lg">
@@ -166,22 +169,44 @@
 
                     <p class="mt-2 text-lg">
                         En algunos casos, los intereses se suman de manera constante, produciendo un crecimiento predecible y lineal.
-                        En otros, los intereses se reinvierten, generando un efecto acumulativo donde el capital crece sobre lo ya acumulado,
-                        provocando una brecha cada vez mayor entre ambos métodos.
-                        Esta diferencia explica por qué, a largo plazo, las decisiones sobre capitalización pueden transformar significativamente los resultados financieros.
+                        En otros, los intereses se reinvierten, generando un efecto acumulativo donde el capital se incrementa sobre lo ya acumulado,
+                        ampliando con el tiempo la diferencia entre ambos métodos.
+                        Esta dinámica explica por qué, a largo plazo, la forma de capitalización puede transformar de manera significativa los resultados financieros.
                     </p>
 
-                    <p class="mt-2 text-lg font-medium text-gray-700 dark:text-gray-300">
-                        A continuación, exploraremos la comparativa entre ambos métodos para visualizar cómo esta diferencia impacta el crecimiento del capital a lo largo del tiempo.
+                    {{-- Explicación comparativa con estilo cortina --}}
+                    <x-filament::section class="mt-10" heading="Comparativa Conceptual: Interés Simple vs Interés Compuesto" collapsible collapsed>
+                        <div class="space-y-4">
+                            <p>
+                                El <strong>interés simple</strong> se calcula únicamente sobre el <em>capital inicial</em>,
+                                lo que genera incrementos
+                                <span class="font-semibold text-emerald-600 dark:text-emerald-400">constantes y lineales</span>.
+                                Cada periodo añade siempre la misma ganancia, sin importar cuánto tiempo transcurra.
+                            </p>
+                            <p>
+                                En cambio, el <strong>interés compuesto</strong> toma como base no solo el capital inicial,
+                                sino también los intereses previamente acumulados.
+                                Esto origina un crecimiento <span class="font-semibold text-teal-600 dark:text-teal-400">acelerado y exponencial</span>,
+                                porque los intereses generan a su vez nuevos intereses.
+                            </p>
+                            <p>
+                                Por ello, mientras el interés simple avanza en línea recta,
+                                el interés compuesto se expande cada vez con mayor rapidez,
+                                generando una diferencia progresiva que, con el paso de los años,
+                                puede ser <span class="font-semibold text-amber-600 dark:text-amber-400">determinante en la rentabilidad o en el costo de una operación financiera</span>.
+                            </p>
+                        </div>
+                    </x-filament::section>
+
+                    <p class="mt-2 text-lg font-medium">
+                        A continuación, podrás explorar gráficamente cómo esta diferencia impacta en el crecimiento del capital a lo largo del tiempo.
                     </p>
 
-                    <!-- Render del widget interactivo -->
-                    <div class="mt-6">
-                        @livewire(\App\Filament\Widgets\InteresInteractivoChart::class)
-                    </div>
+                    {{-- Render del widget interactivo --}}
+                    <livewire:app.filament.widgets.interes-interactivo-chart />
                 </div>
-
             </x-sections.contents.examples>
+
 
         </x-sections.content>
     </div>
