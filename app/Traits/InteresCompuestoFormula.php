@@ -25,16 +25,24 @@ trait InteresCompuestoFormula
         }
 
         $field = $emptyFields[0];
-        $frequency = $data['frecuencia'] ?? 12;
-        $periodicidadTasa = $data['periodicidad_tasa'] ?? 1;
+        $frequency = $data['frecuencia'] ?? 12; // frecuencia de capitalización (n en la fórmula)
+        $periodicidadTasa = $data['periodicidad_tasa'] ?? 1; // periodicidad de la tasa dada
+        $tipoTasa = $data['tipo_tasa']; // 'nominal' o 'efectiva'
 
-        $rate = null;
+        // Convertir la tasa según su tipo
+        $tasaAnual = null;
         if (! empty($data['tasa_interes'])) {
-            $tasaAnual = $data['tasa_interes'];
-            if ($periodicidadTasa != 1) {
-                $tasaAnual = $data['tasa_interes'] * $periodicidadTasa;
+            $tasa = $data['tasa_interes'] / 100;
+
+            if ($tipoTasa === 'nominal') {
+                // Tasa nominal: convertir a tasa nominal anual
+                // Si es trimestral (4%), la anual será 4% * 4 = 16%
+                $tasaAnual = $tasa * $periodicidadTasa;
+            } else {
+                // Tasa efectiva: convertir a tasa efectiva anual
+                // Si es trimestral efectiva (4%), usar: (1 + 0.04)^4 - 1
+                $tasaAnual = pow(1 + $tasa, $periodicidadTasa) - 1;
             }
-            $rate = $tasaAnual / 100;
         }
 
         $result = 0;
@@ -42,25 +50,63 @@ trait InteresCompuestoFormula
 
         switch ($field) {
             case 'capital':
-                $result = $data['monto_final'] / pow(1 + ($rate / $frequency), $frequency * $data['tiempo']);
+                if ($tipoTasa === 'nominal') {
+                    // Fórmula: P = A / (1 + r/n)^(n*t)
+                    $result = $data['monto_final'] / pow(1 + $tasaAnual / $frequency, $frequency * $data['tiempo']);
+                } else {
+                    // Para efectiva: convertir a tasa periódica equivalente
+                    $tasaPeriodica = pow(1 + $tasaAnual, 1 / $frequency) - 1;
+                    $result = $data['monto_final'] / pow(1 + $tasaPeriodica, $frequency * $data['tiempo']);
+                }
                 $message = 'Capital inicial requerido: $'.number_format($result, 2);
                 break;
 
             case 'monto_final':
-                $result = $data['capital'] * pow(1 + ($rate / $frequency), $frequency * $data['tiempo']);
+                if ($tipoTasa === 'nominal') {
+                    // Fórmula: A = P * (1 + r/n)^(n*t)
+                    $result = $data['capital'] * pow(1 + $tasaAnual / $frequency, $frequency * $data['tiempo']);
+                } else {
+                    // Para efectiva: convertir a tasa periódica equivalente
+                    $tasaPeriodica = pow(1 + $tasaAnual, 1 / $frequency) - 1;
+                    $result = $data['capital'] * pow(1 + $tasaPeriodica, $frequency * $data['tiempo']);
+                }
                 $message = 'Monto final obtenido: $'.number_format($result, 2);
                 break;
 
             case 'tasa_interes':
-                $rateCalc = $frequency * (pow($data['monto_final'] / $data['capital'], 1 / ($frequency * $data['tiempo'])) - 1);
-                // Convertir la tasa calculada según la periodicidad deseada
-                $result = ($rateCalc * 100) / $periodicidadTasa; // CORREGIDO: quitar number_format aquí
+                $periods = $frequency * $data['tiempo'];
+
+                if ($tipoTasa === 'nominal') {
+                    // Calcular tasa nominal
+                    // Primero obtener la tasa periódica: i = (A/P)^(1/n*t) - 1
+                    $tasaPeriodica = pow($data['monto_final'] / $data['capital'], 1 / $periods) - 1;
+                    // Convertir a tasa nominal anual: r = i * n
+                    $tasaNominalAnual = $tasaPeriodica * $frequency;
+                    // Convertir a la periodicidad solicitada
+                    $result = ($tasaNominalAnual / $periodicidadTasa) * 100;
+                } else {
+                    // Calcular tasa efectiva
+                    // Primero obtener la tasa periódica
+                    $tasaPeriodica = pow($data['monto_final'] / $data['capital'], 1 / $periods) - 1;
+                    // Convertir a tasa efectiva anual: (1 + i)^n - 1
+                    $tasaEfectivaAnual = pow(1 + $tasaPeriodica, $frequency) - 1;
+                    // Convertir a la periodicidad solicitada
+                    $result = (pow(1 + $tasaEfectivaAnual, 1 / $periodicidadTasa) - 1) * 100;
+                }
+
                 $periodicidadTexto = $this->getPeriodicidadTexto($periodicidadTasa);
-                $message = 'Tasa de interés requerida: '.number_format($result, 2).'% '.$periodicidadTexto;
+                $message = 'Tasa de interés requerida: '.number_format($result, 6).'% '.$periodicidadTexto;
                 break;
 
             case 'tiempo':
-                $result = log($data['monto_final'] / $data['capital']) / ($frequency * log(1 + ($rate / $frequency)));
+                if ($tipoTasa === 'nominal') {
+                    // Fórmula: t = ln(A/P) / (n * ln(1 + r/n))
+                    $result = log($data['monto_final'] / $data['capital']) / ($frequency * log(1 + $tasaAnual / $frequency));
+                } else {
+                    // Para efectiva: usar tasa periódica equivalente
+                    $tasaPeriodica = pow(1 + $tasaAnual, 1 / $frequency) - 1;
+                    $result = log($data['monto_final'] / $data['capital']) / ($frequency * log(1 + $tasaPeriodica));
+                }
                 $message = 'Tiempo requerido: '.number_format($result, 2).' años';
                 break;
         }
@@ -80,11 +126,9 @@ trait InteresCompuestoFormula
             $interest = $finalAmount - $result;
         }
 
-        // Retornar SOLO los campos ocultos, NO modificar los campos principales
         return [
             'error' => false,
             'data' => array_merge($data, [
-                // Campos ocultos para almacenar resultados
                 'campo_calculado' => $field,
                 'resultado_calculado' => $result,
                 'interes_generado_calculado' => $interest,

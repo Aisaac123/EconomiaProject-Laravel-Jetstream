@@ -9,6 +9,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -94,6 +95,22 @@ class InteresCompuestoSchema
                                 ->icon('heroicon-o-percent-badge')
                                 ->schema([
                                     Grid::make(12)->schema([
+                                        Select::make('tipo_tasa')
+                                            ->label('Tipo de tasa')
+                                            ->options([
+                                                'nominal'  => 'Tasa Nominal',
+                                                'efectiva' => 'Tasa Efectiva',
+                                            ])
+                                            ->columnSpan(6)
+                                            ->default('nominal')
+                                            ->live()
+                                            ->searchable()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campo_calculado', null);
+                                                $set('resultado_calculado', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
                                         TextInput::make('tasa_interes')
                                             ->rules(['nullable', 'numeric', 'min:0'])
                                             ->validationMessages([
@@ -105,7 +122,7 @@ class InteresCompuestoSchema
                                             ->placeholder('Ejemplo: 5.5')
                                             ->step(0.01)
                                             ->hint('Tasa nominal (%)')
-                                            ->columnSpan(4)
+                                            ->columnSpan(6)
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
@@ -172,7 +189,6 @@ class InteresCompuestoSchema
                                                 $set('interes_generado_calculado', null);
                                                 $set('mensaje_calculado', null);
                                             }),
-
                                     ]),
                                 ]),
                         ]),
@@ -425,7 +441,7 @@ class InteresCompuestoSchema
                                                 $montoFinal = $get('monto_final');
                                                 $tasaInteres = $get('tasa_interes');
                                                 $tiempo = $get('tiempo');
-
+                                                $tipoTasa = $get('tipo_tasa');
                                                 $campoCalculado = $get('campo_calculado');
                                                 $resultado = $get('resultado_calculado');
                                                 $interesGenerado = $get('interes_generado_calculado');
@@ -451,7 +467,7 @@ class InteresCompuestoSchema
                                                     return static::buildResultHtml(
                                                         $capital, $montoFinal, $tasaInteres, $tiempo,
                                                         $periodicidadTasa, $frecuencia, $interesGenerado,
-                                                        $mensaje, $campoCalculado, $resultado
+                                                        $mensaje, $campoCalculado, $tipoTasa, $resultado
                                                     );
                                                 }
 
@@ -531,7 +547,7 @@ class InteresCompuestoSchema
     protected static function buildResultHtml(
         $capital, $montoFinal, $tasaInteres, $tiempo,
         $periodicidadTasa, $frecuencia, $interesGenerado,
-        $mensaje, $campoCalculado, $resultado
+        $mensaje, $campoCalculado, $tipoTasa, $resultado
     ): Htmlable
     {
         $html = '<div class="space-y-6">';
@@ -654,7 +670,7 @@ class InteresCompuestoSchema
 
         // Información adicional si hay datos
         if ($periodicidadTasa || $frecuencia || $interesGenerado) {
-            $html .= '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
+            $html .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
 
             // Periodicidad de la tasa
             if ($periodicidadTasa) {
@@ -723,7 +739,20 @@ class InteresCompuestoSchema
                     </div>
                 ";
             }
-
+            if ($tipoTasa) {
+                $html .= "
+                    <div class='rounded-lg p-4 border bg-slate-50 border-slate-200 dark:bg-slate-950/50 dark:border-slate-700 shadow-sm'>
+                        <div class='flex items-center gap-2 mb-2'>
+                            <span class='text-slate-600 dark:text-slate-400'>💸</span>
+                            <h4 class='font-semibold text-slate-900 dark:text-slate-100 text-sm'>Interés Generado</h4>
+                        </div>
+                        <p class='text-lg font-bold text-slate-900 dark:text-slate-100'>"
+                                . ($tipoTasa === 'efectiva' ? 'Tasa Efectiva' : 'Tasa Nominal') .
+                                "</p>
+                        <p class='text-xs text-slate-600 dark:text-slate-400'>Ganancia total</p>
+                    </div>
+                ";
+            }
             $html .= '</div>';
         }
 
