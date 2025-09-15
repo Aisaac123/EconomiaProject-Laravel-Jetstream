@@ -43,7 +43,7 @@ class InteresSimpleSchema
                                 ->description('Ingrese los campos que desee y deje alguno libre para calcular.')
                                 ->icon('heroicon-o-calculator')
                                 ->schema([
-                                    Grid::make(2)->schema([
+                                    Grid::make(3)->schema([
                                         TextInput::make('capital')
                                             ->rules(['nullable', 'numeric', 'min:0'])
                                             ->validationMessages([
@@ -53,7 +53,6 @@ class InteresSimpleSchema
                                             ->numeric()
                                             ->prefix('$')
                                             ->placeholder('Ejemplo: 10000')
-                                            ->hint('Monto inicial de inversión')
                                             ->live()
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
@@ -71,7 +70,6 @@ class InteresSimpleSchema
                                             ->numeric()
                                             ->prefix('$')
                                             ->placeholder('Ejemplo: 15000')
-                                            ->hint('Valor final esperado')
                                             ->live()
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
@@ -80,6 +78,22 @@ class InteresSimpleSchema
                                                 $set('mensaje_calculado', null);
                                             }),
 
+                                        TextInput::make('interes_generado')
+                                            ->rules(['nullable', 'numeric', 'min:0'])
+                                            ->validationMessages([
+                                                'min' => 'El capital inicial debe ser mayor o igual a 0',
+                                            ])
+                                            ->label('Interes Generado (I)')
+                                            ->numeric()
+                                            ->prefix('$')
+                                            ->placeholder('Ejemplo: 5000')
+                                            ->live()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campo_calculado', null);
+                                                $set('resultado_calculado', null);
+                                                $set('interes_generado_calculado', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
                                     ]),
                                 ]),
                         ]),
@@ -353,93 +367,102 @@ class InteresSimpleSchema
                                         Placeholder::make('_')
                                             ->label('')
                                             ->content(function (callable $get): Htmlable {
-                                                // Tu código existente para mostrar resultados
                                                 $capital = $get('capital');
                                                 $montoFinal = $get('monto_final');
                                                 $tasaInteres = $get('tasa_interes');
                                                 $tiempo = $get('tiempo');
+                                                $interesGenerado = $get('interes_generado'); // ← Agregar esta línea
 
                                                 $campoCalculado = $get('campo_calculado');
                                                 $resultado = $get('resultado_calculado');
-                                                $interesGenerado = $get('interes_generado_calculado');
+                                                $resultado2 = $get('resultado_calculado_2'); // ← Agregar para segundo resultado
+                                                $interesGeneradoCalculado = $get('interes_generado_calculado');
                                                 $mensaje = $get('mensaje_calculado');
 
                                                 $frecuencia = $get('frecuencia') ?: 12;
                                                 $periodicidadTasa = $get('periodicidad_tasa') ?: 1;
 
-                                                // Resto del código para mostrar resultados...
-                                                // (Mantén tu lógica existente aquí)
-
-                                                // Contar campos vacíos
+                                                // Contar campos vacíos CORRECTAMENTE
                                                 $emptyFields = [];
-                                                foreach (['capital', 'monto_final', 'tasa_interes', 'tiempo'] as $field) {
+                                                $mainFields = ['capital', 'monto_final', 'tasa_interes', 'tiempo'];
+
+                                                foreach ($mainFields as $field) {
                                                     $value = $get($field);
                                                     if ($value === null || $value === '' || $value === 0) {
                                                         $emptyFields[] = $field;
                                                     }
                                                 }
 
+                                                // Verificar si se proporcionó interés generado
+                                                $interesGeneradoProvided = !empty($interesGenerado);
+
+                                                // Validación corregida
+                                                $maxEmptyFields = $interesGeneradoProvided ? 2 : 1;
+
                                                 // Si hay un cálculo exitoso, mostrar resultados
-                                                if ($campoCalculado && $resultado) {
+                                                if ($campoCalculado && ($resultado || $resultado2)) {
                                                     return static::buildResultHtml(
                                                         $capital, $montoFinal, $tasaInteres, $tiempo,
-                                                        $periodicidadTasa, $frecuencia, $interesGenerado,
-                                                        $mensaje, $campoCalculado, $resultado
+                                                        $periodicidadTasa, $frecuencia,
+                                                        $interesGeneradoCalculado ?? $interesGenerado,
+                                                        $mensaje, $campoCalculado, $resultado, $resultado2
                                                     );
                                                 }
 
-                                                // Resto de la lógica de validación y mensajes...
-                                                // (Mantén tu código existente)
-
-                                                if (empty($capital) && empty($montoFinal) && empty($tasaInteres) && empty($tiempo)) {
+                                                // Estado inicial - todos vacíos
+                                                if (empty($capital) && empty($montoFinal) && empty($tasaInteres) && empty($tiempo) && empty($interesGenerado)) {
                                                     return new HtmlString('
-                                            <div class="text-center py-12 text-gray-500 dark:text-gray-400">
-                                                <div class="text-5xl mb-4">📈</div>
-                                                <h3 class="text-xl font-semibold mb-2">Complete los campos para ver los detalles</h3>
-                                                <p class="text-sm text-gray-400">Los resultados aparecerán aquí después del cálculo</p>
-                                            </div>
-                                        ');
+                                    <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                                        <div class="text-5xl mb-4">📈</div>
+                                        <h3 class="text-xl font-semibold mb-2">Complete los campos para ver los detalles</h3>
+                                        <p class="text-sm text-gray-400">Los resultados aparecerán aquí después del cálculo</p>
+                                    </div>
+                                ');
                                                 }
 
-                                                // Validación: debe haber exactamente un campo vacío
-                                                if (count($emptyFields) !== 1) {
-                                                    $errorMessage = count($emptyFields) === 0
-                                                        ? 'Debes dejar exactamente un campo vacío para calcular.'
+                                                // Validación de campos vacíos
+                                                if (count($emptyFields) === 0) {
+                                                    $errorMessage = 'Debes dejar exactamente un campo vacío para calcular' .
+                                                        ($interesGeneradoProvided ? ' (o dos si proporcionas el interés generado)' : '') . '.';
+                                                } else if (count($emptyFields) > $maxEmptyFields) {
+                                                    $errorMessage = $interesGeneradoProvided
+                                                        ? 'Con interés generado puedes dejar máximo 2 campos vacíos. Actualmente hay ' . count($emptyFields) . ' campos vacíos.'
                                                         : 'Solo un campo puede estar vacío. Actualmente hay ' . count($emptyFields) . ' campos vacíos.';
-
+                                                } else {
+                                                    // Validación exitosa - listo para calcular
                                                     return new HtmlString('
-                                            <div class="text-center py-12">
-                                                <div class="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/50 dark:to-orange-950/50 rounded-xl p-8 border border-red-200 dark:border-red-800">
-                                                    <div class="text-6xl mb-4">⚠️</div>
-                                                    <h3 class="text-xl font-bold text-red-900 dark:text-red-100 mb-3">Error de Validación</h3>
-                                                    <p class="text-red-700 dark:text-red-300 mb-4 text-lg">' . $errorMessage . '</p>
-                                                    <div class="bg-red-100 dark:bg-red-900/50 rounded-lg p-4 border border-red-300 dark:border-red-700">
-                                                        <p class="text-sm text-red-800 dark:text-red-200">
-                                                            <strong>Instrucciones:</strong><br>
-                                                            • Completa todos los campos conocidos<br>
-                                                            • Deja vacío únicamente el campo que deseas calcular<br>
-                                                            • Presiona el botón "Calcular" para obtener el resultado
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ');
+                                    <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                                        <div class="text-5xl mb-4">⏳</div>
+                                        <h3 class="text-xl font-semibold mb-2">Listo para calcular</h3>
+                                        <p class="text-sm text-gray-400">Presiona el botón "Calcular" para ver los resultados</p>
+                                    </div>
+                                ');
                                                 }
 
-                                                // Si hay exactamente un campo vacío pero aún no se ha calculado
+                                                // Mostrar error de validación
                                                 return new HtmlString('
-                                        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
-                                            <div class="text-5xl mb-4">⏳</div>
-                                            <h3 class="text-xl font-semibold mb-2">Listo para calcular</h3>
-                                            <p class="text-sm text-gray-400">Presiona el botón "Calcular" para ver los resultados</p>
+                                <div class="text-center py-12">
+                                    <div class="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/50 dark:to-orange-950/50 rounded-xl p-8 border border-red-200 dark:border-red-800">
+                                        <div class="text-6xl mb-4">⚠️</div>
+                                        <h3 class="text-xl font-bold text-red-900 dark:text-red-100 mb-3">Error de Validación</h3>
+                                        <p class="text-red-700 dark:text-red-300 mb-4 text-lg">' . $errorMessage . '</p>
+                                        <div class="bg-red-100 dark:bg-red-900/50 rounded-lg p-4 border border-red-300 dark:border-red-700">
+                                            <p class="text-sm text-red-800 dark:text-red-200">
+                                                <strong>Instrucciones:</strong><br>
+                                                • Completa todos los campos conocidos<br>
+                                                • Deja vacío únicamente el campo que deseas calcular<br>
+                                                ' . ($interesGeneradoProvided ? '• Con interés generado puedes dejar hasta 2 campos vacíos<br>' : '') . '
+                                                • Presiona el botón "Calcular" para obtener el resultado
+                                            </p>
                                         </div>
-                                    ');
+                                    </div>
+                                </div>
+                            ');
                                             }),
                                     ]),
                                 ]),
-                        ])
-                ])
-                    ->skippable()
+                        ]),
+                    ])->skippable()
                     ->startOnStep(1)
                     ->contained(false)
                     ->submitAction(new HtmlString(Blade::render(<<<BLADE
@@ -466,127 +489,159 @@ class InteresSimpleSchema
     protected static function buildResultHtml(
         $capital, $montoFinal, $tasaInteres, $tiempo,
         $periodicidadTasa, $frecuencia, $interesGenerado,
-        $mensaje, $campoCalculado, $resultado
+        $mensaje, $campoCalculado, $resultado, $resultado2 = null
     ): Htmlable {
         $html = '<div class="space-y-6">';
 
         // Header con título dinámico
         $html .= '
-            <div class="bg-gradient-to-r from-green-50 to-emerald-200 dark:from-green-950/50 dark:to-emerald-700/50 rounded-xl p-6 border border-green-200 dark:border-green-800">
-                <h3 class="text-xl font-bold text-green-900 dark:text-green-100 flex items-center gap-3">
-                    <span class="text-3xl">💰</span>
-                    <div>
-                        <div>Resumen de Interés Simple</div>
-                        <div class="text-sm font-normal text-green-600 dark:text-green-300">Cálculos financieros completados</div>
-                    </div>
-                </h3>
-            </div>
-        ';
+        <div class="bg-gradient-to-r from-green-50 to-emerald-200 dark:from-green-950/50 dark:to-emerald-700/50 rounded-xl p-6 border border-green-200 dark:border-green-800">
+            <h3 class="text-xl font-bold text-green-900 dark:text-green-100 flex items-center gap-3">
+                <span class="text-3xl">💰</span>
+                <div>
+                    <div>Resumen de Interés Simple</div>
+                    <div class="text-sm font-normal text-green-600 dark:text-green-300">Cálculos financieros completados</div>
+                </div>
+            </h3>
+        </div>
+    ';
+
+        // Determinar qué campos fueron calculados
+        $camposCalculados = explode(',', $campoCalculado);
 
         // Grid de valores principales
         $html .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
 
         // Capital Inicial
-        $isCalculated = $campoCalculado === 'capital';
+        $isCalculated = in_array('capital', $camposCalculados);
         $bgClass = $isCalculated ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700' : 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700';
         $textClass = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-gray-100';
         $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
 
-        $displayValue = $isCalculated
-            ? number_format($resultado, 2)
-            : (is_numeric($capital) ? number_format($capital, 2) : '--');
+        // Determinar el valor a mostrar para capital
+        if ($isCalculated) {
+            $displayValue = number_format($resultado, 2);
+        } else {
+            $displayValue = is_numeric($capital) ? number_format($capital, 2) : '--';
+        }
 
         $html .= "
-            <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
-                <div class='flex items-center justify-between mb-3'>
-                    <h4 class='font-semibold {$textClass} flex items-center gap-2'>
-                        <span>💵</span>
-                        Capital Inicial
-                    </h4>
-                    ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
-                </div>
-                <p class='text-3xl font-bold {$textClass} mb-2'>{$displayValue}</p>
-                <p class='text-sm text-gray-600 dark:text-gray-400'>Inversión inicial</p>
+        <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
+            <div class='flex items-center justify-between mb-3'>
+                <h4 class='font-semibold {$textClass} flex items-center gap-2'>
+                    <span>💵</span>
+                    Capital Inicial
+                </h4>
+                ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
             </div>
-        ";
+            <p class='text-3xl font-bold {$textClass} mb-2'>$".$displayValue."</p>
+            <p class='text-sm text-gray-600 dark:text-gray-400'>Inversión inicial</p>
+        </div>
+    ";
 
         // Monto Final
-        $isCalculated = $campoCalculado === 'monto_final';
+        $isCalculated = in_array('monto_final', $camposCalculados);
         $bgClass = $isCalculated ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700' : 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700';
         $textClass = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-gray-100';
         $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
 
-        $displayValue = $isCalculated
-            ? number_format($resultado, 2)
-            : (is_numeric($montoFinal) ? number_format($montoFinal, 2) : '--');
+        // Determinar el valor a mostrar para monto final
+        if ($isCalculated) {
+            // Si monto_final fue calculado, podría estar en resultado o resultado2
+            if (in_array('capital', $camposCalculados) && $resultado2) {
+                $displayValue = number_format($resultado2, 2);
+            } else {
+                $displayValue = number_format($resultado, 2);
+            }
+        } else {
+            $displayValue = is_numeric($montoFinal) ? number_format($montoFinal, 2) : '--';
+        }
 
         $html .= "
-            <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
-                <div class='flex items-center justify-between mb-3'>
-                    <h4 class='font-semibold {$textClass} flex items-center gap-2'>
-                        <span>🎯</span>
-                        Monto Final
-                    </h4>
-                    ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
-                </div>
-                <p class='text-3xl font-bold {$textClass} mb-2'>{$displayValue}</p>
-                <p class='text-sm text-gray-600 dark:text-gray-400'>Valor al vencimiento</p>
+        <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
+            <div class='flex items-center justify-between mb-3'>
+                <h4 class='font-semibold {$textClass} flex items-center gap-2'>
+                    <span>🎯</span>
+                    Monto Final
+                </h4>
+                ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
             </div>
-        ";
+            <p class='text-3xl font-bold {$textClass} mb-2'>$".$displayValue."</p>
+            <p class='text-sm text-gray-600 dark:text-gray-400'>Valor al vencimiento</p>
+        </div>
+    ";
 
         // Tasa de Interés
-        $isCalculated = $campoCalculado === 'tasa_interes';
-        $isCalculated = smartRound($isCalculated);
-
+        $isCalculated = in_array('tasa_interes', $camposCalculados);
         $bgClass = $isCalculated ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700' : 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700';
         $textClass = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-gray-100';
         $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
 
-        $displayValue = $isCalculated
-            ? $resultado.'%'
-            : (is_numeric($tasaInteres) ? $tasaInteres.'%' : '--');
+        // Determinar el valor a mostrar para tasa
+        if ($isCalculated) {
+            // La tasa calculada podría estar en resultado o resultado2
+            if (in_array('monto_final', $camposCalculados) && $resultado2) {
+                $displayValue = number_format($resultado2, 2).'%';
+            } else if (in_array('capital', $camposCalculados) && $resultado2) {
+                $displayValue = number_format($resultado2, 2).'%';
+            } else {
+                $displayValue = number_format($resultado, 2).'%';
+            }
+        } else {
+            $displayValue = is_numeric($tasaInteres) ? number_format($tasaInteres, 2).'%' : '--';
+        }
 
         $html .= "
-            <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
-                <div class='flex items-center justify-between mb-3'>
-                    <h4 class='font-semibold {$textClass} flex items-center gap-2'>
-                        <span>📈</span>
-                        Tasa de Interés
-                    </h4>
-                    ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
-                </div>
-                <p class='text-3xl font-bold {$textClass} mb-2'>{$displayValue}</p>
-                <p class='text-sm text-gray-600 dark:text-gray-400'>Según periodicidad seleccionada</p>
+        <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
+            <div class='flex items-center justify-between mb-3'>
+                <h4 class='font-semibold {$textClass} flex items-center gap-2'>
+                    <span>📈</span>
+                    Tasa de Interés
+                </h4>
+                ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
             </div>
-        ";
+            <p class='text-3xl font-bold {$textClass} mb-2'>".$displayValue."</p>
+            <p class='text-sm text-gray-600 dark:text-gray-400'>Según periodicidad seleccionada</p>
+        </div>
+    ";
 
         // Tiempo
-        $isCalculated = $campoCalculado === 'tiempo';
-        $isCalculated = smartRound($isCalculated);
-
+        $isCalculated = in_array('tiempo', $camposCalculados);
         $bgClass = $isCalculated ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700' : 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700';
         $textClass = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-gray-100';
         $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
-        $displayValue = $isCalculated
-            ? $resultado.' años'
-            : (is_numeric($tiempo) ? $tiempo.' años' : '--');
+
+        // Determinar el valor a mostrar para tiempo
+        if ($isCalculated) {
+            // El tiempo calculado podría estar en resultado o resultado2
+            if (in_array('capital', $camposCalculados) && $resultado2) {
+                $displayValue = smartRound($resultado2).' años';
+            } else if (in_array('monto_final', $camposCalculados) && $resultado2) {
+                $displayValue = smartRound($resultado2).' años';
+            } else {
+                $displayValue = smartRound($resultado).' años';
+            }
+        } else {
+            $displayValue = is_numeric($tiempo) ? smartRound($tiempo).' años' : '--';
+        }
+
         $html .= "
-            <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
-                <div class='flex items-center justify-between mb-3'>
-                    <h4 class='font-semibold {$textClass} flex items-center gap-2'>
-                        <span>⏰</span>
-                        Tiempo
-                    </h4>
-                    ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
-                </div>
-                <p class='text-3xl font-bold {$textClass} mb-2'>{$displayValue}</p>
-                <p class='text-sm text-gray-600 dark:text-gray-400'>Período de inversión</p>
+        <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
+            <div class='flex items-center justify-between mb-3'>
+                <h4 class='font-semibold {$textClass} flex items-center gap-2'>
+                    <span>⏰</span>
+                    Tiempo
+                </h4>
+                ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
             </div>
-        ";
+            <p class='text-3xl font-bold {$textClass} mb-2'>".$displayValue."</p>
+            <p class='text-sm text-gray-600 dark:text-gray-400'>Período de inversión</p>
+        </div>
+    ";
 
         $html .= '</div>'; // Fin del grid principal
 
-        // Información adicional si hay datos
+        // Información adicional
         if ($periodicidadTasa || $interesGenerado) {
             $html .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
 
@@ -606,47 +661,47 @@ class InteresSimpleSchema
                 };
 
                 $html .= "
-                    <div class='rounded-lg p-4 border bg-indigo-50 border-indigo-200 dark:bg-indigo-950/50 dark:border-indigo-700 shadow-sm'>
-                        <div class='flex items-center gap-2 mb-2'>
-                            <span class='text-indigo-600 dark:text-indigo-400'>📊</span>
-                            <h4 class='font-semibold text-indigo-900 dark:text-indigo-100 text-sm'>Periodicidad Tasa</h4>
-                        </div>
-                        <p class='text-lg font-bold text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</p>
-                        <p class='text-xs text-indigo-600 dark:text-indigo-400'>{$periodicidadTasa} períodos/año</p>
+                <div class='rounded-lg p-4 border bg-indigo-50 border-indigo-200 dark:bg-indigo-950/50 dark:border-indigo-700 shadow-sm'>
+                    <div class='flex items-center gap-2 mb-2'>
+                        <span class='text-indigo-600 dark:text-indigo-400'>📊</span>
+                        <h4 class='font-semibold text-indigo-900 dark:text-indigo-100 text-sm'>Periodicidad Tasa</h4>
                     </div>
-                ";
+                    <p class='text-lg font-bold text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</p>
+                    <p class='text-xs text-indigo-600 dark:text-indigo-400'>{$periodicidadTasa} períodos/año</p>
+                </div>
+            ";
             }
 
             // Interés generado
             if ($interesGenerado) {
                 $html .= "
-                    <div class='rounded-lg p-4 border bg-amber-50 border-amber-200 dark:bg-amber-950/50 dark:border-amber-700 shadow-sm'>
-                        <div class='flex items-center gap-2 mb-2'>
-                            <span class='text-amber-600 dark:text-amber-400'>💎</span>
-                            <h4 class='font-semibold text-amber-900 dark:text-amber-100 text-sm'>Interés Generado</h4>
-                        </div>
-                        <p class='text-lg font-bold text-amber-900 dark:text-amber-100'>$".number_format($interesGenerado, 2)."</p>
-                        <p class='text-xs text-amber-600 dark:text-amber-400'>Ganancia total</p>
+                <div class='rounded-lg p-4 border bg-amber-50 border-amber-200 dark:bg-amber-950/50 dark:border-amber-700 shadow-sm'>
+                    <div class='flex items-center gap-2 mb-2'>
+                        <span class='text-amber-600 dark:text-amber-400'>💎</span>
+                        <h4 class='font-semibold text-amber-900 dark:text-amber-100 text-sm'>Interés Generado</h4>
                     </div>
-                ";
+                    <p class='text-lg font-bold text-amber-900 dark:text-amber-100'>$".number_format($interesGenerado, 2)."</p>
+                    <p class='text-xs text-amber-600 dark:text-amber-400'>Ganancia total</p>
+                </div>
+            ";
             }
 
             $html .= '</div>';
         }
 
-        // Mensaje de resultado si existe
+        // Mensaje de resultado
         if ($mensaje) {
             $html .= "
-                <div class='bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-xl p-6 border border-blue-200 dark:border-blue-700 shadow-sm'>
-                    <div class='flex items-start gap-4'>
-                        <div class='flex-shrink-0 text-3xl'>🎯</div>
-                        <div>
-                            <h4 class='font-bold text-blue-900 dark:text-blue-100 mb-2 text-lg'>Resultado del Cálculo</h4>
-                            <p class='text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensaje}</p>
-                        </div>
+            <div class='bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-xl p-6 border border-blue-200 dark:border-blue-700 shadow-sm'>
+                <div class='flex items-start gap-4'>
+                    <div class='flex-shrink-0 text-3xl'>🎯</div>
+                    <div>
+                        <h4 class='font-bold text-blue-900 dark:text-blue-100 mb-2 text-lg'>Resultado del Cálculo</h4>
+                        <p class='text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensaje}</p>
                     </div>
                 </div>
-            ";
+            </div>
+        ";
         }
 
         $html .= '</div>'; // Fin del contenedor principal
