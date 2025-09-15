@@ -1,6 +1,7 @@
 @props([
     'title' => 'Ejemplos prácticos',
     'advice' => null,
+    'hasBg' => true,
     'titleClass' => 'text-lg font-semibold',
     'bodyClass' => 'text-gray-700 dark:text-gray-300 pt-2 text-sm',
     'collapsed' => true
@@ -163,7 +164,7 @@
         x-collapse
         class="{{ $bodyClass }}"
     >
-        <div class="bg-gray-100 dark:bg-gray-800 border-r-4 border-primary-700 dark:border-primary-400 rounded-lg p-4 space-y-2">
+        <div class="{{ $hasBg ? 'bg-gray-100 dark:bg-gray-800' : ''}} border-r-4 border-primary-700 dark:border-primary-400 rounded-lg p-4 space-y-2">
             {{ $slot }}
         </div>
         @if($advice)

@@ -9,6 +9,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
@@ -103,7 +104,7 @@ class InteresSimpleSchema
                                             ->suffix('%')
                                             ->placeholder('Ejemplo: 5.5')
                                             ->step(0.01)
-                                            ->hint('Tasa en porcentaje')
+                                            ->hint('Tasa nominal (%)')
                                             ->columnSpan(4)
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
@@ -186,139 +187,148 @@ class InteresSimpleSchema
                                 ->icon('heroicon-o-clock')
                                 ->schema([
                                     Grid::make(12)->schema([
-                                        TextInput::make('anio')
-                                            ->rules(['nullable', 'numeric', 'min:0'])
-                                            ->validationMessages([
-                                                'min' => 'El tiempo debe ser mayor o igual a 0',
-                                            ])
-                                            ->label('Años')
-                                            ->numeric()
-                                            ->suffix('años')
-                                            ->placeholder('Ejemplo: 5')
-                                            ->step(0.01)
-                                            ->columnSpan(3)
-                                            ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
-                                            ->live()
-                                            ->afterStateUpdated(function (callable $set, callable $get) {
-                                                calcularTiempo($set, $get);
-                                                $set('campo_calculado', null);
-                                                $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
-                                                $set('mensaje_calculado', null);
-                                            }),
+                                        FieldSet::make('Tiempo')->schema([
+                                            TextInput::make('anio')
+                                                ->rules(['nullable', 'numeric', 'min:0'])
+                                                ->validationMessages([
+                                                    'min' => 'El tiempo debe ser mayor o igual a 0',
+                                                ])
+                                                ->label('Años')
+                                                ->numeric()
+                                                ->suffix('años')
+                                                ->placeholder('Ejemplo: 5')
+                                                ->minValue(0)
+                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->live()
+                                                ->afterStateUpdated(function (callable $set, callable $get) {
+                                                    calcularTiempo($set, $get);
+                                                    $set('campo_calculado', null);
+                                                    $set('resultado_calculado', null);
+                                                    $set('interes_generado_calculado', null);
+                                                    $set('mensaje_calculado', null);
+                                                }),
 
-                                        TextInput::make('mes')
-                                            ->rules(['nullable', 'numeric', 'min:0'])
-                                            ->validationMessages([
-                                                'min' => 'El tiempo debe ser mayor o igual a 0',
-                                            ])
-                                            ->label('Meses')
-                                            ->numeric()
-                                            ->suffix('meses')
-                                            ->placeholder('Ejemplo: 7')
-                                            ->step(0.01)
-                                            ->columnSpan(3)
-                                            ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
-                                            ->live()
-                                            ->afterStateUpdated(function (callable $set, callable $get) {
-                                                calcularTiempo($set, $get);
-                                                $set('campo_calculado', null);
-                                                $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
-                                                $set('mensaje_calculado', null);
-                                            }),
+                                            TextInput::make('mes')
+                                                ->rules(['nullable', 'numeric', 'min:0'])
+                                                ->validationMessages([
+                                                    'min' => 'El tiempo debe ser mayor o igual a 0',
+                                                ])
+                                                ->label('Meses')
+                                                ->numeric()
+                                                ->suffix('meses')
+                                                ->placeholder('Ejemplo: 7')
+                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->live()
+                                                ->afterStateUpdated(function (callable $set, callable $get) {
+                                                    calcularTiempo($set, $get);
+                                                    $set('campo_calculado', null);
+                                                    $set('resultado_calculado', null);
+                                                    $set('interes_generado_calculado', null);
+                                                    $set('mensaje_calculado', null);
+                                                }),
 
-                                        TextInput::make('dia')
-                                            ->rules(['nullable', 'numeric', 'min:0'])
-                                            ->validationMessages([
-                                                'min' => 'El tiempo debe ser mayor o igual a 0',
-                                            ])
-                                            ->label('Dias')
-                                            ->numeric()
-                                            ->suffix('dias')
-                                            ->placeholder('Ejemplo: 21')
-                                            ->step(0.01)
-                                            ->columnSpan(3)
-                                            ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
-                                            ->live()
-                                            ->afterStateUpdated(function (callable $set, callable $get) {
-                                                calcularTiempo($set, $get);
-                                                $set('campo_calculado', null);
-                                                $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
-                                                $set('mensaje_calculado', null);
-                                            }),
+                                            TextInput::make('dia')
+                                                ->rules(['nullable', 'numeric', 'min:0'])
+                                                ->validationMessages([
+                                                    'min' => 'El tiempo debe ser mayor o igual a 0',
+                                                ])
+                                                ->label('Dias')
+                                                ->numeric()
+                                                ->suffix('dias')
+                                                ->placeholder('Ejemplo: 21')
+                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->live()
+                                                ->afterStateUpdated(function (callable $set, callable $get) {
+                                                    calcularTiempo($set, $get);
+                                                    $set('campo_calculado', null);
+                                                    $set('resultado_calculado', null);
+                                                    $set('interes_generado_calculado', null);
+                                                    $set('mensaje_calculado', null);
+                                                }),
+                                            Toggle::make('usar_fechas_tiempo')
+                                                ->label('Usar fechas')
+                                                ->default(false)
+                                                ->live()
+                                                ->extraAttributes(['class' => 'text-center items-center ml-4 mt-1'])
+                                                ->inline(false)
+                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('campo_calculado', null);
+                                                    $set('resultado_calculado', null);
+                                                    $set('interes_generado_calculado', null);
+                                                    $set('mensaje_calculado', null);
+                                                    $set('tiempo', null);
+                                                    $set('fecha_inicio', null);
+                                                    $set('fecha_final', null);
+                                                    $set('anio', null);
+                                                    $set('mes', null);
+                                                    $set('dia', null);
+                                                }),
+                                        ])
+                                            ->columns([
+                                                'default' => 1,
+                                                'md' => 2,
+                                                'xl' => 4,
+                                            ])->columnSpan(12)
+                                            ->visible(fn(callable $get) => !$get('usar_fechas_tiempo')),
 
-                                        DatePicker::make('fecha_inicio')
-                                            ->label('Fecha de Inicio')
-                                            ->columnSpan(4)
-                                            ->placeholder('Seleccione la fecha inicial')
-                                            ->live()
-                                            ->afterStateUpdated(function (callable $set, callable $get, $state) {
-                                                calcularTiempoDesdeFechas($set, $get);
-                                                $set('campo_calculado', null);
-                                                $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
-                                                $set('mensaje_calculado', null);
-                                            })
+
+                                        FieldSet::make('Fechas')->schema([
+                                            DatePicker::make('fecha_inicio')
+                                                ->label('Fecha de Inicio')
+                                                ->placeholder('Seleccione la fecha inicial')
+                                                ->live()
+                                                ->columnSpan(4)
+                                                ->afterStateUpdated(function (callable $set, callable $get, $state) {
+                                                    calcularTiempoDesdeFechas($set, $get);
+                                                    $set('campo_calculado', null);
+                                                    $set('resultado_calculado', null);
+                                                    $set('interes_generado_calculado', null);
+                                                    $set('mensaje_calculado', null);
+                                                })
+                                                ->visible(fn(callable $get) => $get('usar_fechas_tiempo')),
+
+                                            DatePicker::make('fecha_final')
+                                                ->label('Fecha Final')
+                                                ->placeholder('Seleccione la fecha final')
+                                                ->live()
+                                                ->columnSpan(4)
+                                                ->afterStateUpdated(function (callable $set, callable $get, $state) {
+                                                    calcularTiempoDesdeFechas($set, $get);
+                                                    $set('campo_calculado', null);
+                                                    $set('resultado_calculado', null);
+                                                    $set('interes_generado_calculado', null);
+                                                    $set('mensaje_calculado', null);
+                                                })
+                                                ->visible(fn(callable $get) => $get('usar_fechas_tiempo')),
+
+                                            Toggle::make('usar_fechas_tiempo')
+                                                ->label('Usar fechas')
+                                                ->default(false)
+                                                ->live()
+                                                ->extraAttributes(['class' => 'text-center items-center ml-4 mt-1'])
+                                                ->inline(false)
+                                                ->columnSpan(3)
+                                                ->columnStart(10)
+                                                ->visible(fn(callable $get) => $get('usar_fechas_tiempo'))
+                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('campo_calculado', null);
+                                                    $set('resultado_calculado', null);
+                                                    $set('interes_generado_calculado', null);
+                                                    $set('mensaje_calculado', null);
+                                                    $set('tiempo', null);
+                                                    $set('fecha_inicio', null);
+                                                    $set('fecha_final', null);
+                                                    $set('anio', null);
+                                                    $set('mes', null);
+                                                    $set('dia', null);
+                                                }),
+                                        ])->columns([
+                                            'default' => 1,
+                                            'md' => 6,
+                                            'xl' => 12,
+                                        ])->columnSpan(12)
                                             ->visible(fn(callable $get) => $get('usar_fechas_tiempo')),
-
-                                        DatePicker::make('fecha_final')
-                                            ->label('Fecha Final')
-                                            ->columnSpan(4)
-                                            ->placeholder('Seleccione la fecha final')
-                                            ->live()
-                                            ->afterStateUpdated(function (callable $set, callable $get, $state) {
-                                                calcularTiempoDesdeFechas($set, $get);
-                                                $set('campo_calculado', null);
-                                                $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
-                                                $set('mensaje_calculado', null);
-                                            })
-                                            ->visible(fn(callable $get) => $get('usar_fechas_tiempo')),
-
-                                        Toggle::make('usar_fechas_tiempo')
-                                            ->label('Usar fechas para calcular')
-                                            ->default(false)
-                                            ->live()
-                                            ->extraAttributes(['class' => 'text-center items-center ml-14 mt-1'])
-                                            ->inline(false)
-                                            ->columnSpan(3)
-                                            ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
-                                            ->afterStateUpdated(function (callable $set) {
-                                                $set('campo_calculado', null);
-                                                $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
-                                                $set('mensaje_calculado', null);
-                                                $set('tiempo', null);
-                                                $set('fecha_inicio', null);
-                                                $set('fecha_final', null);
-                                                $set('anio', null);
-                                                $set('mes', null);
-                                                $set('dia', null);
-                                            }),
-
-                                        Toggle::make('usar_fechas_tiempo')
-                                            ->label('Usar fechas para calcular')
-                                            ->default(false)
-                                            ->live()
-                                            ->extraAttributes(['class' => 'text-center items-center ml-14 mt-1'])
-                                            ->inline(false)
-                                            ->columnSpan(3)
-                                            ->columnStart(10)
-                                            ->visible(fn(callable $get) => $get('usar_fechas_tiempo'))
-                                            ->afterStateUpdated(function (callable $set) {
-                                                $set('campo_calculado', null);
-                                                $set('resultado_calculado', null);
-                                                $set('interes_generado_calculado', null);
-                                                $set('mensaje_calculado', null);
-                                                $set('tiempo', null);
-                                                $set('fecha_inicio', null);
-                                                $set('fecha_final', null);
-                                                $set('anio', null);
-                                                $set('mes', null);
-                                                $set('dia', null);
-                                            }),
 
                                         TextInput::make('tiempo')
                                             ->label('Tiempo en Años')

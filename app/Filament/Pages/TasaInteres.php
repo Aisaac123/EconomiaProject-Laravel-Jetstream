@@ -6,9 +6,9 @@ use Filament\Pages\Page;
 
 class TasaInteres extends Page
 {
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-currency-dollar';
 
-    protected static string|\BackedEnum|null $activeNavigationIcon = 'heroicon-s-academic-cap';
+    protected static string|\BackedEnum|null $activeNavigationIcon = 'heroicon-s-currency-dollar';
 
     protected static ?string $navigationLabel = 'Tasa de Interés';
 

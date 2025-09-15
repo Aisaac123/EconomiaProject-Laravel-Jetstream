@@ -28,13 +28,10 @@ trait InteresCompuestoFormula
         $frequency = $data['frecuencia'] ?? 12;
         $periodicidadTasa = $data['periodicidad_tasa'] ?? 1;
 
-        // Convertir la tasa a la periodicidad correcta para el cálculo
         $rate = null;
         if (! empty($data['tasa_interes'])) {
-            // Si la tasa está en periodicidad diferente a anual, convertirla
             $tasaAnual = $data['tasa_interes'];
             if ($periodicidadTasa != 1) {
-                // Convertir de la periodicidad dada a anual
                 $tasaAnual = $data['tasa_interes'] * $periodicidadTasa;
             }
             $rate = $tasaAnual / 100;

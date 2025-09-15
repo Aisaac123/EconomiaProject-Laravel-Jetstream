@@ -62,17 +62,19 @@ if (! function_exists('calcularNumeroPagosDesdeTiempo')) {
             $tiempoAnios = $get('tiempo');
             $frecuencia = $get('frecuencia_anios') ?: 1;
             if (is_numeric($tiempoAnios) && is_numeric($frecuencia)) {
-                $n = $tiempoAnios * $frecuencia;
-                $set('numero_pagos_calculado_anios', round($n));
-                $set('numero_pagos', round($n));
+                // Calcular número de períodos completos
+                $numeroCompletoPagos = calcularPeriodosCompletos($tiempoAnios, $frecuencia);
+                $set('numero_pagos_calculado_anios', $numeroCompletoPagos);
+                $set('numero_pagos', $numeroCompletoPagos);
             }
         } elseif ($modoTiempoPagos === 'fechas_frecuencia') {
             $tiempoCalculado = $get('tiempo');
             $frecuencia = $get('frecuencia_anios') ?: 1;
             if (is_numeric($tiempoCalculado) && is_numeric($frecuencia)) {
-                $n = $tiempoCalculado * $frecuencia;
-                $set('numero_pagos_calculado_fechas', round($n));
-                $set('numero_pagos', round($n));
+                // Calcular número de períodos completos
+                $numeroCompletoPagos = calcularPeriodosCompletos($tiempoCalculado, $frecuencia);
+                $set('numero_pagos_calculado_fechas', $numeroCompletoPagos);
+                $set('numero_pagos', $numeroCompletoPagos);
             }
         } elseif ($modoTiempoPagos === 'manual') {
             // Asegurar que el campo manual también actualice el campo oculto
@@ -81,6 +83,23 @@ if (! function_exists('calcularNumeroPagosDesdeTiempo')) {
                 $set('numero_pagos', $numeroPagosManual);
             }
         }
+    }
+
+
+}
+if (! function_exists('calcularPeriodosCompletos')) {
+    /**
+     * Calcula el número de períodos completos basado en el tiempo y frecuencia
+     */
+    function calcularPeriodosCompletos(float $tiempoAnios, float $frecuencia): int
+    {
+        // Duración de cada período en años
+        $duracionPeriodoAnios = 1 / $frecuencia;
+
+        // Número de períodos completos que caben en el tiempo dado
+        $periodosCompletos = floor($tiempoAnios / $duracionPeriodoAnios);
+
+        return (int) $periodosCompletos;
     }
 }
 
