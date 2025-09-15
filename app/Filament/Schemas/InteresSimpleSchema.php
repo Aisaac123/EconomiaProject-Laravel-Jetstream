@@ -104,7 +104,7 @@ class InteresSimpleSchema
                                             ->suffix('%')
                                             ->placeholder('Ejemplo: 5.5')
                                             ->step(0.01)
-                                            ->hint('Tasa nominal (%)')
+                                            ->hint('Tasa simple (%)')
                                             ->columnSpan(4)
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {

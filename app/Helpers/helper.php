@@ -5,19 +5,13 @@ use Carbon\Carbon;
 if (! function_exists('smartRound')) {
     function smartRound(float $value): float
     {
-        // Si está casi en un entero (±0.01), devolver como entero
-        if (abs($value - round($value)) < 0.01) {
-            return round($value);
-        }
+        // Redondeamos a 3 decimales
+        $rounded = round($value, 3);
 
-        // Si el segundo decimal es 0 ó >= 5 → 1 decimal
-        $oneDecimal = round($value, 1);
-        if (abs($value - $oneDecimal) < 0.05) {
-            return $oneDecimal;
-        }
+        // Convertimos a string y eliminamos ceros finales en decimales
+        $str = rtrim(rtrim(number_format($rounded, 3, '.', ''), '0'), '.');
 
-        // En otros casos → 2 decimales
-        return round($value, 2);
+        return (float) $str;
     }
 }
 

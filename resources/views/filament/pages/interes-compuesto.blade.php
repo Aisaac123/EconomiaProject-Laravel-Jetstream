@@ -67,19 +67,19 @@
                 <div class="space-y-4">
                     <x-sections.contents.example
                         title="📌 Ejemplo 1: Capitalización anual"
-                        description="Inviertes $1,000 a una tasa del 5% anual con capitalización anual durante 3 años."
+                        description="Inviertes $1,000 a una tasa nominal del 5% anual con capitalización anual durante 3 años."
                         solution="A = 1000 × (1 + 0.05/1)^(1×3) = $1,157.63"
                     />
 
                     <x-sections.contents.example
                         title="📌 Ejemplo 2: Capitalización semestral"
-                        description="Mismo capital y tasa, capitalización semestral durante 3 años."
+                        description="Mismo capital y tasa nominal, capitalización semestral durante 3 años."
                         solution="A = 1000 × (1 + 0.05/2)^(2×3) = $1,159.69"
                     />
 
                     <x-sections.contents.example
                         title="📌 Ejemplo 3: Cálculo de capital inicial"
-                        description="Deseas $2,000 en 5 años a una tasa del 4% anual, capitalización mensual."
+                        description="Deseas $2,000 en 5 años a una tasa nominal del 4% anual, capitalización mensual."
                         solution="P = 2000 / (1 + 0.04/12)^(12×5) ≈ $1,638.62"
                     />
                 </div>

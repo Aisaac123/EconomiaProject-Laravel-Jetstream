@@ -463,8 +463,8 @@ class AnualidadSchema
                                                 'md' => 2,
                                             ])->columnSpan(12),
                                         TextEntry::make('Nota')
-                                            ->label('💡 Nota')
-                                            ->columnSpanFull()
+                                            ->columnSpan(12)
+                                            ->icon('heroicon-o-information-circle')
                                             ->state('Se utilizan gran cantidad de decimales al caluclar el tiempo para soportar altas frecuencias de pagos.')
                                             ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia'),
                                     ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia'),
@@ -613,8 +613,8 @@ class AnualidadSchema
                                                 'md' => 2,
                                             ])->columnSpan(12),
                                         TextEntry::make('Nota')
-                                            ->label('💡 Nota')
-                                            ->columnSpanFull()
+                                            ->columnSpan(12)
+                                            ->icon('heroicon-o-information-circle')
                                             ->state('Se utilizan gran cantidad de decimales al caluclar el tiempo para soportar altas frecuencias de pagos.')
                                             ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia'),
 
