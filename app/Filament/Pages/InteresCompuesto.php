@@ -15,6 +15,7 @@ class InteresCompuesto extends Page implements HasForms
     use InteractsWithForms;
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-arrow-trending-up';
+    protected static string|null|\UnitEnum $navigationGroup = 'Primer Corte';
 
     protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-c-arrow-trending-up';
 

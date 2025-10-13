@@ -13,8 +13,9 @@ class Anualidad extends Page
     use FormCalculations;
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-calendar-days';
-
     protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-s-calendar-days';
+    protected static string|null|\UnitEnum $navigationGroup = 'Primer Corte';
+
 
     protected string $view = 'filament.pages.anualidad';
 

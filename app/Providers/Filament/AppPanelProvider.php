@@ -88,6 +88,7 @@ class AppPanelProvider extends PanelProvider
                     ->activeIcon('heroicon-s-document-text')
                     ->isActiveWhen(fn (): bool => request()->routeIs(Dashboard::getRouteName())),
             ]);
+
     }
 
     public function boot(): void

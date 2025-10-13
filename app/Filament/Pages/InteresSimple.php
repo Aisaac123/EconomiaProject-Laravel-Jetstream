@@ -14,10 +14,9 @@ class InteresSimple extends Page implements HasForms
     use FormCalculations;
     use InteractsWithForms;
 
-    // ✅ Corrección: usamos ?string|\BackedEnum, que es lo que espera Filament
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
+    protected static string|null|\UnitEnum $navigationGroup = 'Primer Corte';
 
-    // ✅ Corrección: cambiamos a un icono válido de Heroicons (por ejemplo banknotes)
     protected static string|\BackedEnum|null $activeNavigationIcon = 'heroicon-s-banknotes';
 
     protected string $view = 'filament.pages.interes-simple';
