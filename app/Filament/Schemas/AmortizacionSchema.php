@@ -180,7 +180,7 @@ class AmortizacionSchema
                                             ->numeric()
                                             ->placeholder('12 para mensual')
                                             ->hint('Períodos por año')
-                                            ->default(12)
+                                            ->default(1)
                                             ->columnSpan(5)
                                             ->visible(fn(callable $get) => !$get('usar_select_periodicidad_tasa'))
                                             ->live(onBlur: true)
