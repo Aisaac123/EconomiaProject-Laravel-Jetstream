@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\PageGroupType;
 use App\Filament\Schemas\InteresSimpleSchema;
 use App\Traits\FormCalculations;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -15,7 +16,8 @@ class InteresSimple extends Page implements HasForms
     use InteractsWithForms;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
-    protected static string|null|\UnitEnum $navigationGroup = 'Primer Corte';
+
+    protected static string|null|\UnitEnum $navigationGroup = PageGroupType::FUNDAMENTAL->value;
 
     protected static string|\BackedEnum|null $activeNavigationIcon = 'heroicon-s-banknotes';
 

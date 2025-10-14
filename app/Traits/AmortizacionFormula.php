@@ -47,6 +47,7 @@ trait AmortizacionFormula
 
             if (count($camposVacios) > 0) {
                 $camposTexto = implode(', ', $camposVacios);
+
                 return [
                     'error' => true,
                     'message' => "Los siguientes campos son obligatorios: $camposTexto",
@@ -65,16 +66,16 @@ trait AmortizacionFormula
         if (count($camposFlexiblesVacios) > $maxCamposVacios) {
             return [
                 'error' => true,
-                'message' => "En el sistema {$sistemaAmortizacion}, solo puedes dejar máximo {$maxCamposVacios} campo(s) vacío(s). Actualmente hay " . count($camposFlexiblesVacios) . " vacíos.",
+                'message' => "En el sistema {$sistemaAmortizacion}, solo puedes dejar máximo {$maxCamposVacios} campo(s) vacío(s). Actualmente hay ".count($camposFlexiblesVacios).' vacíos.',
             ];
         }
 
         // Inicializar valores
         $values = [
-            'monto_prestamo' => !empty($data['monto_prestamo']) ? (float) $data['monto_prestamo'] : null,
-            'tasa_interes' => !empty($data['tasa_interes']) ? (float) $data['tasa_interes'] : null,
-            'numero_pagos' => !empty($data['numero_pagos']) ? (int) $data['numero_pagos'] : null,
-            'cuota_fija' => !empty($data['cuota_fija']) ? (float) $data['cuota_fija'] : null,
+            'monto_prestamo' => ! empty($data['monto_prestamo']) ? (float) $data['monto_prestamo'] : null,
+            'tasa_interes' => ! empty($data['tasa_interes']) ? (float) $data['tasa_interes'] : null,
+            'numero_pagos' => ! empty($data['numero_pagos']) ? (int) $data['numero_pagos'] : null,
+            'cuota_fija' => ! empty($data['cuota_fija']) ? (float) $data['cuota_fija'] : null,
         ];
 
         // Convertir tasa a decimal por periodo
@@ -117,7 +118,7 @@ trait AmortizacionFormula
         } catch (\Throwable $e) {
             return [
                 'error' => true,
-                'message' => 'Error en cálculo: ' . $e->getMessage(),
+                'message' => 'Error en cálculo: '.$e->getMessage(),
             ];
         }
 
@@ -156,7 +157,7 @@ trait AmortizacionFormula
                     $values['monto_prestamo'] = $values['cuota_fija'] * ((1 - pow(1 + $tasaPorPeriodo, -$values['numero_pagos'])) / $tasaPorPeriodo);
                 }
                 $camposCalculados[] = 'monto_prestamo';
-                $messages[] = 'Monto del préstamo calculado: $' . number_format($values['monto_prestamo'], 2);
+                $messages[] = 'Monto del préstamo calculado: $'.number_format($values['monto_prestamo'], 2);
                 $calculated = true;
             }
 
@@ -170,7 +171,7 @@ trait AmortizacionFormula
                     $values['cuota_fija'] = $values['monto_prestamo'] * ($tasaPorPeriodo / (1 - pow(1 + $tasaPorPeriodo, -$values['numero_pagos'])));
                 }
                 $camposCalculados[] = 'cuota_fija';
-                $messages[] = 'Cuota fija calculada: $' . number_format($values['cuota_fija'], 2);
+                $messages[] = 'Cuota fija calculada: $'.number_format($values['cuota_fija'], 2);
                 $calculated = true;
             }
 
@@ -182,7 +183,7 @@ trait AmortizacionFormula
                 if ($ratio > 0) {
                     $values['numero_pagos'] = round(-log($ratio) / log(1 + $tasaPorPeriodo), 0);
                     $camposCalculados[] = 'numero_pagos';
-                    $messages[] = 'Número de pagos calculado: ' . intval($values['numero_pagos']);
+                    $messages[] = 'Número de pagos calculado: '.intval($values['numero_pagos']);
                     $calculated = true;
                 } else {
                     return [
@@ -202,16 +203,20 @@ trait AmortizacionFormula
                 $found = false;
 
                 for ($i = 0; $i < $maxIter; $i++) {
-                    if (abs($r) < 1e-12) $r = 1e-8;
+                    if (abs($r) < 1e-12) {
+                        $r = 1e-8;
+                    }
 
                     $factor = pow(1 + $r, -$values['numero_pagos']);
                     $f = $values['cuota_fija'] * ((1 - $factor) / $r) - $values['monto_prestamo'];
                     $fprime = $values['cuota_fija'] * (
-                            (($values['numero_pagos'] * $factor) / (1 + $r)) / $r -
-                            ((1 - $factor) / ($r * $r))
-                        );
+                        (($values['numero_pagos'] * $factor) / (1 + $r)) / $r -
+                        ((1 - $factor) / ($r * $r))
+                    );
 
-                    if (abs($fprime) < 1e-12) break;
+                    if (abs($fprime) < 1e-12) {
+                        break;
+                    }
 
                     $r_new = $r - $f / $fprime;
                     if (abs($r_new - $r) < $tol) {
@@ -221,8 +226,12 @@ trait AmortizacionFormula
                     }
                     $r = $r_new;
 
-                    if ($r < -0.99) $r = -0.99;
-                    if ($r > 10) $r = 10;
+                    if ($r < -0.99) {
+                        $r = -0.99;
+                    }
+                    if ($r > 10) {
+                        $r = 10;
+                    }
                 }
 
                 if ($found && $r > -0.99 && $r < 10) {
@@ -230,7 +239,7 @@ trait AmortizacionFormula
                     $tasaAnual = $r * $periodicidadTasa * 100;
                     $values['tasa_interes'] = smartRound($tasaAnual / $periodicidadTasa);
                     $camposCalculados[] = 'tasa_interes';
-                    $messages[] = 'Tasa de interés calculada: ' . $values['tasa_interes'] . '%';
+                    $messages[] = 'Tasa de interés calculada: '.$values['tasa_interes'].'%';
                     $calculated = true;
                 } else {
                     return [
@@ -255,7 +264,7 @@ trait AmortizacionFormula
             $values['monto_prestamo'],
             $values['cuota_fija'],
             $tasaPorPeriodo,
-            (int)$values['numero_pagos'],
+            (int) $values['numero_pagos'],
             'frances'
         );
 
@@ -268,7 +277,7 @@ trait AmortizacionFormula
             'sistema' => 'Francés',
             'monto_prestamo' => round($values['monto_prestamo'], 2),
             'tasa_interes' => round($values['tasa_interes'], 2),
-            'numero_pagos' => (int)$values['numero_pagos'],
+            'numero_pagos' => (int) $values['numero_pagos'],
             'cuota_fija' => round($values['cuota_fija'], 2),
             'cuota_inicial' => round($primeraCuota['cuota'], 2),
             'cuota_final' => round($ultimaCuota['cuota'], 2),
@@ -330,7 +339,7 @@ trait AmortizacionFormula
             'sistema' => 'Alemán',
             'monto_prestamo' => round($values['monto_prestamo'], 2),
             'tasa_interes' => round($values['tasa_interes'], 2),
-            'numero_pagos' => (int)$values['numero_pagos'],
+            'numero_pagos' => (int) $values['numero_pagos'],
             'amortizacion_constante' => round($amortizacionConstante, 2),
             'cuota_inicial' => round($primeraCuota['cuota'], 2),
             'cuota_final' => round($ultimaCuota['cuota'], 2),
@@ -345,10 +354,10 @@ trait AmortizacionFormula
             'tabla_amortizacion' => $tabla,
         ];
 
-        $messages[] = 'Sistema Alemán: Amortización constante de $' . number_format($amortizacionConstante, 2);
-        $messages[] = 'Cuota inicial: $' . number_format($primeraCuota['cuota'], 2);
-        $messages[] = 'Cuota final: $' . number_format($ultimaCuota['cuota'], 2);
-        $messages[] = 'Total de intereses: $' . number_format($totalIntereses, 2);
+        $messages[] = 'Sistema Alemán: Amortización constante de $'.number_format($amortizacionConstante, 2);
+        $messages[] = 'Cuota inicial: $'.number_format($primeraCuota['cuota'], 2);
+        $messages[] = 'Cuota final: $'.number_format($ultimaCuota['cuota'], 2);
+        $messages[] = 'Total de intereses: $'.number_format($totalIntereses, 2);
 
         return [
             'error' => false,
@@ -395,7 +404,7 @@ trait AmortizacionFormula
             'sistema' => 'Americano',
             'monto_prestamo' => round($values['monto_prestamo'], 2),
             'tasa_interes' => round($values['tasa_interes'], 2),
-            'numero_pagos' => (int)$values['numero_pagos'],
+            'numero_pagos' => (int) $values['numero_pagos'],
             'cuota_interes_periodica' => round($cuotaInteres, 2),
             'cuota_inicial' => round($primeraCuota['cuota'], 2),
             'cuota_final' => round($ultimaCuota['cuota'], 2),
@@ -410,9 +419,9 @@ trait AmortizacionFormula
             'tabla_amortizacion' => $tabla,
         ];
 
-        $messages[] = 'Sistema Americano: Cuota de interés periódica de $' . number_format($cuotaInteres, 2);
-        $messages[] = 'Pago final (capital + interés): $' . number_format($ultimaCuota['cuota'], 2);
-        $messages[] = 'Total de intereses: $' . number_format($totalIntereses, 2);
+        $messages[] = 'Sistema Americano: Cuota de interés periódica de $'.number_format($cuotaInteres, 2);
+        $messages[] = 'Pago final (capital + interés): $'.number_format($ultimaCuota['cuota'], 2);
+        $messages[] = 'Total de intereses: $'.number_format($totalIntereses, 2);
 
         return [
             'error' => false,

@@ -3,7 +3,6 @@
 namespace App\Providers\Filament;
 
 use Filament\Actions\Action;
-use Filament\Forms\Components\Toggle;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -35,7 +34,7 @@ class AppPanelProvider extends PanelProvider
                     'profile' => fn (Action $action): Action => $action->label(\Auth::user()->name),
                 ])
                 ->homeUrl('/dashboard')
-                ->colors(['primary' => Color::hex('#0A2C28')])
+                ->colors(['primary' => Color::Teal[950]])
                 ->brandLogo('assets/app-icon.png')
                 ->favicon('assets/app-icon.png')
                 ->brandLogoHeight('40px')

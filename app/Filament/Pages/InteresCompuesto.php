@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\PageGroupType;
 use App\Filament\Schemas\InteresCompuestoSchema;
 use App\Traits\FormCalculations;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -15,7 +16,8 @@ class InteresCompuesto extends Page implements HasForms
     use InteractsWithForms;
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-arrow-trending-up';
-    protected static string|null|\UnitEnum $navigationGroup = 'Primer Corte';
+
+    protected static string|null|\UnitEnum $navigationGroup = PageGroupType::FUNDAMENTAL->value;
 
     protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-c-arrow-trending-up';
 
@@ -35,7 +37,6 @@ class InteresCompuesto extends Page implements HasForms
     {
         return 'Interés Compuesto';
     }
-
 
     public function mount(): void
     {

@@ -23,7 +23,7 @@
 
     <body class="antialiased">
         {{ $slot }}
-
+        @stack('scripts')
         @livewire('notifications')
 
         @filamentScripts

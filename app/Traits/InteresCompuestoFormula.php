@@ -19,12 +19,12 @@ trait InteresCompuestoFormula
         }
 
         // Verificar si se proporcionó interés generado
-        $interesGeneradoProvided = !empty($data['interes_generado']);
+        $interesGeneradoProvided = ! empty($data['interes_generado']);
 
         // Si se proporciona interés generado, removerlo de campos vacíos para el conteo
         $emptyFieldsForValidation = $emptyFields;
         if ($interesGeneradoProvided) {
-            $emptyFieldsForValidation = array_filter($emptyFields, function($field) {
+            $emptyFieldsForValidation = array_filter($emptyFields, function ($field) {
                 return $field !== 'interes_generado';
             });
         }
@@ -35,8 +35,8 @@ trait InteresCompuestoFormula
         if (count($emptyFieldsForValidation) === 0) {
             return [
                 'error' => true,
-                'message' => 'Debes dejar exactamente un campo vacío para calcular' .
-                    ($interesGeneradoProvided ? ' (o dos si proporcionas el interés generado)' : '') . '.',
+                'message' => 'Debes dejar exactamente un campo vacío para calcular'.
+                    ($interesGeneradoProvided ? ' (o dos si proporcionas el interés generado)' : '').'.',
             ];
         }
 
@@ -68,7 +68,7 @@ trait InteresCompuestoFormula
 
         // Convertir la tasa según su tipo si está disponible
         $tasaAnual = null;
-        if (!empty($data['tasa_interes'])) {
+        if (! empty($data['tasa_interes'])) {
             $tasa = $data['tasa_interes'] / 100;
 
             if ($tipoTasa === 'nominal') {
@@ -159,7 +159,7 @@ trait InteresCompuestoFormula
                     break;
             }
 
-        } else if (count($emptyFields) == 2) {
+        } elseif (count($emptyFields) == 2) {
             // Dos campos vacíos + interés generado proporcionado
             $fields = $emptyFields;
             sort($fields);
@@ -179,7 +179,7 @@ trait InteresCompuestoFormula
                 $message = 'Capital: $'.number_format($result1, 2).' | Monto final: $'.number_format($result2, 2);
                 $fieldsToUpdate = ['capital', 'monto_final'];
 
-            } else if (in_array('capital', $fields) && in_array('tasa_interes', $fields)) {
+            } elseif (in_array('capital', $fields) && in_array('tasa_interes', $fields)) {
                 // Faltan capital y tasa, tenemos monto final, interés y tiempo
                 $capital = $data['monto_final'] - $interesGenerado;
                 $periods = $frequency * $data['tiempo'];
@@ -198,7 +198,7 @@ trait InteresCompuestoFormula
                 $message = 'Capital: $'.number_format($result1, 2).' | Tasa: '.number_format($result2, 6).'% '.$periodicidadTexto;
                 $fieldsToUpdate = ['capital', 'tasa_interes'];
 
-            } else if (in_array('capital', $fields) && in_array('tiempo', $fields)) {
+            } elseif (in_array('capital', $fields) && in_array('tiempo', $fields)) {
                 // Faltan capital y tiempo, tenemos monto final, tasa e interés
                 $capital = $data['monto_final'] - $interesGenerado;
 
@@ -214,7 +214,7 @@ trait InteresCompuestoFormula
                 $message = 'Capital: $'.number_format($result1, 2).' | Tiempo: '.number_format($result2, 4).' años';
                 $fieldsToUpdate = ['capital', 'tiempo'];
 
-            } else if (in_array('monto_final', $fields) && in_array('tasa_interes', $fields)) {
+            } elseif (in_array('monto_final', $fields) && in_array('tasa_interes', $fields)) {
                 // Faltan monto final y tasa, tenemos capital, interés y tiempo
                 $montoFinal = $data['capital'] + $interesGenerado;
                 $periods = $frequency * $data['tiempo'];
@@ -233,7 +233,7 @@ trait InteresCompuestoFormula
                 $message = 'Monto final: $'.number_format($result1, 2).' | Tasa: '.number_format($result2, 6).'% '.$periodicidadTexto;
                 $fieldsToUpdate = ['monto_final', 'tasa_interes'];
 
-            } else if (in_array('monto_final', $fields) && in_array('tiempo', $fields)) {
+            } elseif (in_array('monto_final', $fields) && in_array('tiempo', $fields)) {
                 // Faltan monto final y tiempo, tenemos capital, tasa e interés
                 $montoFinal = $data['capital'] + $interesGenerado;
 
@@ -249,7 +249,7 @@ trait InteresCompuestoFormula
                 $message = 'Monto final: $'.number_format($result1, 2).' | Tiempo: '.number_format($result2, 4).' años';
                 $fieldsToUpdate = ['monto_final', 'tiempo'];
 
-            } else if (in_array('tasa_interes', $fields) && in_array('tiempo', $fields)) {
+            } elseif (in_array('tasa_interes', $fields) && in_array('tiempo', $fields)) {
                 // Faltan tasa y tiempo, tenemos capital, monto final e interés
                 if (abs($data['monto_final'] - ($data['capital'] + $interesGenerado)) > 0.01) {
                     return [
@@ -287,7 +287,7 @@ trait InteresCompuestoFormula
                 'interes_generado_calculado' => $interesGenerado,
                 'mensaje_calculado' => $message,
             ]),
-            'message' => $message . ' | Interés generado: $'.number_format($interesGenerado, 2),
+            'message' => $message.' | Interés generado: $'.number_format($interesGenerado, 2),
         ];
     }
 
@@ -295,7 +295,7 @@ trait InteresCompuestoFormula
     {
         // Convertir la tasa según su tipo
         $tasaAnual = null;
-        if (!empty($data['tasa_interes'])) {
+        if (! empty($data['tasa_interes'])) {
             $tasa = $data['tasa_interes'] / 100;
 
             if ($tipoTasa === 'nominal') {
@@ -364,11 +364,11 @@ trait InteresCompuestoFormula
 
         // Calcular interés generado
         $interest = null;
-        if (!empty($finalAmount) && !empty($data['capital'])) {
+        if (! empty($finalAmount) && ! empty($data['capital'])) {
             $interest = $finalAmount - $data['capital'];
-        } elseif (empty($finalAmount) && !empty($data['capital'])) {
+        } elseif (empty($finalAmount) && ! empty($data['capital'])) {
             $interest = $result - $data['capital'];
-        } elseif (!empty($finalAmount) && empty($data['capital'])) {
+        } elseif (! empty($finalAmount) && empty($data['capital'])) {
             $interest = $finalAmount - $result;
         }
 

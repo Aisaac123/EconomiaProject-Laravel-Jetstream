@@ -79,7 +79,6 @@ if (! function_exists('calcularNumeroPagosDesdeTiempo')) {
         }
     }
 
-
 }
 if (! function_exists('calcularPeriodosCompletos')) {
     /**
@@ -96,4 +95,3 @@ if (! function_exists('calcularPeriodosCompletos')) {
         return (int) $periodosCompletos;
     }
 }
-

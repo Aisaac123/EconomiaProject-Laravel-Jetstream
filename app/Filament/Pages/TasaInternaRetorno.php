@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\PageGroupType;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -13,7 +14,7 @@ class TasaInternaRetorno extends Page
 
     protected static ?string $navigationLabel = 'Tasa Interna de Retorno';
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Segundo Corte';
+    protected static string|null|\UnitEnum $navigationGroup = PageGroupType::ADVANCE->value;
 
     protected static ?int $navigationSort = 4;
 

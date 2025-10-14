@@ -8,4 +8,3 @@ class InteresInteractivoChart extends Widget
 {
     protected string $view = 'filament.widgets.interes-interactivo-chart';
 }
-

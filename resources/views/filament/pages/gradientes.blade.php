@@ -13,9 +13,8 @@
         </x-sections.heading-title>
 
         {{-- Introducción --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-purple-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">¿Qué son los Gradientes?</h2>
+        <x-sections.content title="¿Qué son los Gradientes?" class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-purple-200 dark:border-gray-700">
+            <div class="">
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -67,9 +66,8 @@
         </x-sections.content>
 
         {{-- Comparación Visual Gradientes --}}
-        <x-sections.content>
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">📈 Tipos de Gradientes</h2>
+        <x-sections.content title="📈 Tipos de Gradientes" class="bg-white dark:bg-gray-950">
+            <div class="">
 
                 <div class="grid md:grid-cols-2 gap-8">
                     {{-- Gradiente Aritmético --}}
@@ -130,8 +128,7 @@
         </x-sections.content>
 
         {{-- GRADIENTE ARITMÉTICO DETALLADO --}}
-        <x-sections.content>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🔢 Gradiente Aritmético</h2>
+        <x-sections.content collapsed="true" title="🔢 Gradiente Aritmético">
 
             {{-- Introducción Gradiente Aritmético --}}
             <div class="mb-8">
@@ -303,8 +300,7 @@
         </x-sections.content>
 
         {{-- GRADIENTE GEOMÉTRICO DETALLADO --}}
-        <x-sections.content>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">📊 Gradiente Geométrico</h2>
+        <x-sections.content collapsed="true" title="📊 Gradiente Geométrico">
 
             {{-- Introducción Gradiente Geométrico --}}
             <div class="mb-8">
@@ -556,10 +552,8 @@
         </x-sections.content>
 
         {{-- COMPARATIVA Y APLICACIONES --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-orange-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">📊 Comparativa: Aritmético vs Geométrico</h2>
-
+        <x-sections.content collapsed="true" title="📊 Comparativa: Aritmético vs Geométrico">
+            <div class="">
                 <div class="grid md:grid-cols-2 gap-8 mb-8">
                     {{-- Tabla Comparativa --}}
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
@@ -664,13 +658,7 @@
         <x-sections.calculator id="calculadora">
             <x-slot:form>
                 <x-sections.contents.calculator-form>
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">🧮 Calculadora de Gradientes</h3>
-                        <p class="text-gray-600 dark:text-gray-400 text-center mb-6 py-8 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                            🔧 <strong>Calculadora en Desarrollo</strong><br>
-                            <span class="text-sm">Próximamente podrás simular gradientes aritméticos y geométricos</span>
-                        </p>
-                    </div>
+                    <x-forms.calculation-form calculation-type="gradientes" />
                 </x-sections.contents.calculator-form>
             </x-slot:form>
 
@@ -712,10 +700,8 @@
         </x-sections.calculator>
 
         {{-- CONSIDERACIONES FINALES --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-indigo-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">💎 Consideraciones Finales sobre Gradientes</h2>
-
+        <x-sections.content title="💎 Consideraciones Finales sobre Gradientes" class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-indigo-200 dark:border-gray-700">
+            <div class="">
                 <div class="grid md:grid-cols-2 gap-8">
                     <div class="space-y-6">
                         <div class="flex items-start">

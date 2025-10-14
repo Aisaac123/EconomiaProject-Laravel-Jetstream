@@ -139,7 +139,7 @@ class InteresSimpleSchema
                                             ->hint('Períodos por año')
                                             ->default(1)
                                             ->columnSpan(5)
-                                            ->visible(fn(callable $get) => !$get('usar_select_periodicidad_tasa'))
+                                            ->visible(fn (callable $get) => ! $get('usar_select_periodicidad_tasa'))
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
@@ -164,7 +164,7 @@ class InteresSimpleSchema
                                             ->default(1)
                                             ->searchable()
                                             ->columnSpan(5)
-                                            ->visible(fn(callable $get) => $get('usar_select_periodicidad_tasa'))
+                                            ->visible(fn (callable $get) => $get('usar_select_periodicidad_tasa'))
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
@@ -212,7 +212,7 @@ class InteresSimpleSchema
                                                 ->suffix('años')
                                                 ->placeholder('Ejemplo: 5')
                                                 ->minValue(0)
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     calcularTiempo($set, $get);
@@ -231,7 +231,7 @@ class InteresSimpleSchema
                                                 ->numeric()
                                                 ->suffix('meses')
                                                 ->placeholder('Ejemplo: 7')
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     calcularTiempo($set, $get);
@@ -250,7 +250,7 @@ class InteresSimpleSchema
                                                 ->numeric()
                                                 ->suffix('dias')
                                                 ->placeholder('Ejemplo: 21')
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     calcularTiempo($set, $get);
@@ -265,7 +265,7 @@ class InteresSimpleSchema
                                                 ->live()
                                                 ->extraAttributes(['class' => 'text-center items-center ml-4 mt-1'])
                                                 ->inline(false)
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->afterStateUpdated(function (callable $set) {
                                                     $set('campo_calculado', null);
                                                     $set('resultado_calculado', null);
@@ -284,8 +284,7 @@ class InteresSimpleSchema
                                                 'md' => 2,
                                                 'xl' => 4,
                                             ])->columnSpan(12)
-                                            ->visible(fn(callable $get) => !$get('usar_fechas_tiempo')),
-
+                                            ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo')),
 
                                         FieldSet::make('Fechas')->schema([
                                             DatePicker::make('fecha_inicio')
@@ -300,7 +299,7 @@ class InteresSimpleSchema
                                                     $set('interes_generado_calculado', null);
                                                     $set('mensaje_calculado', null);
                                                 })
-                                                ->visible(fn(callable $get) => $get('usar_fechas_tiempo')),
+                                                ->visible(fn (callable $get) => $get('usar_fechas_tiempo')),
 
                                             DatePicker::make('fecha_final')
                                                 ->label('Fecha Final')
@@ -314,7 +313,7 @@ class InteresSimpleSchema
                                                     $set('interes_generado_calculado', null);
                                                     $set('mensaje_calculado', null);
                                                 })
-                                                ->visible(fn(callable $get) => $get('usar_fechas_tiempo')),
+                                                ->visible(fn (callable $get) => $get('usar_fechas_tiempo')),
 
                                             Toggle::make('usar_fechas_tiempo')
                                                 ->label('Usar fechas')
@@ -324,7 +323,7 @@ class InteresSimpleSchema
                                                 ->inline(false)
                                                 ->columnSpan(3)
                                                 ->columnStart(10)
-                                                ->visible(fn(callable $get) => $get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => $get('usar_fechas_tiempo'))
                                                 ->afterStateUpdated(function (callable $set) {
                                                     $set('campo_calculado', null);
                                                     $set('resultado_calculado', null);
@@ -342,14 +341,14 @@ class InteresSimpleSchema
                                             'md' => 6,
                                             'xl' => 12,
                                         ])->columnSpan(12)
-                                            ->visible(fn(callable $get) => $get('usar_fechas_tiempo')),
+                                            ->visible(fn (callable $get) => $get('usar_fechas_tiempo')),
 
                                         TextInput::make('tiempo')
                                             ->label('Tiempo en Años')
                                             ->suffix('años')
                                             ->columnSpan(6)
-                                            ->disabled()
-                                    ])
+                                            ->disabled(),
+                                    ]),
                                 ]),
                         ]),
 
@@ -394,7 +393,7 @@ class InteresSimpleSchema
                                                 }
 
                                                 // Verificar si se proporcionó interés generado
-                                                $interesGeneradoProvided = !empty($interesGenerado);
+                                                $interesGeneradoProvided = ! empty($interesGenerado);
 
                                                 // Validación corregida
                                                 $maxEmptyFields = $interesGeneradoProvided ? 2 : 1;
@@ -422,12 +421,12 @@ class InteresSimpleSchema
 
                                                 // Validación de campos vacíos
                                                 if (count($emptyFields) === 0) {
-                                                    $errorMessage = 'Debes dejar exactamente un campo vacío para calcular' .
-                                                        ($interesGeneradoProvided ? ' (o dos si proporcionas el interés generado)' : '') . '.';
-                                                } else if (count($emptyFields) > $maxEmptyFields) {
+                                                    $errorMessage = 'Debes dejar exactamente un campo vacío para calcular'.
+                                                        ($interesGeneradoProvided ? ' (o dos si proporcionas el interés generado)' : '').'.';
+                                                } elseif (count($emptyFields) > $maxEmptyFields) {
                                                     $errorMessage = $interesGeneradoProvided
-                                                        ? 'Con interés generado puedes dejar máximo 2 campos vacíos. Actualmente hay ' . count($emptyFields) . ' campos vacíos.'
-                                                        : 'Solo un campo puede estar vacío. Actualmente hay ' . count($emptyFields) . ' campos vacíos.';
+                                                        ? 'Con interés generado puedes dejar máximo 2 campos vacíos. Actualmente hay '.count($emptyFields).' campos vacíos.'
+                                                        : 'Solo un campo puede estar vacío. Actualmente hay '.count($emptyFields).' campos vacíos.';
                                                 } else {
                                                     // Validación exitosa - listo para calcular
                                                     return new HtmlString('
@@ -445,13 +444,13 @@ class InteresSimpleSchema
                                     <div class="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/50 dark:to-orange-950/50 rounded-xl p-8 border border-red-200 dark:border-red-800">
                                         <div class="text-6xl mb-4">⚠️</div>
                                         <h3 class="text-xl font-bold text-red-900 dark:text-red-100 mb-3">Error de Validación</h3>
-                                        <p class="text-red-700 dark:text-red-300 mb-4 text-lg">' . $errorMessage . '</p>
+                                        <p class="text-red-700 dark:text-red-300 mb-4 text-lg">'.$errorMessage.'</p>
                                         <div class="bg-red-100 dark:bg-red-900/50 rounded-lg p-4 border border-red-300 dark:border-red-700">
                                             <p class="text-sm text-red-800 dark:text-red-200">
                                                 <strong>Instrucciones:</strong><br>
                                                 • Completa todos los campos conocidos<br>
                                                 • Deja vacío únicamente el campo que deseas calcular<br>
-                                                ' . ($interesGeneradoProvided ? '• Con interés generado puedes dejar hasta 2 campos vacíos<br>' : '') . '
+                                                '.($interesGeneradoProvided ? '• Con interés generado puedes dejar hasta 2 campos vacíos<br>' : '').'
                                                 • Presiona el botón "Calcular" para obtener el resultado
                                             </p>
                                         </div>
@@ -462,10 +461,10 @@ class InteresSimpleSchema
                                     ]),
                                 ]),
                         ]),
-                    ])->skippable()
+                ])->skippable()
                     ->startOnStep(1)
                     ->contained(false)
-                    ->submitAction(new HtmlString(Blade::render(<<<BLADE
+                    ->submitAction(new HtmlString(Blade::render(<<<'BLADE'
                             <div class="items-center space-x-4">
                                 <x-filament::button
                                     type="submit"
@@ -582,7 +581,7 @@ class InteresSimpleSchema
             // La tasa calculada podría estar en resultado o resultado2
             if (in_array('monto_final', $camposCalculados) && $resultado2) {
                 $displayValue = number_format($resultado2, 2).'%';
-            } else if (in_array('capital', $camposCalculados) && $resultado2) {
+            } elseif (in_array('capital', $camposCalculados) && $resultado2) {
                 $displayValue = number_format($resultado2, 2).'%';
             } else {
                 $displayValue = number_format($resultado, 2).'%';
@@ -616,7 +615,7 @@ class InteresSimpleSchema
             // El tiempo calculado podría estar en resultado o resultado2
             if (in_array('capital', $camposCalculados) && $resultado2) {
                 $displayValue = smartRound($resultado2).' años';
-            } else if (in_array('monto_final', $camposCalculados) && $resultado2) {
+            } elseif (in_array('monto_final', $camposCalculados) && $resultado2) {
                 $displayValue = smartRound($resultado2).' años';
             } else {
                 $displayValue = smartRound($resultado).' años';
@@ -712,7 +711,4 @@ class InteresSimpleSchema
     /**
      * Método helper para calcular tiempo desde fechas
      */
-
-
-
 }

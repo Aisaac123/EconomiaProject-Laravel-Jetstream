@@ -19,12 +19,12 @@ trait InteresSimpleFormula
         }
 
         // Verificar si se proporcionó interés generado
-        $interesGeneradoProvided = !empty($data['interes_generado']);
+        $interesGeneradoProvided = ! empty($data['interes_generado']);
 
         // Si se proporciona interés generado, removerlo de campos vacíos para el conteo
         $emptyFieldsForValidation = $emptyFields;
         if ($interesGeneradoProvided) {
-            $emptyFieldsForValidation = array_filter($emptyFields, function($field) {
+            $emptyFieldsForValidation = array_filter($emptyFields, function ($field) {
                 return $field !== 'interes_generado';
             });
         }
@@ -35,8 +35,8 @@ trait InteresSimpleFormula
         if (count($emptyFieldsForValidation) === 0) {
             return [
                 'error' => true,
-                'message' => 'Debes dejar exactamente un campo vacío para calcular' .
-                    ($interesGeneradoProvided ? ' (o dos si proporcionas el interés generado)' : '') . '.',
+                'message' => 'Debes dejar exactamente un campo vacío para calcular'.
+                    ($interesGeneradoProvided ? ' (o dos si proporcionas el interés generado)' : '').'.',
             ];
         }
 
@@ -66,7 +66,7 @@ trait InteresSimpleFormula
 
         // Convertir la tasa a anual si está disponible
         $rate = null;
-        if (!empty($data['tasa_interes'])) {
+        if (! empty($data['tasa_interes'])) {
             $tasaAnual = $data['tasa_interes'];
             if ($periodicidadTasa != 1) {
                 $tasaAnual = $data['tasa_interes'] * $periodicidadTasa;
@@ -114,7 +114,7 @@ trait InteresSimpleFormula
                     break;
             }
 
-        } else if (count($emptyFields) == 2) {
+        } elseif (count($emptyFields) == 2) {
             // Dos campos vacíos + interés generado
             $fields = $emptyFields;
             sort($fields);
@@ -126,7 +126,7 @@ trait InteresSimpleFormula
                 $result2 = $result1 + $interesGenerado;
                 $message = 'Capital: $'.number_format($result1, 2).' | Monto final: $'.number_format($result2, 2);
 
-            } else if (in_array('capital', $fields) && in_array('tasa_interes', $fields)) {
+            } elseif (in_array('capital', $fields) && in_array('tasa_interes', $fields)) {
                 // Faltan capital y tasa, tenemos monto final, interés y tiempo
                 $capital = $data['monto_final'] - $interesGenerado;
                 $rateCalc = $interesGenerado / ($capital * $data['tiempo']);
@@ -135,7 +135,7 @@ trait InteresSimpleFormula
                 $periodicidadTexto = $this->getPeriodicidadTexto($periodicidadTasa);
                 $message = 'Capital: $'.number_format($result1, 2).' | Tasa: '.number_format($result2, 4).'% '.$periodicidadTexto;
 
-            } else if (in_array('capital', $fields) && in_array('tiempo', $fields)) {
+            } elseif (in_array('capital', $fields) && in_array('tiempo', $fields)) {
                 // Faltan capital y tiempo, tenemos monto final, tasa e interés
                 $capital = $data['monto_final'] - $interesGenerado;
                 $tiempo = $interesGenerado / ($capital * $rate);
@@ -143,7 +143,7 @@ trait InteresSimpleFormula
                 $result2 = $tiempo;
                 $message = 'Capital: $'.number_format($result1, 2).' | Tiempo: '.smartRound($result2).' años';
 
-            } else if (in_array('monto_final', $fields) && in_array('tasa_interes', $fields)) {
+            } elseif (in_array('monto_final', $fields) && in_array('tasa_interes', $fields)) {
                 // Faltan monto final y tasa, tenemos capital, interés y tiempo
                 $montoFinal = $data['capital'] + $interesGenerado;
                 $rateCalc = $interesGenerado / ($data['capital'] * $data['tiempo']);
@@ -152,7 +152,7 @@ trait InteresSimpleFormula
                 $periodicidadTexto = $this->getPeriodicidadTexto($periodicidadTasa);
                 $message = 'Monto final: $'.number_format($result1, 2).' | Tasa: '.number_format($result2, 4).'% '.$periodicidadTexto;
 
-            } else if (in_array('monto_final', $fields) && in_array('tiempo', $fields)) {
+            } elseif (in_array('monto_final', $fields) && in_array('tiempo', $fields)) {
                 // Faltan monto final y tiempo, tenemos capital, tasa e interés
                 $montoFinal = $data['capital'] + $interesGenerado;
                 $tiempo = $interesGenerado / ($data['capital'] * $rate);
@@ -160,7 +160,7 @@ trait InteresSimpleFormula
                 $result2 = $tiempo;
                 $message = 'Monto final: $'.number_format($result1, 2).' | Tiempo: '.smartRound($result2).' años';
 
-            } else if (in_array('tasa_interes', $fields) && in_array('tiempo', $fields)) {
+            } elseif (in_array('tasa_interes', $fields) && in_array('tiempo', $fields)) {
                 // Faltan tasa y tiempo, tenemos capital, monto final e interés
                 // Verificar consistencia: monto_final = capital + interes_generado
                 if (abs($data['monto_final'] - ($data['capital'] + $interesGenerado)) > 0.01) {
@@ -189,7 +189,7 @@ trait InteresSimpleFormula
                 'interes_generado_calculado' => $interesGenerado,
                 'mensaje_calculado' => $message,
             ]),
-            'message' => $message . ' | Interés generado: $'.number_format($interesGenerado, 2),
+            'message' => $message.' | Interés generado: $'.number_format($interesGenerado, 2),
         ];
     }
 
@@ -197,7 +197,7 @@ trait InteresSimpleFormula
     {
         // Convertir la tasa a anual si es necesario
         $rate = null;
-        if (!empty($data['tasa_interes'])) {
+        if (! empty($data['tasa_interes'])) {
             $tasaAnual = $data['tasa_interes'];
             if ($periodicidadTasa != 1) {
                 $tasaAnual = $data['tasa_interes'] * $periodicidadTasa;
@@ -239,11 +239,11 @@ trait InteresSimpleFormula
 
         // Calcular interés generado
         $interest = null;
-        if (!empty($finalAmount) && !empty($data['capital'])) {
+        if (! empty($finalAmount) && ! empty($data['capital'])) {
             $interest = $finalAmount - $data['capital'];
-        } elseif (empty($finalAmount) && !empty($data['capital'])) {
+        } elseif (empty($finalAmount) && ! empty($data['capital'])) {
             $interest = $result - $data['capital'];
-        } elseif (!empty($finalAmount) && empty($data['capital'])) {
+        } elseif (! empty($finalAmount) && empty($data['capital'])) {
             $interest = $finalAmount - $result;
         }
 

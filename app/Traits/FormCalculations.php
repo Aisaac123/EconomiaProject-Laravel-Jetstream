@@ -7,14 +7,17 @@ use Filament\Notifications\Notification;
 
 trait FormCalculations
 {
+    use AmortizacionFormula;
     use AnualidadFormula;
+    use GradientesFormula;
     use InteresCompuestoFormula;
     use InteresSimpleFormula;
-    use AmortizacionFormula;
+
     /**
      * Public Properties
      */
     public array $result = [];
+
     public ?array $data = [];
 
     /**
@@ -25,6 +28,7 @@ trait FormCalculations
         return match ($calculationType) {
             CalculationType::ANUALIDAD => $this->calculateAnualidad($formData),
             CalculationType::AMORTIZACION => $this->calculateAmortizacion($formData),
+            CalculationType::GRADIENTES => $this->calculateGradiente($formData),
             CalculationType::SIMPLE => $this->calculateInteresSimple($formData),
             CalculationType::COMPUESTO => $this->calculateInteresCompuesto($formData),
             CalculationType::TASA_INTERES => throw new \Exception('Por implementar'),

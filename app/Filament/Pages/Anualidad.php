@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\PageGroupType;
 use App\Filament\Schemas\AnualidadSchema;
 use App\Traits\FormCalculations;
 use Filament\Pages\Page;
@@ -13,9 +14,10 @@ class Anualidad extends Page
     use FormCalculations;
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-calendar-days';
-    protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-s-calendar-days';
-    protected static string|null|\UnitEnum $navigationGroup = 'Primer Corte';
 
+    protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-s-calendar-days';
+
+    protected static string|null|\UnitEnum $navigationGroup = PageGroupType::FUNDAMENTAL->value;
 
     protected string $view = 'filament.pages.anualidad';
 
@@ -28,7 +30,6 @@ class Anualidad extends Page
     {
         return '';
     }
-
 
     public function mount(): void
     {

@@ -9,7 +9,6 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -112,7 +111,7 @@ class InteresCompuestoSchema
                                         Select::make('tipo_tasa')
                                             ->label('Tipo de tasa')
                                             ->options([
-                                                'nominal'  => 'Tasa Nominal',
+                                                'nominal' => 'Tasa Nominal',
                                                 'efectiva' => 'Tasa Efectiva',
                                             ])
                                             ->columnSpan(6)
@@ -156,7 +155,7 @@ class InteresCompuestoSchema
                                             ->hint('Períodos por año')
                                             ->default(1)
                                             ->columnSpan(5)
-                                            ->visible(fn(callable $get) => !$get('usar_select_periodicidad_tasa'))
+                                            ->visible(fn (callable $get) => ! $get('usar_select_periodicidad_tasa'))
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
@@ -181,7 +180,7 @@ class InteresCompuestoSchema
                                             ->default(1)
                                             ->searchable()
                                             ->columnSpan(5)
-                                            ->visible(fn(callable $get) => $get('usar_select_periodicidad_tasa'))
+                                            ->visible(fn (callable $get) => $get('usar_select_periodicidad_tasa'))
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
@@ -228,7 +227,7 @@ class InteresCompuestoSchema
                                                 ->suffix('años')
                                                 ->placeholder('Ejemplo: 5')
                                                 ->minValue(0)
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     calcularTiempo($set, $get);
@@ -247,7 +246,7 @@ class InteresCompuestoSchema
                                                 ->numeric()
                                                 ->suffix('meses')
                                                 ->placeholder('Ejemplo: 7')
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     calcularTiempo($set, $get);
@@ -266,7 +265,7 @@ class InteresCompuestoSchema
                                                 ->numeric()
                                                 ->suffix('dias')
                                                 ->placeholder('Ejemplo: 21')
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     calcularTiempo($set, $get);
@@ -281,7 +280,7 @@ class InteresCompuestoSchema
                                                 ->live()
                                                 ->extraAttributes(['class' => 'text-center items-center ml-4 mt-1'])
                                                 ->inline(false)
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->afterStateUpdated(function (callable $set) {
                                                     $set('campo_calculado', null);
                                                     $set('resultado_calculado', null);
@@ -300,8 +299,7 @@ class InteresCompuestoSchema
                                                 'md' => 2,
                                                 'xl' => 4,
                                             ])->columnSpan(12)
-                                            ->visible(fn(callable $get) => !$get('usar_fechas_tiempo')),
-
+                                            ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo')),
 
                                         FieldSet::make('Fechas')->schema([
                                             DatePicker::make('fecha_inicio')
@@ -316,7 +314,7 @@ class InteresCompuestoSchema
                                                     $set('interes_generado_calculado', null);
                                                     $set('mensaje_calculado', null);
                                                 })
-                                                ->visible(fn(callable $get) => $get('usar_fechas_tiempo')),
+                                                ->visible(fn (callable $get) => $get('usar_fechas_tiempo')),
 
                                             DatePicker::make('fecha_final')
                                                 ->label('Fecha Final')
@@ -330,7 +328,7 @@ class InteresCompuestoSchema
                                                     $set('interes_generado_calculado', null);
                                                     $set('mensaje_calculado', null);
                                                 })
-                                                ->visible(fn(callable $get) => $get('usar_fechas_tiempo')),
+                                                ->visible(fn (callable $get) => $get('usar_fechas_tiempo')),
 
                                             Toggle::make('usar_fechas_tiempo')
                                                 ->label('Usar fechas')
@@ -340,7 +338,7 @@ class InteresCompuestoSchema
                                                 ->inline(false)
                                                 ->columnSpan(3)
                                                 ->columnStart(10)
-                                                ->visible(fn(callable $get) => $get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => $get('usar_fechas_tiempo'))
                                                 ->afterStateUpdated(function (callable $set) {
                                                     $set('campo_calculado', null);
                                                     $set('resultado_calculado', null);
@@ -358,14 +356,14 @@ class InteresCompuestoSchema
                                             'md' => 6,
                                             'xl' => 12,
                                         ])->columnSpan(12)
-                                            ->visible(fn(callable $get) => $get('usar_fechas_tiempo')),
+                                            ->visible(fn (callable $get) => $get('usar_fechas_tiempo')),
 
                                         TextInput::make('tiempo')
                                             ->label('Tiempo en Años')
                                             ->suffix('años')
                                             ->columnSpan(6)
-                                            ->disabled()
-                                    ])
+                                            ->disabled(),
+                                    ]),
                                 ]),
                             Section::make('Frecuencia de Capitalización')
                                 ->description('Configure con qué frecuencia se capitaliza el interés')
@@ -383,7 +381,7 @@ class InteresCompuestoSchema
                                             ->hint('Veces por año')
                                             ->default(1)
                                             ->columnSpan(8)
-                                            ->visible(fn(callable $get) => !$get('usar_select_frecuencia'))
+                                            ->visible(fn (callable $get) => ! $get('usar_select_frecuencia'))
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
@@ -408,7 +406,7 @@ class InteresCompuestoSchema
                                             ->default(1)
                                             ->searchable()
                                             ->columnSpan(8)
-                                            ->visible(fn(callable $get) => $get('usar_select_frecuencia'))
+                                            ->visible(fn (callable $get) => $get('usar_select_frecuencia'))
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campo_calculado', null);
@@ -478,7 +476,7 @@ class InteresCompuestoSchema
                                                 }
 
                                                 // Verificar si se proporcionó interés generado
-                                                $interesGeneradoProvided = !empty($interesGenerado);
+                                                $interesGeneradoProvided = ! empty($interesGenerado);
 
                                                 // Validación corregida
                                                 $maxEmptyFields = $interesGeneradoProvided ? 2 : 1;
@@ -506,12 +504,12 @@ class InteresCompuestoSchema
 
                                                 // Validación de campos vacíos
                                                 if (count($emptyFields) === 0) {
-                                                    $errorMessage = 'Debes dejar exactamente un campo vacío para calcular' .
-                                                        ($interesGeneradoProvided ? ' (o dos si proporcionas el interés generado)' : '') . '.';
-                                                } else if (count($emptyFields) > $maxEmptyFields) {
+                                                    $errorMessage = 'Debes dejar exactamente un campo vacío para calcular'.
+                                                        ($interesGeneradoProvided ? ' (o dos si proporcionas el interés generado)' : '').'.';
+                                                } elseif (count($emptyFields) > $maxEmptyFields) {
                                                     $errorMessage = $interesGeneradoProvided
-                                                        ? 'Con interés generado puedes dejar máximo 2 campos vacíos. Actualmente hay ' . count($emptyFields) . ' campos vacíos.'
-                                                        : 'Solo un campo puede estar vacío. Actualmente hay ' . count($emptyFields) . ' campos vacíos.';
+                                                        ? 'Con interés generado puedes dejar máximo 2 campos vacíos. Actualmente hay '.count($emptyFields).' campos vacíos.'
+                                                        : 'Solo un campo puede estar vacío. Actualmente hay '.count($emptyFields).' campos vacíos.';
                                                 } else {
                                                     // Validación exitosa - listo para calcular
                                                     return new HtmlString('
@@ -529,13 +527,13 @@ class InteresCompuestoSchema
                                     <div class="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/50 dark:to-orange-950/50 rounded-xl p-8 border border-red-200 dark:border-red-800">
                                         <div class="text-6xl mb-4">⚠️</div>
                                         <h3 class="text-xl font-bold text-red-900 dark:text-red-100 mb-3">Error de Validación</h3>
-                                        <p class="text-red-700 dark:text-red-300 mb-4 text-lg">' . $errorMessage . '</p>
+                                        <p class="text-red-700 dark:text-red-300 mb-4 text-lg">'.$errorMessage.'</p>
                                         <div class="bg-red-100 dark:bg-red-900/50 rounded-lg p-4 border border-red-300 dark:border-red-700">
                                             <p class="text-sm text-red-800 dark:text-red-200">
                                                 <strong>Instrucciones:</strong><br>
                                                 • Completa todos los campos conocidos<br>
                                                 • Deja vacío únicamente el campo que deseas calcular<br>
-                                                ' . ($interesGeneradoProvided ? '• Con interés generado puedes dejar hasta 2 campos vacíos<br>' : '') . '
+                                                '.($interesGeneradoProvided ? '• Con interés generado puedes dejar hasta 2 campos vacíos<br>' : '').'
                                                 • Presiona el botón "Calcular" para obtener el resultado
                                             </p>
                                         </div>
@@ -545,11 +543,11 @@ class InteresCompuestoSchema
                                             }),
                                     ]),
                                 ]),
-                        ])
-                    ])->skippable()
+                        ]),
+                ])->skippable()
                     ->startOnStep(1)
                     ->contained(false)
-                    ->submitAction(new HtmlString(Blade::render(<<<BLADE
+                    ->submitAction(new HtmlString(Blade::render(<<<'BLADE'
                             <div class="items-center space-x-4">
                                 <x-filament::button
                                     type="submit"
@@ -664,7 +662,7 @@ class InteresCompuestoSchema
             // La tasa calculada podría estar en resultado o resultado2
             if (in_array('monto_final', $camposCalculados) && $resultado2) {
                 $displayValue = number_format($resultado2, 2).'%';
-            } else if (in_array('capital', $camposCalculados) && $resultado2) {
+            } elseif (in_array('capital', $camposCalculados) && $resultado2) {
                 $displayValue = number_format($resultado2, 2).'%';
             } else {
                 $displayValue = number_format($resultado, 2).'%';
@@ -700,7 +698,7 @@ class InteresCompuestoSchema
             // El tiempo calculado podría estar en resultado o resultado2
             if (in_array('capital', $camposCalculados) && $resultado2) {
                 $displayValue = number_format($resultado2, 2).' años';
-            } else if (in_array('monto_final', $camposCalculados) && $resultado2) {
+            } elseif (in_array('monto_final', $camposCalculados) && $resultado2) {
                 $displayValue = number_format($resultado2, 2).' años';
             } else {
                 $displayValue = number_format($resultado, 2).' años';
@@ -792,7 +790,7 @@ class InteresCompuestoSchema
                             <h4 class='font-semibold text-slate-900 dark:text-slate-100 text-sm'>Tipo de tasa</h4>
                         </div>
                         <p class='text-lg font-bold text-slate-900 dark:text-slate-100'>"
-                    . ($tipoTasa === 'efectiva' ? 'Tasa Efectiva' : 'Tasa Nominal') .
+                    .($tipoTasa === 'efectiva' ? 'Tasa Efectiva' : 'Tasa Nominal').
                     "</p>
                         <p class='text-xs text-slate-600 dark:text-slate-400'>Ganancia total</p>
                     </div>
@@ -812,8 +810,6 @@ class InteresCompuestoSchema
                 </div>
             ";
             }
-
-
 
             $html .= '</div>';
         }

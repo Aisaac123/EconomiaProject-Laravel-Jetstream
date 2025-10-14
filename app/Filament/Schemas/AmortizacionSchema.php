@@ -182,7 +182,7 @@ class AmortizacionSchema
                                             ->hint('Períodos por año')
                                             ->default(1)
                                             ->columnSpan(5)
-                                            ->visible(fn(callable $get) => !$get('usar_select_periodicidad_tasa'))
+                                            ->visible(fn (callable $get) => ! $get('usar_select_periodicidad_tasa'))
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
@@ -207,7 +207,7 @@ class AmortizacionSchema
                                             ->default(12)
                                             ->searchable()
                                             ->columnSpan(5)
-                                            ->visible(fn(callable $get) => $get('usar_select_periodicidad_tasa'))
+                                            ->visible(fn (callable $get) => $get('usar_select_periodicidad_tasa'))
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
@@ -357,7 +357,7 @@ class AmortizacionSchema
                                                 ->suffix('años')
                                                 ->placeholder('Ejemplo: 5')
                                                 ->step(0.01)
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     static::calcularTiempo($set, $get);
@@ -378,7 +378,7 @@ class AmortizacionSchema
                                                 ->suffix('meses')
                                                 ->placeholder('Ejemplo: 7')
                                                 ->step(0.01)
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     static::calcularTiempo($set, $get);
@@ -399,7 +399,7 @@ class AmortizacionSchema
                                                 ->suffix('dias')
                                                 ->placeholder('Ejemplo: 21')
                                                 ->step(0.01)
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     static::calcularTiempo($set, $get);
@@ -458,7 +458,7 @@ class AmortizacionSchema
                                                 ->placeholder('12 para mensual')
                                                 ->hint('Veces por año')
                                                 ->default(12)
-                                                ->visible(fn(callable $get) => !$get('usar_select_frecuencia'))
+                                                ->visible(fn (callable $get) => ! $get('usar_select_frecuencia'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     static::calcularTiempo($set, $get);
@@ -467,7 +467,7 @@ class AmortizacionSchema
                                                     $set('resultados_calculados', null);
                                                     $set('tabla_amortizacion', null);
                                                     $set('mensaje_calculado', null);
-                                                })->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia' && !$get('usar_select_frecuencia')),
+                                                })->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia' && ! $get('usar_select_frecuencia')),
 
                                             Toggle::make('usar_select_frecuencia')
                                                 ->label('Seleccionar frecuencia')
@@ -541,7 +541,7 @@ class AmortizacionSchema
                                                     $set('resultados_calculados', null);
                                                     $set('tabla_amortizacion', null);
                                                     $set('mensaje_calculado', null);
-                                                })->visible(fn (callable $get) => !$get('usar_select_frecuencia')),
+                                                })->visible(fn (callable $get) => ! $get('usar_select_frecuencia')),
 
                                             Toggle::make('usar_select_frecuencia')
                                                 ->label('Seleccionar frecuencia')
@@ -554,7 +554,7 @@ class AmortizacionSchema
                                                     $set('resultados_calculados', null);
                                                     $set('tabla_amortizacion', null);
                                                     $set('mensaje_calculado', null);
-                                                })
+                                                }),
                                         ])
                                             ->columns([
                                                 'default' => 1,
@@ -596,14 +596,14 @@ class AmortizacionSchema
                                 ->description('Detalle período por período de la amortización del préstamo')
                                 ->schema([
                                     Grid::make(1)->schema([
-                                        Placeholder::make('_tabla')
+                                        Placeholder::make('_')
                                             ->label('')
                                             ->content(function (callable $get): Htmlable {
                                                 return static::buildTablaAmortizacionHtml($get);
                                             }),
                                     ]),
                                 ]),
-                        ])
+                        ]),
                 ])->skippable()
                     ->startOnStep(1)
                     ->contained(false)
@@ -647,23 +647,29 @@ class AmortizacionSchema
 
         // Verificar campos vacíos
         $emptyFields = [];
-        if (!$montoPrestamo) $emptyFields[] = 'monto_prestamo';
-        if (!$tasaInteres) $emptyFields[] = 'tasa_interes';
-        if (!$numeroPagos) $emptyFields[] = 'numero_pagos';
+        if (! $montoPrestamo) {
+            $emptyFields[] = 'monto_prestamo';
+        }
+        if (! $tasaInteres) {
+            $emptyFields[] = 'tasa_interes';
+        }
+        if (! $numeroPagos) {
+            $emptyFields[] = 'numero_pagos';
+        }
 
         // Si hay resultados, mostrarlos
-        if (!empty($resultadosArray)) {
+        if (! empty($resultadosArray)) {
             $html = '<div class="space-y-6">';
 
             // Header con tipo de sistema
-            $sistemaTexto = match($sistemaAmortizacion) {
+            $sistemaTexto = match ($sistemaAmortizacion) {
                 'frances' => '🇫🇷 Sistema Francés',
                 'aleman' => '🇩🇪 Sistema Alemán',
                 'americano' => '🇺🇸 Sistema Americano',
                 default => 'Sistema de Amortización'
             };
 
-            $sistemaDescripcion = match($sistemaAmortizacion) {
+            $sistemaDescripcion = match ($sistemaAmortizacion) {
                 'frances' => 'Cuota fija durante todo el período',
                 'aleman' => 'Amortización constante, cuota decreciente',
                 'americano' => 'Solo intereses, capital al final',
@@ -688,8 +694,8 @@ class AmortizacionSchema
             // Monto del Préstamo
             $isCalculated = in_array('monto_prestamo', $camposCalculadosArray);
             $displayValue = $isCalculated
-                ? '$' . number_format($resultadosArray['monto_prestamo'] ?? 0, 2)
-                : (is_numeric($montoPrestamo) ? '$' . number_format($montoPrestamo, 2) : '--');
+                ? '$'.number_format($resultadosArray['monto_prestamo'] ?? 0, 2)
+                : (is_numeric($montoPrestamo) ? '$'.number_format($montoPrestamo, 2) : '--');
             $html .= static::buildCard('Monto del Préstamo', '💰', $displayValue, 'Capital inicial', $isCalculated);
 
             // Tasa de Interés
@@ -733,57 +739,57 @@ class AmortizacionSchema
 
             // Cuota Inicial
             if (isset($resultadosArray['cuota_inicial'])) {
-                $html .= static::buildCard('Cuota Inicial', '💳', '$' . number_format($resultadosArray['cuota_inicial'], 2), 'Primer pago', false, 'blue');
+                $html .= static::buildCard('Cuota Inicial', '💳', '$'.number_format($resultadosArray['cuota_inicial'], 2), 'Primer pago', false, 'blue');
             }
 
             // Cuota Final
             if (isset($resultadosArray['cuota_final'])) {
-                $html .= static::buildCard('Cuota Final', '💳', '$' . number_format($resultadosArray['cuota_final'], 2), 'Último pago', false, 'blue');
+                $html .= static::buildCard('Cuota Final', '💳', '$'.number_format($resultadosArray['cuota_final'], 2), 'Último pago', false, 'blue');
             }
 
             // Cuota Fija (solo sistema francés)
             if (isset($resultadosArray['cuota_fija'])) {
-                $html .= static::buildCard('Cuota Fija', '💰', '$' . number_format($resultadosArray['cuota_fija'], 2), 'Pago constante', false, 'green');
+                $html .= static::buildCard('Cuota Fija', '💰', '$'.number_format($resultadosArray['cuota_fija'], 2), 'Pago constante', false, 'green');
             }
 
             // Amortización Constante (solo sistema alemán)
             if (isset($resultadosArray['amortizacion_constante'])) {
-                $html .= static::buildCard('Amortización Constante', '📊', '$' . number_format($resultadosArray['amortizacion_constante'], 2), 'Capital por período', false, 'green');
+                $html .= static::buildCard('Amortización Constante', '📊', '$'.number_format($resultadosArray['amortizacion_constante'], 2), 'Capital por período', false, 'green');
             }
 
             // Cuota de Interés Periódica (solo sistema americano)
             if (isset($resultadosArray['cuota_interes_periodica'])) {
-                $html .= static::buildCard('Cuota de Interés', '💸', '$' . number_format($resultadosArray['cuota_interes_periodica'], 2), 'Pago periódico de interés', false, 'amber');
+                $html .= static::buildCard('Cuota de Interés', '💸', '$'.number_format($resultadosArray['cuota_interes_periodica'], 2), 'Pago periódico de interés', false, 'amber');
             }
 
             // Amortización Inicial
             if (isset($resultadosArray['amortizacion_inicial'])) {
-                $html .= static::buildCard('Amortización Inicial', '📉', '$' . number_format($resultadosArray['amortizacion_inicial'], 2), 'Primer abono a capital', false, 'cyan');
+                $html .= static::buildCard('Amortización Inicial', '📉', '$'.number_format($resultadosArray['amortizacion_inicial'], 2), 'Primer abono a capital', false, 'cyan');
             }
 
             // Amortización Final
             if (isset($resultadosArray['amortizacion_final'])) {
-                $html .= static::buildCard('Amortización Final', '📉', '$' . number_format($resultadosArray['amortizacion_final'], 2), 'Último abono a capital', false, 'cyan');
+                $html .= static::buildCard('Amortización Final', '📉', '$'.number_format($resultadosArray['amortizacion_final'], 2), 'Último abono a capital', false, 'cyan');
             }
 
             // Interés Inicial
             if (isset($resultadosArray['interes_inicial'])) {
-                $html .= static::buildCard('Interés Inicial', '💵', '$' . number_format($resultadosArray['interes_inicial'], 2), 'Primer interés', false, 'orange');
+                $html .= static::buildCard('Interés Inicial', '💵', '$'.number_format($resultadosArray['interes_inicial'], 2), 'Primer interés', false, 'orange');
             }
 
             // Interés Final
             if (isset($resultadosArray['interes_final'])) {
-                $html .= static::buildCard('Interés Final', '💵', '$' . number_format($resultadosArray['interes_final'], 2), 'Último interés', false, 'orange');
+                $html .= static::buildCard('Interés Final', '💵', '$'.number_format($resultadosArray['interes_final'], 2), 'Último interés', false, 'orange');
             }
 
             // Total de Intereses
             if (isset($resultadosArray['total_intereses'])) {
-                $html .= static::buildCard('Total de Intereses', '💸', '$' . number_format($resultadosArray['total_intereses'], 2), 'Costo financiero total', false, 'red');
+                $html .= static::buildCard('Total de Intereses', '💸', '$'.number_format($resultadosArray['total_intereses'], 2), 'Costo financiero total', false, 'red');
             }
 
             // Total a Pagar
             if (isset($resultadosArray['total_pagado'])) {
-                $html .= static::buildCard('Total a Pagar', '💎', '$' . number_format($resultadosArray['total_pagado'], 2), 'Capital + Intereses', false, 'purple');
+                $html .= static::buildCard('Total a Pagar', '💎', '$'.number_format($resultadosArray['total_pagado'], 2), 'Capital + Intereses', false, 'purple');
             }
 
             $html .= '</div>'; // Fin del grid
@@ -864,7 +870,7 @@ class AmortizacionSchema
     {
         $tablaJson = $get('tabla_amortizacion');
 
-        if (!$tablaJson) {
+        if (! $tablaJson) {
             return new HtmlString('
                 <div class="text-center py-12 text-gray-500 dark:text-gray-400">
                     <div class="text-5xl mb-4">📊</div>
@@ -884,7 +890,7 @@ class AmortizacionSchema
             ');
         }
 
-        $html = '<div class="overflow-x-auto">';
+        $html = '<div class="overflow-x-auto rounded-lg shadow-lg">';
         $html .= '<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">';
 
         // Header de la tabla
@@ -923,8 +929,8 @@ class AmortizacionSchema
                 <td class='px-4 py-3 text-sm text-right font-semibold text-blue-700 dark:text-blue-400'>\$".number_format($fila['cuota'], 2)."</td>
                 <td class='px-4 py-3 text-sm text-right text-orange-600 dark:text-orange-400'>\$".number_format($fila['interes'], 2)."</td>
                 <td class='px-4 py-3 text-sm text-right text-green-600 dark:text-green-400'>\$".number_format($fila['amortizacion'], 2)."</td>
-                <td class='px-4 py-3 text-sm text-right font-semibold text-purple-700 dark:text-purple-400'>\$".number_format($fila['saldo_final'], 2)."</td>
-            </tr>";
+                <td class='px-4 py-3 text-sm text-right font-semibold text-purple-700 dark:text-purple-400'>\$".number_format($fila['saldo_final'], 2).'</td>
+            </tr>';
         }
 
         $html .= '</tbody>';
@@ -938,9 +944,9 @@ class AmortizacionSchema
             <tfoot class="bg-gradient-to-r from-purple-200 to-indigo-200 dark:from-purple-800/50 dark:to-indigo-800/50">
                 <tr>
                     <td class="px-4 py-4 text-sm font-bold text-purple-900 dark:text-purple-100" colspan="2">TOTALES</td>
-                    <td class="px-4 py-4 text-sm text-right font-bold text-purple-900 dark:text-purple-100">$' . number_format($totalCuotas, 2) . '</td>
-                    <td class="px-4 py-4 text-sm text-right font-bold text-purple-900 dark:text-purple-100">$' . number_format($totalIntereses, 2) . '</td>
-                    <td class="px-4 py-4 text-sm text-right font-bold text-purple-900 dark:text-purple-100">$' . number_format($totalAmortizacion, 2) . '</td>
+                    <td class="px-4 py-4 text-sm text-right font-bold text-purple-900 dark:text-purple-100">$'.number_format($totalCuotas, 2).'</td>
+                    <td class="px-4 py-4 text-sm text-right font-bold text-purple-900 dark:text-purple-100">$'.number_format($totalIntereses, 2).'</td>
+                    <td class="px-4 py-4 text-sm text-right font-bold text-purple-900 dark:text-purple-100">$'.number_format($totalAmortizacion, 2).'</td>
                     <td class="px-4 py-4 text-sm text-right font-bold text-purple-900 dark:text-purple-100">$0.00</td>
                 </tr>
             </tfoot>
@@ -1016,54 +1022,54 @@ class AmortizacionSchema
         bool $isCalculated,
         string $color = 'gray'
     ): string {
-        $colorClasses = match($color) {
+        $colorClasses = match ($color) {
             'green' => [
                 'bg' => 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700',
                 'text' => 'text-green-900 dark:text-green-100',
                 'badge' => 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200',
-                'subtitle' => 'text-green-600 dark:text-green-400'
+                'subtitle' => 'text-green-600 dark:text-green-400',
             ],
             'blue' => [
                 'bg' => 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-300 dark:from-blue-950/50 dark:to-cyan-950/50 dark:border-blue-700',
                 'text' => 'text-blue-900 dark:text-blue-100',
                 'badge' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200',
-                'subtitle' => 'text-blue-600 dark:text-blue-400'
+                'subtitle' => 'text-blue-600 dark:text-blue-400',
             ],
             'purple' => [
                 'bg' => 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-300 dark:from-purple-950/50 dark:to-pink-950/50 dark:border-purple-700',
                 'text' => 'text-purple-900 dark:text-purple-100',
                 'badge' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200',
-                'subtitle' => 'text-purple-600 dark:text-purple-400'
+                'subtitle' => 'text-purple-600 dark:text-purple-400',
             ],
             'red' => [
                 'bg' => 'bg-gradient-to-br from-red-50 to-rose-50 border-red-300 dark:from-red-950/50 dark:to-rose-950/50 dark:border-red-700',
                 'text' => 'text-red-900 dark:text-red-100',
                 'badge' => 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200',
-                'subtitle' => 'text-red-600 dark:text-red-400'
+                'subtitle' => 'text-red-600 dark:text-red-400',
             ],
             'amber' => [
                 'bg' => 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-300 dark:from-amber-950/50 dark:to-yellow-950/50 dark:border-amber-700',
                 'text' => 'text-amber-900 dark:text-amber-100',
                 'badge' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200',
-                'subtitle' => 'text-amber-600 dark:text-amber-400'
+                'subtitle' => 'text-amber-600 dark:text-amber-400',
             ],
             'orange' => [
                 'bg' => 'bg-gradient-to-br from-orange-50 to-red-50 border-orange-300 dark:from-orange-950/50 dark:to-red-950/50 dark:border-orange-700',
                 'text' => 'text-orange-900 dark:text-orange-100',
                 'badge' => 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200',
-                'subtitle' => 'text-orange-600 dark:text-orange-400'
+                'subtitle' => 'text-orange-600 dark:text-orange-400',
             ],
             'cyan' => [
                 'bg' => 'bg-gradient-to-br from-cyan-50 to-teal-50 border-cyan-300 dark:from-cyan-950/50 dark:to-teal-950/50 dark:border-cyan-700',
                 'text' => 'text-cyan-900 dark:text-cyan-100',
                 'badge' => 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-200',
-                'subtitle' => 'text-cyan-600 dark:text-cyan-400'
+                'subtitle' => 'text-cyan-600 dark:text-cyan-400',
             ],
             default => [
                 'bg' => 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700',
                 'text' => 'text-gray-900 dark:text-gray-100',
                 'badge' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200',
-                'subtitle' => 'text-gray-600 dark:text-gray-400'
+                'subtitle' => 'text-gray-600 dark:text-gray-400',
             ]
         };
 
@@ -1072,7 +1078,7 @@ class AmortizacionSchema
                 'bg' => 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700',
                 'text' => 'text-green-900 dark:text-green-100',
                 'badge' => 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200',
-                'subtitle' => 'text-green-600 dark:text-green-400'
+                'subtitle' => 'text-green-600 dark:text-green-400',
             ];
         }
 

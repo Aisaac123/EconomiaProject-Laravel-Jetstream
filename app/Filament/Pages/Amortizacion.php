@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\PageGroupType;
 use App\Filament\Schemas\AmortizacionSchema;
 use App\Traits\FormCalculations;
 use Filament\Pages\Page;
@@ -16,9 +17,9 @@ class Amortizacion extends Page
 
     protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-s-calculator';
 
-    protected static ?string $navigationLabel = 'Amortización';
+    protected static ?string $navigationLabel = 'Sistemas de Amortización';
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Segundo Corte';
+    protected static string|null|\UnitEnum $navigationGroup = PageGroupType::ADVANCE->value;
 
     protected static ?int $navigationSort = 1;
 

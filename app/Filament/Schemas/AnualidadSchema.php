@@ -79,7 +79,7 @@ class AnualidadSchema
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
                                                 $set('interes_generado_calculado_VP', null);
-                                                $set('interes_generado_calculado_VF', null);;
+                                                $set('interes_generado_calculado_VF', null);
                                                 $set('mensaje_calculado', null);
                                             }),
 
@@ -146,7 +146,7 @@ class AnualidadSchema
                                             ->hint('Períodos por año')
                                             ->default(1)
                                             ->columnSpan(5)
-                                            ->visible(fn(callable $get) => !$get('usar_select_periodicidad_tasa'))
+                                            ->visible(fn (callable $get) => ! $get('usar_select_periodicidad_tasa'))
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
@@ -172,7 +172,7 @@ class AnualidadSchema
                                             ->default(1)
                                             ->searchable()
                                             ->columnSpan(5)
-                                            ->visible(fn(callable $get) => $get('usar_select_periodicidad_tasa'))
+                                            ->visible(fn (callable $get) => $get('usar_select_periodicidad_tasa'))
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
@@ -326,7 +326,7 @@ class AnualidadSchema
                                                 ->suffix('años')
                                                 ->placeholder('Ejemplo: 5')
                                                 ->step(0.01)
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     static::calcularTiempo($set, $get);
@@ -348,7 +348,7 @@ class AnualidadSchema
                                                 ->suffix('meses')
                                                 ->placeholder('Ejemplo: 7')
                                                 ->step(0.01)
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     static::calcularTiempo($set, $get);
@@ -370,7 +370,7 @@ class AnualidadSchema
                                                 ->suffix('dias')
                                                 ->placeholder('Ejemplo: 21')
                                                 ->step(0.01)
-                                                ->visible(fn(callable $get) => !$get('usar_fechas_tiempo'))
+                                                ->visible(fn (callable $get) => ! $get('usar_fechas_tiempo'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     static::calcularTiempo($set, $get);
@@ -432,7 +432,7 @@ class AnualidadSchema
                                                 ->placeholder('12 para mensual')
                                                 ->hint('Veces por año')
                                                 ->default(1)
-                                                ->visible(fn(callable $get) => !$get('usar_select_frecuencia'))
+                                                ->visible(fn (callable $get) => ! $get('usar_select_frecuencia'))
                                                 ->live()
                                                 ->afterStateUpdated(function (callable $set, callable $get) {
                                                     static::calcularTiempo($set, $get);
@@ -442,7 +442,7 @@ class AnualidadSchema
                                                     $set('interes_generado_calculado_VP', null);
                                                     $set('interes_generado_calculado_VF', null);
                                                     $set('mensaje_calculado', null);
-                                                })->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia' && !$get('usar_select_frecuencia')),
+                                                })->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'anios_frecuencia' && ! $get('usar_select_frecuencia')),
 
                                             Toggle::make('usar_select_frecuencia')
                                                 ->label('Seleccionar frecuencia')
@@ -592,7 +592,7 @@ class AnualidadSchema
                                                     $set('interes_generado_calculado_VP', null);
                                                     $set('interes_generado_calculado_VF', null);
                                                     $set('mensaje_calculado', null);
-                                                })->visible(fn (callable $get) => !$get('usar_select_frecuencia')),
+                                                })->visible(fn (callable $get) => ! $get('usar_select_frecuencia')),
 
                                             Toggle::make('usar_select_frecuencia')
                                                 ->label('Seleccionar frecuencia')
@@ -606,7 +606,7 @@ class AnualidadSchema
                                                     $set('interes_generado_calculado_VP', null);
                                                     $set('interes_generado_calculado_VF', null);
                                                     $set('mensaje_calculado', null);
-                                                })
+                                                }),
                                         ])
                                             ->columns([
                                                 'default' => 1,
@@ -617,7 +617,6 @@ class AnualidadSchema
                                             ->icon('heroicon-o-information-circle')
                                             ->state('Se utilizan gran cantidad de decimales al caluclar el tiempo para soportar altas frecuencias de pagos.')
                                             ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia'),
-
 
                                     ])->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'fechas_frecuencia'),
                                 ]),
@@ -731,7 +730,7 @@ class AnualidadSchema
                                             }),
                                     ]),
                                 ]),
-                        ])
+                        ]),
                 ])->skippable()
                     ->startOnStep(1)
                     ->contained(false)
@@ -957,7 +956,7 @@ class AnualidadSchema
                 ";
             }
 
-        $html .= '</div>'; // Fin del grid principal
+            $html .= '</div>'; // Fin del grid principal
 
         }
 
@@ -1038,6 +1037,4 @@ class AnualidadSchema
     {
         return number_format($tiempo, $decimales, '.', '');
     }
-
-
 }
