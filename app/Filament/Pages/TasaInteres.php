@@ -12,7 +12,7 @@ class TasaInteres extends Page
 
     protected static ?string $navigationLabel = 'Tasa de Interés';
 
-    protected static ?string $title = 'Tasa de Interés';
+    protected static ?string $title = '';
 
     protected string $view = 'filament.pages.tasa-interes';
 }

@@ -10,11 +10,12 @@ trait FormCalculations
     use AnualidadFormula;
     use InteresCompuestoFormula;
     use InteresSimpleFormula;
-
+    use AmortizacionFormula;
     /**
      * Public Properties
      */
     public array $result = [];
+    public ?array $data = [];
 
     /**
      * Helping Methods
@@ -23,6 +24,7 @@ trait FormCalculations
     {
         return match ($calculationType) {
             CalculationType::ANUALIDAD => $this->calculateAnualidad($formData),
+            CalculationType::AMORTIZACION => $this->calculateAmortizacion($formData),
             CalculationType::SIMPLE => $this->calculateInteresSimple($formData),
             CalculationType::COMPUESTO => $this->calculateInteresCompuesto($formData),
             CalculationType::TASA_INTERES => throw new \Exception('Por implementar'),

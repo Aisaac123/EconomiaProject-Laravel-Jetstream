@@ -36,7 +36,6 @@ class InteresCompuesto extends Page implements HasForms
         return 'Interés Compuesto';
     }
 
-    public ?array $data = [];
 
     public function mount(): void
     {

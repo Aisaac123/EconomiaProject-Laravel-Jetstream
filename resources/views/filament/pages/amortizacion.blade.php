@@ -333,7 +333,7 @@
 
         {{-- Comparativa de Sistemas --}}
         <x-sections.content>
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+            <div class="">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">📊 Comparativa de Sistemas de Amortización</h2>
 
                 <div class="grid md:grid-cols-3 gap-6 mb-8">
@@ -508,13 +508,7 @@
         <x-sections.calculator id="calculadora">
             <x-slot:form>
                 <x-sections.contents.calculator-form>
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">🧮 Calculadora de Amortización</h3>
-                        <p class="text-gray-600 dark:text-gray-400 text-center mb-6 py-8 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                            🔧 <strong>Calculadora en Desarrollo</strong><br>
-                            <span class="text-sm">Próximamente podrás simular diferentes sistemas de amortización</span>
-                        </p>
-                    </div>
+                    <x-forms.calculation-form calculation-type="amortizacion" />
                 </x-sections.contents.calculator-form>
             </x-slot:form>
 

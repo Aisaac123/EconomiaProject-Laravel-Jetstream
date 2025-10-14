@@ -21,8 +21,6 @@ class InteresSimple extends Page implements HasForms
 
     protected string $view = 'filament.pages.interes-simple';
 
-    public ?array $data = [];
-
     public function mount(): void
     {
         $this->form->fill();

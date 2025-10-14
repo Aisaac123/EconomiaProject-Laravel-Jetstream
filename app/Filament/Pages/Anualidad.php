@@ -29,7 +29,6 @@ class Anualidad extends Page
         return '';
     }
 
-    public ?array $data = [];
 
     public function mount(): void
     {
