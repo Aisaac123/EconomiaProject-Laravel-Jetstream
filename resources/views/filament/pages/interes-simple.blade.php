@@ -2,8 +2,7 @@
     <div class="space-y-6 min-h-[1650px]">
         <x-sections.heading-title
             title="Interés Simple"
-            quote='“El interés simple es el método más directo para calcular el costo del dinero en el tiempo. Su simplicidad es su mayor virtud.”
-— Paul A. Samuelson'
+            quote='El dinero tiene un precio, y ese precio depende del tiempo.” — Gabriel Baca'
             button-text="Comenzar a calcular"
             href="#calculadora"
         >

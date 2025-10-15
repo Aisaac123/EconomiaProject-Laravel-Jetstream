@@ -12,6 +12,7 @@ trait FormCalculations
     use GradientesFormula;
     use InteresCompuestoFormula;
     use InteresSimpleFormula;
+    use TasaInternaRetornoFormula;
 
     /**
      * Public Properties
@@ -28,6 +29,7 @@ trait FormCalculations
         return match ($calculationType) {
             CalculationType::ANUALIDAD => $this->calculateAnualidad($formData),
             CalculationType::AMORTIZACION => $this->calculateAmortizacion($formData),
+            CalculationType::TIR => $this->calculateTIR($formData),
             CalculationType::GRADIENTES => $this->calculateGradiente($formData),
             CalculationType::SIMPLE => $this->calculateInteresSimple($formData),
             CalculationType::COMPUESTO => $this->calculateInteresCompuesto($formData),

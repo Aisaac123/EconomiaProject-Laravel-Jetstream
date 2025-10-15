@@ -22,11 +22,6 @@ class Capitalizacion extends Page
 
     public function getHeading(): Htmlable|string
     {
-        return 'Calculadora de Capitalización';
-    }
-
-    public function getSubheading(): Htmlable|string
-    {
-        return 'Cálculo de interés compuesto y valor futuro';
+        return '';
     }
 }

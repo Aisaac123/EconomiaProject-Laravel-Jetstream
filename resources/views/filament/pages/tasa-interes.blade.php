@@ -197,13 +197,6 @@
                             </p>
                         </div>
                     </x-filament::section>
-
-                    <p class="mt-2 text-lg font-medium">
-                        A continuación, podrás explorar gráficamente cómo esta diferencia impacta en el crecimiento del capital a lo largo del tiempo.
-                    </p>
-
-                    {{-- Render del widget interactivo --}}
-                    <livewire:app.filament.widgets.interes-interactivo-chart />
                 </div>
             </x-sections.contents.examples>
 

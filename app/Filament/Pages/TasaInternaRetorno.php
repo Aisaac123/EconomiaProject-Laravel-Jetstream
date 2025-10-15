@@ -3,11 +3,16 @@
 namespace App\Filament\Pages;
 
 use App\Enums\PageGroupType;
+use App\Filament\Schemas\TasaInternaRetornoSchema;
+use App\Traits\FormCalculations;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 
 class TasaInternaRetorno extends Page
 {
+    use FormCalculations;
+
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-currency-dollar';
 
     protected static string|null|\BackedEnum $activeNavigationIcon = 'heroicon-s-currency-dollar';
@@ -22,11 +27,18 @@ class TasaInternaRetorno extends Page
 
     public function getHeading(): Htmlable|string
     {
-        return 'Calculadora de Tasa Interna de Retorno';
+        return '';
     }
 
-    public function getSubheading(): Htmlable|string
+    public function mount(): void
     {
-        return 'Análisis de inversiones y evaluación de proyectos';
+        $this->form->fill();
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return TasaInternaRetornoSchema::configure($schema)
+            ->statePath('data')
+            ->operation('calculate');
     }
 }

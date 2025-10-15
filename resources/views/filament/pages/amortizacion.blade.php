@@ -1,9 +1,9 @@
 <x-filament-panels::page>
-    <div class="space-y-6 min-h-[2000px]">
+    <div class="space-y-6 min-h-[1800px]">
         {{-- Título principal --}}
         <x-sections.heading-title
             title="Sistemas de Amortización"
-            quote="“La amortización no es solo pagar deudas, es la matemática que transforma obligaciones en libertad financiera.” — Anónimo"
+            quote="“El secreto no está en cuánto ganas, sino en cómo manejas lo que debes.”  — Robert Kiyosaki"
             button-text="Explorar Calculadora"
             href="#calculadora"
         >
@@ -13,9 +13,8 @@
         </x-sections.heading-title>
 
         {{-- Introducción --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-blue-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">¿Qué es la Amortización?</h2>
+        <x-sections.content title="¿Qué es la Amortización?" class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-blue-200 dark:border-gray-700">
+            <div class="">
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -66,8 +65,7 @@
         </x-sections.content>
 
         {{-- Sistemas de Amortización Detallados --}}
-        <x-sections.content>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Sistemas de Amortización Principales</h2>
+        <x-sections.content collapsed="true" title="🏦 Sistemas de Amortización Principales">
 
             {{-- Sistema Francés --}}
             <div class="mb-8">
@@ -79,7 +77,7 @@
                                 <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                                     <li class="flex items-center">
                                         <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                                        <strong>Cuota constante</strong> durante todo el plazo
+                                        <strong>Cuota constante </strong> durante todo el plazo
                                     </li>
                                     <li class="flex items-center">
                                         <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
@@ -261,7 +259,7 @@
                                 <h4 class="font-semibold text-lg text-gray-900 dark:text-white mb-3">Características Principales</h4>
                                 <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                                     <li class="flex items-center">
-                                        <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                                        <span class="w-2 h-2 bg-red-500 rounded-full mr-2"> </span>
                                         <strong>Solo intereses</strong> durante el plazo
                                     </li>
                                     <li class="flex items-center">
@@ -332,9 +330,9 @@
         </x-sections.content>
 
         {{-- Comparativa de Sistemas --}}
-        <x-sections.content>
+        <x-sections.content collapsed="true" title="📊 Comparativa de Sistemas de Amortización">
             <div class="">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">📊 Comparativa de Sistemas de Amortización</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6"></h2>
 
                 <div class="grid md:grid-cols-3 gap-6 mb-8">
                     {{-- Sistema Francés --}}
@@ -437,9 +435,9 @@
         </x-sections.content>
 
         {{-- Aplicaciones Prácticas --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-purple-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">💼 Aplicaciones Prácticas en la Vida Real</h2>
+        <x-sections.content collapsed="true" title="💼 Aplicaciones Prácticas en la Vida Real" class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-purple-200 dark:border-gray-700">
+            <div class="">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6"></h2>
 
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {{-- Hipotecas --}}
@@ -547,9 +545,8 @@
         </x-sections.calculator>
 
         {{-- Consejos Finales --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-yellow-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">💡 Consejos Financieros sobre Amortización</h2>
+        <x-sections.content title="💡 Consejos Financieros sobre Amortización" class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-yellow-200 dark:border-gray-700">
+            <div class="">
 
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="space-y-4">

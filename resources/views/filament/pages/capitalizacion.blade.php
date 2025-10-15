@@ -3,9 +3,9 @@
         {{-- Título principal --}}
         <x-sections.heading-title
             title="Sistemas de Capitalización"
-            quote="“El interés compuesto es la fuerza más poderosa del universo. Quien lo entiende, lo gana; quien no, lo paga.” — Albert Einstein"
-            button-text="Explorar Calculadora"
-            href="#calculadora"
+            quote="“No definen cuánto se gana, sino cómo y cuándo los intereses se incorporan al capital.” — Leland Blank y Anthony Tarquin"
+            button-text="Explorar Simulación"
+            href="#simulacion"
         >
             <x-slot:icon>
                 <x-heroicon-c-chart-bar class="size-16 text-white" aria-hidden="true" />
@@ -13,9 +13,9 @@
         </x-sections.heading-title>
 
         {{-- Introducción --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-green-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">¿Qué es la Capitalización?</h2>
+        <x-sections.content title="¿Qué es la Capitalización?" class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-green-200 dark:border-gray-700">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4"></h2>
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -67,9 +67,8 @@
         </x-sections.content>
 
         {{-- Comparación Visual Simple vs Compuesto --}}
-        <x-sections.content>
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">📊 El Efecto Diferencial: Simple vs Compuesto</h2>
+        <x-sections.content collapsed="true" title="📊 El Efecto Diferencial: Simple vs Compuesto" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+            <div class="">
 
                 <div class="grid md:grid-cols-2 gap-8">
                     {{-- Gráfico conceptual --}}
@@ -136,8 +135,7 @@
         </x-sections.content>
 
         {{-- Sistemas de Capitalización Detallados --}}
-        <x-sections.content>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Sistemas de Capitalización</h2>
+        <x-sections.content collapsed="true" title="🏦 Sistemas de Capitalización">
 
             {{-- Capitalización Simple --}}
             <div class="mb-8">
@@ -447,10 +445,8 @@
         </x-sections.content>
 
         {{-- Frecuencias de Capitalización --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-orange-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🔄 Frecuencias de Capitalización</h2>
-
+        <x-sections.content collapsed="true" title="🔄 Frecuencias de Capitalización" class="bg-gradient-to-r from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-orange-200 dark:border-gray-700">
+            <div>
                 <div class="grid md:grid-cols-2 gap-8">
                     {{-- Tabla de frecuencias --}}
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
@@ -542,10 +538,8 @@
         </x-sections.content>
 
         {{-- Aplicaciones en Inversiones Reales --}}
-        <x-sections.content>
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">💼 Aplicaciones en el Mundo Real</h2>
-
+        <x-sections.content collapsed="true" title="💼 Aplicaciones en el Mundo Real" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+            <div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     {{-- Fondos de Inversión --}}
                     <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
@@ -625,61 +619,24 @@
         </x-sections.content>
 
         {{-- Calculadora --}}
-        <x-sections.calculator id="calculadora">
-            <x-slot:form>
-                <x-sections.contents.calculator-form>
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">🧮 Calculadora de Capitalización</h3>
-                        <p class="text-gray-600 dark:text-gray-400 text-center mb-6 py-8 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                            🔧 <strong>Calculadora en Desarrollo</strong><br>
-                            <span class="text-sm">Próximamente podrás simular diferentes sistemas de capitalización</span>
-                        </p>
-                    </div>
-                </x-sections.contents.calculator-form>
-            </x-slot:form>
+        <x-sections.content
+            id="simulacion"
+            title="Interacción: Interés Simple vs Compuesto"
+            :collapsed="false">
 
-            <x-slot:explanation>
-                <x-sections.contents.calculator-explanation>
-                    <x-slot:formula_slot>
-                        <div class="space-y-3">
-                            <div>
-                                <p class="font-semibold text-blue-600 dark:text-blue-400">Simple:</p>
-                                <p class="text-sm font-mono">VF = VP × (1 + i × n)</p>
-                            </div>
-                            <div>
-                                <p class="font-semibold text-green-600 dark:text-green-400">Compuesta:</p>
-                                <p class="text-sm font-mono">VF = VP × (1 + i)ⁿ</p>
-                            </div>
-                            <div>
-                                <p class="font-semibold text-purple-600 dark:text-purple-400">Continua:</p>
-                                <p class="text-sm font-mono">VF = VP × e^(i × n)</p>
-                            </div>
-                            <div>
-                                <p class="font-semibold text-orange-600 dark:text-orange-400">Tasa Efectiva:</p>
-                                <p class="text-sm font-mono">iₑ = (1 + iₙ/m)ᵐ - 1</p>
-                            </div>
-                        </div>
-                    </x-slot:formula_slot>
-                    <x-slot:var_slot>
-                        <div class="space-y-2">
-                            <p><strong>VF:</strong> Valor futuro</p>
-                            <p><strong>VP:</strong> Valor presente (capital inicial)</p>
-                            <p><strong>i:</strong> Tasa de interés periódica</p>
-                            <p><strong>n:</strong> Número de períodos</p>
-                            <p><strong>e:</strong> Constante matemática (2.71828)</p>
-                            <p><strong>m:</strong> Frecuencia de capitalización por año</p>
-                            <p><strong>iₑ:</strong> Tasa efectiva anual</p>
-                            <p><strong>iₙ:</strong> Tasa nominal anual</p>
-                        </div>
-                    </x-slot:var_slot>
-                </x-sections.contents.calculator-explanation>
-            </x-slot:explanation>
-        </x-sections.calculator>
+            <div class="space-y-6 text-gray-700 dark:text-gray-300">
+                <p class="mt-2 text-lg font-medium mx-auto text-center">
+                    A continuación, podrás explorar gráficamente cómo esta diferencia impacta en el crecimiento del capital a lo largo del tiempo.
+                </p>
+
+                {{-- Render del widget interactivo --}}
+                <livewire:app.filament.widgets.interes-interactivo-chart />
+            </div>
+        </x-sections.content>
 
         {{-- Consejos de Inversión --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-indigo-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">💎 Consejos para Maximizar la Capitalización</h2>
+        <x-sections.content title="💎 Consejos para Maximizar la Capitalización" class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-indigo-200 dark:border-gray-700">
+            <div class="">
 
                 <div class="grid md:grid-cols-2 gap-8">
                     <div class="space-y-6">

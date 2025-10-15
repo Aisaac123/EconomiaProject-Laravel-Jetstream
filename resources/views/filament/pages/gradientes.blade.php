@@ -1,9 +1,9 @@
 <x-filament-panels::page>
-    <div class="space-y-6 min-h-[2500px]">
+    <div class="space-y-6 min-h-[2400px]">
         {{-- Título principal --}}
         <x-sections.heading-title
             title="Sistemas de Gradientes"
-            quote="“Los gradientes representan la realidad financiera: pocos flujos son constantes, la mayoría crecen o decrecen sistemáticamente.” — Anónimo"
+            quote="“Nada permanece constante, todo cambia en el tiempo, incluso el valor del dinero.” — Leland Blank y Anthony Tarquin"
             button-text="Explorar Calculadora"
             href="#calculadora"
         >
@@ -66,7 +66,7 @@
         </x-sections.content>
 
         {{-- Comparación Visual Gradientes --}}
-        <x-sections.content title="📈 Tipos de Gradientes" class="bg-white dark:bg-gray-950">
+        <x-sections.content title="📈 Tipos de Gradientes">
             <div class="">
 
                 <div class="grid md:grid-cols-2 gap-8">

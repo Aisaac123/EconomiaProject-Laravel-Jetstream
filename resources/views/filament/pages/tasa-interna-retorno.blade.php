@@ -1,9 +1,9 @@
 <x-filament-panels::page>
-    <div class="space-y-  min-h-[2800px]">
+    <div class="space-y-4  min-h-[2800px]">
         {{-- Título principal --}}
         <x-sections.heading-title
             title="Tasa Interna de Retorno (TIR)"
-            quote="“La TIR no es solo un número, es la brújula que guía las decisiones de inversión hacia la creación de valor verdadero.” — Anónimo"
+            quote="“El punto exacto donde los flujos futuros igualan al costo del capital invertido.” — Gabriel Baca Urbina"
             button-text="Explorar Calculadora"
             href="#calculadora"
         >
@@ -13,9 +13,8 @@
         </x-sections.heading-title>
 
         {{-- Introducción --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-amber-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">¿Qué es la Tasa Interna de Retorno (TIR)?</h2>
+        <x-sections.content title="¿Qué es la Tasa Interna de Retorno (TIR)?" class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-amber-200 dark:border-gray-700 mb-4">
+            <div class="">
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -59,14 +58,13 @@
         </x-sections.content>
 
         {{-- Conceptos Fundamentales --}}
-        <x-sections.content>
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🎓 Fundamentos de la TIR</h2>
+        <x-sections.content title="🎓 Fundamentos de la TIR" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+            <div class="">
 
                 <div class="grid md:grid-cols-2 gap-8">
                     {{-- Relación TIR-VPN --}}
                     <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6">
-                        <h4 class="font-semibold text-blue-900 dark:text-blue-100 mb-4">📈 Relación TIR vs VPN</h4>
+                        <h4 class="font-semibold text-blue-900 dark:text-blue-100">📈 Relación TIR vs VPN</h4>
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-blue-800 dark:text-blue-200">Tasa Descuento</span>
@@ -133,9 +131,7 @@
         </x-sections.content>
 
         {{-- MÉTODOS DE CÁLCULO --}}
-        <x-sections.content>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🧮 Métodos de Cálculo de la TIR</h2>
-
+        <x-sections.content title="🧮 Métodos de Cálculo de la TIR">
             {{-- Método Newton-Raphson --}}
             <div class="mb-8">
                 <x-filament::section heading="⚡ Método Newton-Raphson (Analítico)" collapsible="true" collapsed="false">
@@ -377,9 +373,8 @@
         </x-sections.content>
 
         {{-- CASOS ESPECIALES Y PROBLEMAS --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-red-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-red-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">⚠️ Casos Especiales y Problemas con la TIR</h2>
+        <x-sections.content title="⚠️ Casos Especiales y Problemas con la TIR" class="bg-gradient-to-r from-red-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-red-200 dark:border-gray-700">
+            <div class="">
 
                 <div class="grid md:grid-cols-2 gap-8">
                     {{-- TIR Múltiple --}}
@@ -482,9 +477,9 @@
         </x-sections.content>
 
         {{-- APLICACIONES Y EJEMPLOS PRÁCTICOS --}}
-        <x-sections.content>
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">💼 Aplicaciones Prácticas y Ejemplos</h2>
+        <x-sections.content title="💼 Aplicaciones Prácticas y Ejemplos" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+            <div class="">
+
 
                 <div class="grid md:grid-cols-2 gap-8 mb-8">
                     {{-- Ejemplo Proyecto Simple --}}
@@ -619,13 +614,7 @@
         <x-sections.calculator id="calculadora">
             <x-slot:form>
                 <x-sections.contents.calculator-form>
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">🧮 Calculadora de TIR</h3>
-                        <p class="text-gray-600 dark:text-gray-400 text-center mb-6 py-8 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                            🔧 <strong>Calculadora en Desarrollo</strong><br>
-                            <span class="text-sm">Próximamente podrás calcular TIR para tus flujos de caja</span>
-                        </p>
-                    </div>
+                    <x-forms.calculation-form calculation-type="tir" />
                 </x-sections.contents.calculator-form>
             </x-slot:form>
 
@@ -667,9 +656,8 @@
         </x-sections.calculator>
 
         {{-- CONSIDERACIONES FINALES --}}
-        <x-sections.content>
-            <div class="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-700">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">💎 Consideraciones Finales sobre la TIR</h2>
+        <x-sections.content title="💎 Consideraciones Finales sobre la TIR" class="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-700">
+            <div>
 
                 <div class="grid md:grid-cols-2 gap-8">
                     <div class="space-y-6">

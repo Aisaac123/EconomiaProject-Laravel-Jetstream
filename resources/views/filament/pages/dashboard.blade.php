@@ -6,7 +6,7 @@
         href="#conceptos"
     >
         <x-slot:quote>
-            <p class="text-xl text-white/90 max-w-3xl mx-auto">Herramienta educativa para el análisis de modelos financieros avanzados y tasas de interés.</p>
+            <p class="text-xl text-white/90 max-w-3xl mx-auto">Herramienta educativa para el análisis de modelos financieros básicos y avanzados.</p>
         </x-slot:quote>
         <x-slot:icon>
             <x-heroicon-c-calculator class="size-16 text-white" aria-hidden="true" />
@@ -499,7 +499,7 @@
                                         <div class="flex-1">
                                             <h3 class="text-xl font-bold">Sistemas de Amortización</h3>
                                             <p class="mt-2 text-sm">
-                                                Tablas de amortización para préstamos con diferentes sistemas de pago.
+                                                Sistemas para amortizar deudas mediante pagos periódicos.
                                             </p>
                                         </div>
                                     </div>
@@ -528,7 +528,7 @@
                                         <div class="flex-1">
                                             <h3 class="text-xl font-bold">Sistemas de Capitalización</h3>
                                             <p class="mt-2 text-sm">
-                                                Estudio de la acumulación y reinversión de intereses en diferentes períodos.
+                                                El estudio de la acumulación y reinversión de intereses.
                                             </p>
                                         </div>
                                     </div>
@@ -547,7 +547,7 @@
                             </a>
 
                             <!-- Tarjeta TIR -->
-                            <a href="{{ url('/tir') }}" class="group block focus:outline-none">
+                            <a href="{{ url('/tasa-interna-retorno') }}" class="group block focus:outline-none">
                                 <div class="custom-hover rounded-xl shadow-md border-l-4 border-pink-500 p-5 relative overflow-hidden text-gray-800 dark:text-gray-200 transition-all duration-500 hover:shadow-xl hover:border-l-8 flex flex-col h-full">
                                     <div class="absolute inset-0 bg-pink-500/20 rounded-xl -z-10 transition-all duration-700 group-hover:bg-gradient-to-r group-hover:from-pink-400 group-hover:via-pink-600 group-hover:to-pink-500"></div>
                                     <div class="flex items-start relative z-10 transition-colors duration-500 group-hover:text-white flex-1">
