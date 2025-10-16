@@ -684,303 +684,297 @@ class TasaInternaRetornoSchema
         $resultadosArray = $resultados ? json_decode($resultados, true) : [];
         $camposCalculadosArray = $get('campos_calculados') ? json_decode($get('campos_calculados'), true) : [];
 
-        if (! empty($resultadosArray)) {
-            $html = '<div class="space-y-6">';
-
-            // Determinar si tenemos tasa de descuento (para mostrar o no VPN)
-            $tieneTasaDescuento = ! empty($tasaDescuento);
-            $calculoTIR = in_array('tir', $camposCalculadosArray);
-            $calculoVPN = in_array('vpn', $camposCalculadosArray);
-
-            // Header con tipo de cálculo
-            if ($calculoTIR && ! $tieneTasaDescuento) {
-                $tipoCalculo = 'Tasa Interna de Retorno (TIR)';
-                $descripcion = 'Tasa que hace el VPN igual a cero';
-            } elseif ($calculoVPN && $tieneTasaDescuento) {
-                $tipoCalculo = 'Valor Presente Neto (VPN)';
-                $descripcion = 'Valor presente de los flujos de caja';
-            } else {
-                $tipoCalculo = 'Análisis TIR y VPN';
-                $descripcion = 'Evaluación completa del proyecto';
-            }
-
-            $html .= '
-            <div class="bg-gradient-to-r from-emerald-50 to-green-100 dark:from-emerald-950/50 dark:to-green-700/50 rounded-xl p-6 border border-emerald-200 dark:border-emerald-800">
-                <h3 class="text-xl font-bold text-emerald-900 dark:text-emerald-100 flex items-center gap-3">
-                    <span class="text-3xl">💹</span>
-                    <div>
-                        <div>'.$tipoCalculo.'</div>
-                        <div class="text-sm font-normal text-emerald-600 dark:text-emerald-300">'.$descripcion.'</div>
-                    </div>
-                </h3>
+        if (empty($resultadosArray)) {
+            return new HtmlString('
+            <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                <div class="text-5xl mb-4">💹</div>
+                <h3 class="text-xl font-semibold mb-2">Complete los datos para calcular</h3>
+                <p class="text-sm text-gray-400">Los resultados del análisis TIR/VPN aparecerán aquí</p>
             </div>
-        ';
+        ');
+        }
 
-            // Grid principal con TIR y/o VPN destacados
-            $mostrarGrid = (isset($resultadosArray['tir']) || (isset($resultadosArray['vpn']) && $tieneTasaDescuento));
+        // Inicio HTML
+        $html = '<div class="space-y-5">';
 
-            if ($mostrarGrid) {
-                $html .= '<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">';
+        // ============================================
+        // HEADER - Tipo de Análisis
+        // ============================================
+        $tieneTasaDescuento = ! empty($tasaDescuento);
+        $calculoTIR = in_array('tir', $camposCalculadosArray);
+        $calculoVPN = in_array('vpn', $camposCalculadosArray);
 
-                // TIR - siempre mostrar si existe
-                if (isset($resultadosArray['tir'])) {
-                    $tirValor = $resultadosArray['tir'];
-                    $tirColor = $tirValor >= 0 ? ($tirValor === 0 ? 'amber' : 'green') : 'red';
+        if ($calculoTIR && ! $tieneTasaDescuento) {
+            $tipoAnalisis = ['titulo' => '📊 Análisis TIR', 'desc' => 'Tasa que hace el VPN igual a cero', 'color' => 'emerald'];
+        } elseif ($calculoVPN && $tieneTasaDescuento) {
+            $tipoAnalisis = ['titulo' => '💰 Análisis VPN', 'desc' => 'Valor presente de los flujos de caja', 'color' => 'green'];
+        } else {
+            $tipoAnalisis = ['titulo' => '💹 Análisis TIR y VPN', 'desc' => 'Evaluación completa del proyecto', 'color' => 'teal'];
+        }
 
-                    $html .= "
-                    <div class='rounded-xl p-6 border bg-gradient-to-br from-{$tirColor}-50 to-emerald-50 border-{$tirColor}-300 dark:from-{$tirColor}-950/50 dark:to-emerald-950/50 dark:border-{$tirColor}-700 shadow-lg'>
-                        <div class='flex items-center justify-between mb-3'>
-                            <h4 class='font-bold text-{$tirColor}-900 dark:text-{$tirColor}-100 flex items-center gap-2 text-lg'>
-                                <span class='text-2xl'>💹</span>
-                                TIR
-                            </h4>
-                            <span class='px-3 py-1 text-xs font-medium rounded-full bg-{$tirColor}-100 text-{$tirColor}-800 dark:bg-{$tirColor}-900/50 dark:text-{$tirColor}-200'>✨ Calculado</span>
+        $colorClass = $tipoAnalisis['color'];
+        $html .= "
+        <div class='bg-gradient-to-r from-{$colorClass}-50 to-{$colorClass}-100 dark:from-{$colorClass}-950/50 dark:to-{$colorClass}-800/50 rounded-xl p-5 border border-{$colorClass}-200 dark:border-{$colorClass}-800'>
+            <div class='flex items-center gap-3'>
+                <span class='text-3xl'>💹</span>
+                <div>
+                    <h3 class='text-lg font-bold text-{$colorClass}-900 dark:text-{$colorClass}-100'>{$tipoAnalisis['titulo']}</h3>
+                    <p class='text-sm text-{$colorClass}-700 dark:text-{$colorClass}-300'>{$tipoAnalisis['desc']}</p>
+                </div>
+            </div>
+        </div>
+    ";
+
+        // ============================================
+        // BLOQUE 1: Indicadores Principales (TIR, TIRM, VPN)
+        // ============================================
+        $mostrarIndicadores = (isset($resultadosArray['tir']) || isset($resultadosArray['tirm']) || (isset($resultadosArray['vpn']) && $tieneTasaDescuento));
+
+        if ($mostrarIndicadores) {
+            $html .= '<div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">';
+            $html .= '<h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                  <span>📈</span> INDICADORES DE RENTABILIDAD
+                  </h4>';
+
+            // Determinar grid: 2 o 3 columnas según qué tengamos
+            $numIndicadores = 0;
+            if (isset($resultadosArray['tir'])) {
+                $numIndicadores++;
+            }
+            if (isset($resultadosArray['tirm'])) {
+                $numIndicadores++;
+            }
+            if (isset($resultadosArray['vpn']) && $tieneTasaDescuento) {
+                $numIndicadores++;
+            }
+
+            $gridCols = $numIndicadores === 3 ? 'grid-cols-3' : 'grid-cols-2';
+            $html .= "<div class='grid {$gridCols} gap-3'>";
+
+            // TIR
+            if (isset($resultadosArray['tir'])) {
+                $tirValor = $resultadosArray['tir'];
+                $tirColor = $tirValor >= 0 ? ($tirValor === 0 ? 'amber' : 'green') : 'red';
+
+                $html .= "
+                <div class='rounded-lg p-4 border bg-gradient-to-br from-{$tirColor}-50 to-emerald-50 border-{$tirColor}-200 dark:from-{$tirColor}-950/50 dark:to-emerald-950/50 dark:border-{$tirColor}-700 shadow-md'>
+                    <div class='flex items-center justify-between mb-2'>
+                        <div class='flex items-center gap-2'>
+                            <span class='text-xl'>💹</span>
+                            <h5 class='font-bold text-{$tirColor}-900 dark:text-{$tirColor}-100 text-sm'>TIR</h5>
                         </div>
-                        <p class='text-4xl font-bold text-{$tirColor}-900 dark:text-{$tirColor}-100 mb-2'>".number_format($tirValor, 4)."%</p>
-                        <p class='text-sm text-{$tirColor}-600 dark:text-{$tirColor}-400'>Tasa de rentabilidad del proyecto</p>
+                        <span class='px-2 py-0.5 text-xs font-medium rounded-full bg-{$tirColor}-100 text-{$tirColor}-800 dark:bg-{$tirColor}-900/50 dark:text-{$tirColor}-200'>✨</span>
                     </div>
-                ";
-                }
+                    <p class='text-2xl font-bold text-{$tirColor}-900 dark:text-{$tirColor}-100'>".number_format($tirValor, 4)."%</p>
+                    <p class='text-xs text-{$tirColor}-600 dark:text-{$tirColor}-400 mt-1'>Tasa de rentabilidad</p>
+                </div>
+            ";
+            }
 
-                if (isset($resultadosArray['tirm'])) {
-                    $tirmValor = (float) $resultadosArray['tirm'] ?? 0;
-                    $tirmColor = $tirmValor >= 0 ? ($tirmValor === 0 ? 'amber' : 'green') : 'red';
+            // TIRM
+            if (isset($resultadosArray['tirm'])) {
+                $tirmValor = (float) $resultadosArray['tirm'] ?? 0;
+                $tirmColor = $tirmValor >= 0 ? ($tirmValor === 0 ? 'amber' : 'green') : 'red';
 
-                    $html .= "
-                        <div class='rounded-xl p-6 border bg-gradient-to-br from-{$tirmColor}-50 to-emerald-50 border-{$tirmColor}-300 dark:from-{$tirmColor}-950/50 dark:to-emerald-950/50 dark:border-{$tirmColor}-700 shadow-lg'>
-                            <div class='flex items-center justify-between mb-3'>
-                                <h4 class='font-bold text-{$tirmColor}-900 dark:text-{$tirmColor}-100 flex items-center gap-2 text-lg'>
-                                    <span class='text-2xl'>📈</span>
-                                    TIRM
-                                </h4>
-                                <span class='px-3 py-1 text-xs font-medium rounded-full bg-{$tirmColor}-100 text-{$tirmColor}-800 dark:bg-{$tirmColor}-900/50 dark:text-{$tirmColor}-200'>✨ Calculado</span>
-                            </div>
-                            <p class='text-4xl font-bold text-{$tirmColor}-900 dark:text-{$tirmColor}-100 mb-2'>".number_format($tirmValor, 4)."%</p>
-                            <p class='text-sm text-{$tirmColor}-600 dark:text-{$tirmColor}-400'>Tasa interna de retorno modificada</p>
+                $html .= "
+                <div class='rounded-lg p-4 border bg-gradient-to-br from-{$tirmColor}-50 to-teal-50 border-{$tirmColor}-200 dark:from-{$tirmColor}-950/50 dark:to-teal-950/50 dark:border-{$tirmColor}-700 shadow-md'>
+                    <div class='flex items-center justify-between mb-2'>
+                        <div class='flex items-center gap-2'>
+                            <span class='text-xl'>📈</span>
+                            <h5 class='font-bold text-{$tirmColor}-900 dark:text-{$tirmColor}-100 text-sm'>TIRM</h5>
                         </div>
-                    ";
-                }
-
-                // VPN - solo mostrar si tenemos tasa de descuento
-                if (isset($resultadosArray['vpn']) && $tieneTasaDescuento) {
-                    $vpnValor = $resultadosArray['vpn'];
-                    $vpnColor = $vpnValor >= 0 ? ($vpnValor === 0 ? 'yellow' : 'green') : 'red';
-
-                    $html .= "
-                    <div class='rounded-xl p-6 border bg-gradient-to-br from-{$vpnColor}-50 to-teal-50 border-{$vpnColor}-300 dark:from-{$vpnColor}-950/50 dark:to-teal-950/50 dark:border-{$vpnColor}-700 shadow-lg'>
-                        <div class='flex items-center justify-between mb-3'>
-                            <h4 class='font-bold text-{$vpnColor}-900 dark:text-{$vpnColor}-100 flex items-center gap-2 text-lg'>
-                                <span class='text-2xl'>💰</span>
-                                VPN
-                            </h4>
-                            <span class='px-3 py-1 text-xs font-medium rounded-full bg-{$vpnColor}-100 text-{$vpnColor}-800 dark:bg-{$vpnColor}-900/50 dark:text-{$vpnColor}-200'>✨ Calculado</span>
-                        </div>
-                        <p class='text-4xl font-bold text-{$vpnColor}-900 dark:text-{$vpnColor}-100 mb-2'>$".number_format($vpnValor, 2)."</p>
-                        <p class='text-sm text-{$vpnColor}-600 dark:text-{$vpnColor}-400'>Valor presente neto de los flujos</p>
+                        <span class='px-2 py-0.5 text-xs font-medium rounded-full bg-{$tirmColor}-100 text-{$tirmColor}-800 dark:bg-{$tirmColor}-900/50 dark:text-{$tirmColor}-200'>✨</span>
                     </div>
-                ";
-                }
-
-                $html .= '</div>'; // Fin grid principal
+                    <p class='text-2xl font-bold text-{$tirmColor}-900 dark:text-{$tirmColor}-100'>".number_format($tirmValor, 4)."%</p>
+                    <p class='text-xs text-{$tirmColor}-600 dark:text-{$tirmColor}-400 mt-1'>TIR Modificada</p>
+                </div>
+            ";
             }
 
-            // Grid de información adicional
-            $html .= '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
+            // VPN
+            if (isset($resultadosArray['vpn']) && $tieneTasaDescuento) {
+                $vpnValor = $resultadosArray['vpn'];
+                $vpnColor = $vpnValor >= 0 ? ($vpnValor === 0 ? 'yellow' : 'green') : 'red';
 
-            // Inversión Inicial
-            if (isset($resultadosArray['inversion_inicial'])) {
-                $html .= static::buildCard(
-                    'Inversión Inicial',
-                    '💸',
-                    '$'.number_format($resultadosArray['inversion_inicial'], 2),
-                    'Desembolso inicial',
-                    false,
-                    'blue',
-                    'p-4'
-                );
+                $html .= "
+                <div class='rounded-lg p-4 border bg-gradient-to-br from-{$vpnColor}-50 to-cyan-50 border-{$vpnColor}-200 dark:from-{$vpnColor}-950/50 dark:to-cyan-950/50 dark:border-{$vpnColor}-700 shadow-md'>
+                    <div class='flex items-center justify-between mb-2'>
+                        <div class='flex items-center gap-2'>
+                            <span class='text-xl'>💰</span>
+                            <h5 class='font-bold text-{$vpnColor}-900 dark:text-{$vpnColor}-100 text-sm'>VPN</h5>
+                        </div>
+                        <span class='px-2 py-0.5 text-xs font-medium rounded-full bg-{$vpnColor}-100 text-{$vpnColor}-800 dark:bg-{$vpnColor}-900/50 dark:text-{$vpnColor}-200'>✨</span>
+                    </div>
+                    <p class='text-2xl font-bold text-{$vpnColor}-900 dark:text-{$vpnColor}-100'>$".number_format($vpnValor, 2)."</p>
+                    <p class='text-xs text-{$vpnColor}-600 dark:text-{$vpnColor}-400 mt-1'>Valor presente neto</p>
+                </div>
+            ";
             }
 
-            // Suma de Flujos
-            if (isset($resultadosArray['suma_flujos'])) {
-                $html .= static::buildCard(
-                    'Total de Flujos',
-                    '📊',
-                    '$'.number_format($resultadosArray['suma_flujos'], 2),
-                    'Suma de ingresos',
-                    false,
-                    'cyan',
-                    'p-4'
-                );
-            }
+            $html .= '</div>';
+            $html .= '</div>'; // Fin bloque indicadores principales
+        }
 
-            // Número de Períodos
-            if (isset($resultadosArray['numero_periodos'])) {
-                $html .= static::buildCard(
-                    'Períodos',
-                    '🔢',
-                    $resultadosArray['numero_periodos'],
-                    'Duración del proyecto',
-                    false,
-                    'purple',
-                    'p-4'
-                );
-            }
+        // ============================================
+        // BLOQUE 2: Datos del Proyecto
+        // ============================================
+        $html .= '<div class="space-y-3">';
+        $html .= '<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <span>📊</span> DATOS DEL PROYECTO
+              </h4>';
 
-            // ROI - siempre mostrar (no depende de VPN, solo de flujos)
+        $html .= '<div class="grid grid-cols-3 gap-3">';
+
+        // Inversión Inicial
+        if (isset($resultadosArray['inversion_inicial'])) {
+            $html .= static::buildCard('Inversión', '💸', '$'.number_format($resultadosArray['inversion_inicial'], 2), 'Capital inicial', false, 'blue');
+        }
+
+        // Suma de Flujos
+        if (isset($resultadosArray['suma_flujos'])) {
+            $html .= static::buildCard('Total Flujos', '📊', '$'.number_format($resultadosArray['suma_flujos'], 2), 'Ingresos totales', false, 'cyan');
+        }
+
+        // Número de Períodos
+        if (isset($resultadosArray['numero_periodos'])) {
+            $html .= static::buildCard('Períodos', '🔢', $resultadosArray['numero_periodos'], 'Duración', false, 'purple');
+        }
+
+        $html .= '</div>';
+
+        // Periodicidad en línea horizontal
+        $periodicidadTexto = match ((int) $periodicidadTasa) {
+            1 => 'Anual', 2 => 'Semestral', 4 => 'Trimestral', 6 => 'Bimestral',
+            12 => 'Mensual', 24 => 'Quincenal', 52 => 'Semanal',
+            360 => 'Diaria Comercial', 365 => 'Diaria',
+            default => $periodicidadTasa.' veces/año'
+        };
+
+        $html .= "
+        <div class='bg-indigo-50/70 dark:bg-indigo-950/30 rounded-lg p-2.5 border border-indigo-200 dark:border-indigo-800'>
+            <div class='flex items-center justify-between'>
+                <div class='flex items-center gap-2'>
+                    <span class='text-lg'>🔄</span>
+                    <span class='text-xs font-semibold text-indigo-900 dark:text-indigo-100'>Periodicidad</span>
+                </div>
+                <div class='text-right'>
+                    <span class='font-bold text-sm text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</span>
+                    <span class='text-xs text-indigo-600 dark:text-indigo-400 ml-2'>({$periodicidadTasa}/año)</span>
+                </div>
+            </div>
+        </div>
+    ";
+
+        $html .= '</div>'; // Fin datos del proyecto
+
+        // ============================================
+        // BLOQUE 3: Indicadores Complementarios
+        // ============================================
+        $mostrarComplementarios = isset($resultadosArray['roi']) || isset($resultadosArray['payback_period']) ||
+            isset($resultadosArray['rentabilidad']) || isset($resultadosArray['tasa_descuento']);
+
+        if ($mostrarComplementarios) {
+            $html .= '<div class="space-y-3">';
+            $html .= '<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <span>💎</span> INDICADORES COMPLEMENTARIOS
+                  </h4>';
+
+            $html .= '<div class="grid grid-cols-2 gap-3">';
+
+            // ROI
             if (isset($resultadosArray['roi'])) {
                 $roiValor = $resultadosArray['roi'];
                 $roiColor = $roiValor > 0 ? 'green' : 'red';
-                $html .= static::buildCard(
-                    'ROI',
-                    '📈',
-                    number_format($roiValor, 2).'%',
-                    'Retorno de inversión',
-                    false,
-                    $roiColor,
-                    'p-4'
-                );
+                $html .= static::buildCard('ROI', '📈', number_format($roiValor, 2).'%', 'Retorno de inversión', false, $roiColor);
             }
 
-            // Payback Period - siempre mostrar (no depende de VPN)
+            // Payback Period
             if (isset($resultadosArray['payback_period'])) {
-                $html .= static::buildCard(
-                    'Período de Recuperación',
-                    '⏱️',
-                    number_format($resultadosArray['payback_period'], 2).' períodos',
-                    'Tiempo de recuperación',
-                    false,
-                    'amber',
-                    'p-4'
-                );
+                $html .= static::buildCard('Payback', '⏱️', number_format($resultadosArray['payback_period'], 2), 'Períodos de recuperación', false, 'amber');
             }
 
-            // Tasa de Financiamiento (TIRM)
-            if (isset($resultadosArray['tasa_financiamiento'])) {
-                $html .= static::buildCard(
-                    'Tasa de Financiamiento',
-                    '💳',
-                    number_format($resultadosArray['tasa_financiamiento'], 4).'%',
-                    'Costo de capital usado',
-                    false,
-                    'red',
-                    'p-4'
-                );
-            }
-
-            // Tasa de Reinversión (TIRM)
-            if (isset($resultadosArray['tasa_reinversion'])) {
-                $html .= static::buildCard(
-                    'Tasa de Reinversión',
-                    '💰',
-                    number_format($resultadosArray['tasa_reinversion'], 4).'%',
-                    'Tasa de reinversión usada',
-                    false,
-                    'green',
-                    'p-4'
-                );
-            }
-
-            // Tasa de Descuento - solo mostrar si fue ingresada
-            if (isset($resultadosArray['tasa_descuento']) && $tieneTasaDescuento) {
-                $html .= static::buildCard(
-                    'Tasa de Descuento',
-                    '📊',
-                    number_format($resultadosArray['tasa_descuento'], 4).'%',
-                    'Costo de oportunidad',
-                    false,
-                    'orange',
-                    'p-4'
-                );
-            }
-
-            // Periodicidad
-            $periodicidadTexto = match ((int) $periodicidadTasa) {
-                1 => 'Anual', 2 => 'Semestral', 4 => 'Trimestral', 6 => 'Bimestral',
-                12 => 'Mensual', 24 => 'Quincenal', 52 => 'Semanal',
-                360 => 'Diaria Comercial', 365 => 'Diaria',
-                default => $periodicidadTasa.' veces/año'
-            };
-
-            $html .= "
-            <div class='rounded-lg p-4 border bg-indigo-50 border-indigo-200 dark:bg-indigo-950/50 dark:border-indigo-700 shadow-sm'>
-                <div class='flex items-center gap-2 mb-2'>
-                    <span class='text-indigo-600 dark:text-indigo-400 text-xl'>🔄</span>
-                    <h4 class='font-semibold text-indigo-900 dark:text-indigo-100 text-xs'>Periodicidad</h4>
-                </div>
-                <p class='text-lg font-bold text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</p>
-                <p class='text-xs text-indigo-600 dark:text-indigo-400'>{$periodicidadTasa} períodos/año</p>
-            </div>
-        ";
-
-            // Rentabilidad - solo mostrar si tenemos VPN (depende de tasa de descuento)
+            // Rentabilidad
             if (isset($resultadosArray['rentabilidad']) && $tieneTasaDescuento) {
                 $rentValor = $resultadosArray['rentabilidad'];
                 $rentColor = $rentValor > 0 ? 'green' : 'red';
-                $html .= static::buildCard(
-                    'Rentabilidad',
-                    '💎',
-                    number_format($rentValor, 2).'%',
-                    'Rentabilidad del proyecto',
-                    false,
-                    $rentColor,
-                    'p-4'
-                );
+                $html .= static::buildCard('Rentabilidad', '💎', number_format($rentValor, 2).'%', 'Del proyecto', false, $rentColor);
             }
 
-            $html .= '</div>'; // Fin grid secundario
-
-            // Sección de Decisión y Mensaje
-            $html .= '<div class="grid grid-cols-1 gap-4">';
-
-            // Decisión de Inversión
-            if (isset($resultadosArray['decision'])) {
-                $decision = $resultadosArray['decision'];
-                $decisionColor = $decision === 'Aceptar' ? 'green' : ($decision === 'Rechazar' ? 'red' : 'amber');
-                $decisionIcon = $decision === 'Aceptar' ? '✅' : ($decision === 'Rechazar' ? '❌' : '⚠️');
-
-                $html .= "
-                <div class='rounded-xl p-6 border bg-gradient-to-r from-{$decisionColor}-50 to-{$decisionColor}-100 border-{$decisionColor}-300 dark:from-{$decisionColor}-950/50 dark:to-{$decisionColor}-900/50 dark:border-{$decisionColor}-700 shadow-lg'>
-                    <div class='flex items-start gap-4'>
-                        <div class='flex-shrink-0 text-4xl'>{$decisionIcon}</div>
-                        <div class='flex-1'>
-                            <h4 class='text-xl font-bold text-{$decisionColor}-900 dark:text-{$decisionColor}-100 mb-2'>Decisión: {$decision} el Proyecto</h4>
-                            <p class='text-sm text-{$decisionColor}-700 dark:text-{$decisionColor}-300 leading-relaxed'>{$resultadosArray['justificacion']}</p>
-                        </div>
-                    </div>
-                </div>
-            ";
+            // Tasa de Descuento
+            if (isset($resultadosArray['tasa_descuento']) && $tieneTasaDescuento) {
+                $html .= static::buildCard('Tasa Descuento', '📉', number_format($resultadosArray['tasa_descuento'], 4).'%', 'Costo oportunidad', false, 'orange');
             }
 
-            // Mensaje de resultado
-            if ($mensaje) {
-                $html .= "
-                <div class='bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-xl p-6 border border-blue-200 dark:border-blue-700 shadow-sm'>
-                    <div class='flex items-start gap-4'>
-                        <div class='flex-shrink-0 text-3xl'>🎯</div>
-                        <div class='flex-1'>
-                            <h4 class='font-bold text-blue-900 dark:text-blue-100 mb-2 text-lg'>Resumen del Cálculo</h4>
-                            <p class='text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensaje}</p>
-                        </div>
-                    </div>
-                </div>
-            ";
-            }
-
-            $html .= '</div>'; // Fin grid de decisión
-
-            $html .= '</div>'; // Fin contenedor principal
-
-            return new HtmlString($html);
+            $html .= '</div>';
+            $html .= '</div>'; // Fin indicadores complementarios
         }
 
-        // Estado inicial
-        return new HtmlString('
-        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
-            <div class="text-5xl mb-4">💹</div>
-            <h3 class="text-xl font-semibold mb-2">Complete los datos para calcular</h3>
-            <p class="text-sm text-gray-400">Los resultados del análisis TIR/VPN aparecerán aquí</p>
-        </div>
-    ');
+        // ============================================
+        // BLOQUE 4: Tasas TIRM (si existen)
+        // ============================================
+        if (isset($resultadosArray['tasa_financiamiento']) || isset($resultadosArray['tasa_reinversion'])) {
+            $html .= '<div class="space-y-3">';
+            $html .= '<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <span>⚙️</span> PARÁMETROS TIRM
+                  </h4>';
+
+            $html .= '<div class="grid grid-cols-2 gap-3">';
+
+            // Tasa de Financiamiento
+            if (isset($resultadosArray['tasa_financiamiento'])) {
+                $html .= static::buildCard('Tasa Financiamiento', '💳', number_format($resultadosArray['tasa_financiamiento'], 4).'%', 'Costo de capital', false, 'red');
+            }
+
+            // Tasa de Reinversión
+            if (isset($resultadosArray['tasa_reinversion'])) {
+                $html .= static::buildCard('Tasa Reinversión', '💰', number_format($resultadosArray['tasa_reinversion'], 4).'%', 'Tasa de reinversión', false, 'green');
+            }
+
+            $html .= '</div>';
+            $html .= '</div>'; // Fin parámetros TIRM
+        }
+
+        // ============================================
+        // BLOQUE 5: Decisión de Inversión (Destacado)
+        // ============================================
+        if (isset($resultadosArray['decision'])) {
+            $decision = $resultadosArray['decision'];
+            $decisionColor = $decision === 'Aceptar' ? 'green' : ($decision === 'Rechazar' ? 'red' : 'amber');
+            $decisionIcon = $decision === 'Aceptar' ? '✅' : ($decision === 'Rechazar' ? '❌' : '⚠️');
+
+            $html .= "
+            <div class='bg-gradient-to-br from-{$decisionColor}-50 to-{$decisionColor}-100 dark:from-{$decisionColor}-950/50 dark:to-{$decisionColor}-900/50 rounded-xl p-4 border-2 border-{$decisionColor}-300 dark:border-{$decisionColor}-700'>
+                <div class='flex items-start gap-3'>
+                    <span class='text-3xl flex-shrink-0'>{$decisionIcon}</span>
+                    <div class='flex-1'>
+                        <h4 class='text-base font-bold text-{$decisionColor}-900 dark:text-{$decisionColor}-100 mb-1'>DECISIÓN: {$decision} el Proyecto</h4>
+                        <p class='text-sm text-{$decisionColor}-700 dark:text-{$decisionColor}-300 leading-relaxed'>{$resultadosArray['justificacion']}</p>
+                    </div>
+                </div>
+            </div>
+        ";
+        }
+
+        // ============================================
+        // MENSAJE FINAL (Si existe)
+        // ============================================
+        if ($mensaje) {
+            $html .= "
+            <div class='bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 rounded-xl p-4 border border-blue-300 dark:border-blue-700'>
+                <div class='flex items-start gap-3'>
+                    <span class='text-2xl flex-shrink-0'>🎯</span>
+                    <div class='flex-1'>
+                        <h4 class='font-bold text-blue-900 dark:text-blue-100 text-sm mb-1'>RESUMEN</h4>
+                        <p class='text-sm text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensaje}</p>
+                    </div>
+                </div>
+            </div>
+        ";
+        }
+
+        $html .= '</div>'; // Fin contenedor principal
+
+        return new HtmlString($html);
     }
 
     private static function buildTablaFlujosHtml(callable $get): Htmlable

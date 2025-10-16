@@ -115,12 +115,14 @@ class AmortizacionSchema
                                             ->searchable()
                                             ->helperText('Seleccione el método de amortización del préstamo')
                                             ->live()
+                                            ->columnSpan(2)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
                                                 $set('tabla_amortizacion', null);
                                                 $set('mensaje_calculado', null);
                                             }),
+
                                         TextInput::make('monto_prestamo')
                                             ->rules(['nullable', 'numeric', 'min:0'])
                                             ->validationMessages([
@@ -131,6 +133,44 @@ class AmortizacionSchema
                                             ->prefix('$')
                                             ->placeholder('Ejemplo: 100000')
                                             ->live(onBlur: true)
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('tabla_amortizacion', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
+
+                                        TextInput::make('cuota_inicial')
+                                            ->rules(['nullable', 'numeric', 'min:0'])
+                                            ->validationMessages([
+                                                'min' => 'La cuota inicial debe ser mayor o igual a 0',
+                                            ])
+                                            ->label('Cuota Inicial')
+                                            ->numeric()
+                                            ->prefix('$')
+                                            ->placeholder('Ejemplo: 1500')
+                                            ->hint('Solo sistema Alemán')
+                                            ->live(onBlur: true)
+                                            ->visible(fn (callable $get) => $get('sistema_amortizacion') === 'aleman')
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('campos_calculados', null);
+                                                $set('resultados_calculados', null);
+                                                $set('tabla_amortizacion', null);
+                                                $set('mensaje_calculado', null);
+                                            }),
+
+                                        TextInput::make('cuota_periodica')
+                                            ->rules(['nullable', 'numeric', 'min:0'])
+                                            ->validationMessages([
+                                                'min' => 'La cuota periódica debe ser mayor o igual a 0',
+                                            ])
+                                            ->label('Cuota Periódica de Interés')
+                                            ->numeric()
+                                            ->prefix('$')
+                                            ->placeholder('Ejemplo: 500')
+                                            ->hint('Solo sistema Americano')
+                                            ->live(onBlur: true)
+                                            ->visible(fn (callable $get) => $get('sistema_amortizacion') === 'americano')
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
@@ -301,7 +341,10 @@ class AmortizacionSchema
                                             ->label('Número de Pagos (n)')
                                             ->numeric()
                                             ->placeholder('Ejemplo: 60')
-                                            ->hint('Total de pagos a realizar')
+                                            ->hint(fn (callable $get) => $get('sistema_amortizacion') === 'americano'
+                                                ? 'Obligatorio en sistema Americano'
+                                                : 'Total de pagos a realizar')
+                                            ->required(fn (callable $get) => $get('sistema_amortizacion') === 'americano')
                                             ->visible(fn (callable $get) => $get('modo_tiempo_pagos') === 'manual')
                                             ->live()
                                             ->afterStateUpdated(function (callable $set, callable $get) {
@@ -635,7 +678,6 @@ class AmortizacionSchema
         $tasaInteres = $get('tasa_interes');
         $numeroPagos = $get('numero_pagos');
         $sistemaAmortizacion = $get('sistema_amortizacion');
-        $cuotaFija = $get('cuota_fija');
 
         $camposCalculados = $get('campos_calculados');
         $resultados = $get('resultados_calculados');
@@ -645,222 +687,272 @@ class AmortizacionSchema
         $camposCalculadosArray = $camposCalculados ? json_decode($camposCalculados, true) : [];
         $resultadosArray = $resultados ? json_decode($resultados, true) : [];
 
-        // Verificar campos vacíos
-        $emptyFields = [];
-        if (! $montoPrestamo) {
-            $emptyFields[] = 'monto_prestamo';
-        }
-        if (! $tasaInteres) {
-            $emptyFields[] = 'tasa_interes';
-        }
-        if (! $numeroPagos) {
-            $emptyFields[] = 'numero_pagos';
-        }
-
-        // Si hay resultados, mostrarlos
-        if (! empty($resultadosArray)) {
-            $html = '<div class="space-y-6">';
-
-            // Header con tipo de sistema
-            $sistemaTexto = match ($sistemaAmortizacion) {
-                'frances' => '🇫🇷 Sistema Francés',
-                'aleman' => '🇩🇪 Sistema Alemán',
-                'americano' => '🇺🇸 Sistema Americano',
-                default => 'Sistema de Amortización'
-            };
-
-            $sistemaDescripcion = match ($sistemaAmortizacion) {
-                'frances' => 'Cuota fija durante todo el período',
-                'aleman' => 'Amortización constante, cuota decreciente',
-                'americano' => 'Solo intereses, capital al final',
-                default => 'Sistema seleccionado'
-            };
-
-            $html .= '
-                <div class="bg-gradient-to-r from-purple-50 to-indigo-100 dark:from-purple-950/50 dark:to-indigo-700/50 rounded-xl p-6 border border-purple-200 dark:border-purple-800">
-                    <h3 class="text-xl font-bold text-purple-900 dark:text-purple-100 flex items-center gap-3">
-                        <span class="text-3xl">🏦</span>
-                        <div>
-                            <div>'.$sistemaTexto.'</div>
-                            <div class="text-sm font-normal text-purple-600 dark:text-purple-300">'.$sistemaDescripcion.'</div>
-                        </div>
-                    </h3>
-                </div>
-            ';
-
-            // Grid de valores principales
-            $html .= '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">';
-
-            // Monto del Préstamo
-            $isCalculated = in_array('monto_prestamo', $camposCalculadosArray);
-            $displayValue = $isCalculated
-                ? '$'.number_format($resultadosArray['monto_prestamo'] ?? 0, 2)
-                : (is_numeric($montoPrestamo) ? '$'.number_format($montoPrestamo, 2) : '--');
-            $html .= static::buildCard('Monto del Préstamo', '💰', $displayValue, 'Capital inicial', $isCalculated);
-
-            // Tasa de Interés
-            $isCalculated = in_array('tasa_interes', $camposCalculadosArray);
-            $displayValue = $isCalculated
-                ? ($resultadosArray['tasa_interes'].'%')
-                : (is_numeric($tasaInteres) ? $tasaInteres.'%' : '--');
-            $html .= static::buildCard('Tasa de Interés', '📈', $displayValue, 'Tasa nominal', $isCalculated);
-
-            // Número de Pagos
-            $isCalculated = in_array('numero_pagos', $camposCalculadosArray);
-            $displayValue = $isCalculated
-                ? ($resultadosArray['numero_pagos'] ?? 0)
-                : (is_numeric($numeroPagos) ? $numeroPagos : '--');
-            $html .= static::buildCard('Número de Pagos', '🔢', $displayValue, 'Total de cuotas', $isCalculated);
-
-            // Periodicidad
-            $periodicidadTexto = match ((int) $periodicidadTasa) {
-                1 => 'Anual',
-                2 => 'Semestral',
-                4 => 'Trimestral',
-                6 => 'Bimestral',
-                12 => 'Mensual',
-                24 => 'Quincenal',
-                52 => 'Semanal',
-                360 => 'Diaria Comercial',
-                365 => 'Diaria',
-                default => $periodicidadTasa.' veces/año'
-            };
-
-            $html .= "
-                <div class='rounded-lg p-4 border bg-indigo-50 border-indigo-200 dark:bg-indigo-950/50 dark:border-indigo-700 shadow-sm'>
-                    <div class='flex items-center gap-2 mb-2'>
-                        <span class='text-indigo-600 dark:text-indigo-400'>📊</span>
-                        <h4 class='font-semibold text-indigo-900 dark:text-indigo-100 text-sm'>Periodicidad</h4>
-                    </div>
-                    <p class='text-xl font-bold text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</p>
-                    <p class='text-xs text-indigo-600 dark:text-indigo-400'>{$periodicidadTasa} períodos/año</p>
-                </div>
-            ";
-
-            // Cuota Inicial
-            if (isset($resultadosArray['cuota_inicial'])) {
-                $html .= static::buildCard('Cuota Inicial', '💳', '$'.number_format($resultadosArray['cuota_inicial'], 2), 'Primer pago', false, 'blue');
-            }
-
-            // Cuota Final
-            if (isset($resultadosArray['cuota_final'])) {
-                $html .= static::buildCard('Cuota Final', '💳', '$'.number_format($resultadosArray['cuota_final'], 2), 'Último pago', false, 'blue');
-            }
-
-            // Cuota Fija (solo sistema francés)
-            if (isset($resultadosArray['cuota_fija'])) {
-                $html .= static::buildCard('Cuota Fija', '💰', '$'.number_format($resultadosArray['cuota_fija'], 2), 'Pago constante', false, 'green');
-            }
-
-            // Amortización Constante (solo sistema alemán)
-            if (isset($resultadosArray['amortizacion_constante'])) {
-                $html .= static::buildCard('Amortización Constante', '📊', '$'.number_format($resultadosArray['amortizacion_constante'], 2), 'Capital por período', false, 'green');
-            }
-
-            // Cuota de Interés Periódica (solo sistema americano)
-            if (isset($resultadosArray['cuota_interes_periodica'])) {
-                $html .= static::buildCard('Cuota de Interés', '💸', '$'.number_format($resultadosArray['cuota_interes_periodica'], 2), 'Pago periódico de interés', false, 'amber');
-            }
-
-            // Amortización Inicial
-            if (isset($resultadosArray['amortizacion_inicial'])) {
-                $html .= static::buildCard('Amortización Inicial', '📉', '$'.number_format($resultadosArray['amortizacion_inicial'], 2), 'Primer abono a capital', false, 'cyan');
-            }
-
-            // Amortización Final
-            if (isset($resultadosArray['amortizacion_final'])) {
-                $html .= static::buildCard('Amortización Final', '📉', '$'.number_format($resultadosArray['amortizacion_final'], 2), 'Último abono a capital', false, 'cyan');
-            }
-
-            // Interés Inicial
-            if (isset($resultadosArray['interes_inicial'])) {
-                $html .= static::buildCard('Interés Inicial', '💵', '$'.number_format($resultadosArray['interes_inicial'], 2), 'Primer interés', false, 'orange');
-            }
-
-            // Interés Final
-            if (isset($resultadosArray['interes_final'])) {
-                $html .= static::buildCard('Interés Final', '💵', '$'.number_format($resultadosArray['interes_final'], 2), 'Último interés', false, 'orange');
-            }
-
-            // Total de Intereses
-            if (isset($resultadosArray['total_intereses'])) {
-                $html .= static::buildCard('Total de Intereses', '💸', '$'.number_format($resultadosArray['total_intereses'], 2), 'Costo financiero total', false, 'red');
-            }
-
-            // Total a Pagar
-            if (isset($resultadosArray['total_pagado'])) {
-                $html .= static::buildCard('Total a Pagar', '💎', '$'.number_format($resultadosArray['total_pagado'], 2), 'Capital + Intereses', false, 'purple');
-            }
-
-            $html .= '</div>'; // Fin del grid
-
-            // Mensaje de resultado
-            if ($mensaje) {
-                $html .= "
-                    <div class='bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-xl p-6 border border-blue-200 dark:border-blue-700 shadow-sm'>
-                        <div class='flex items-start gap-4'>
-                            <div class='flex-shrink-0 text-3xl'>🎯</div>
-                            <div>
-                                <h4 class='font-bold text-blue-900 dark:text-blue-100 mb-2 text-lg'>Resultado del Cálculo</h4>
-                                <p class='text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensaje}</p>
-                            </div>
-                        </div>
-                    </div>
-                ";
-            }
-
-            $html .= '</div>'; // Fin del contenedor principal
-
-            return new HtmlString($html);
-        }
-
-        // Validaciones y mensajes de estado
+        // Validaciones iniciales
         if (empty($montoPrestamo) && empty($tasaInteres) && empty($numeroPagos) && empty($sistemaAmortizacion)) {
             return new HtmlString('
-                <div class="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <div class="text-5xl mb-4">🏦</div>
-                    <h3 class="text-xl font-semibold mb-2">Complete los campos para calcular</h3>
-                    <p class="text-sm text-gray-400">Los resultados del sistema de amortización aparecerán aquí</p>
-                </div>
-            ');
+            <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                <div class="text-5xl mb-4">🏦</div>
+                <h3 class="text-xl font-semibold mb-2">Complete los campos para calcular</h3>
+                <p class="text-sm text-gray-400">Los resultados del sistema de amortización aparecerán aquí</p>
+            </div>
+        ');
         }
 
         if (empty($sistemaAmortizacion)) {
             return new HtmlString('
-                <div class="text-center py-12">
-                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50 rounded-xl p-8 border border-amber-200 dark:border-amber-800">
-                        <div class="text-6xl mb-4">⚠️</div>
-                        <h3 class="text-xl font-bold text-amber-900 dark:text-amber-100 mb-3">Sistema no seleccionado</h3>
-                        <p class="text-amber-700 dark:text-amber-300 text-lg">Por favor, selecciona un sistema de amortización (Francés, Alemán o Americano)</p>
-                    </div>
+            <div class="text-center py-12">
+                <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50 rounded-xl p-8 border border-amber-200 dark:border-amber-800">
+                    <div class="text-6xl mb-4">⚠️</div>
+                    <h3 class="text-xl font-bold text-amber-900 dark:text-amber-100 mb-3">Sistema no seleccionado</h3>
+                    <p class="text-amber-700 dark:text-amber-300 text-lg">Por favor, selecciona un sistema de amortización</p>
                 </div>
-            ');
+            </div>
+        ');
         }
 
-        if (count($emptyFields) > 1) {
+        if (empty($resultadosArray)) {
             return new HtmlString('
-                <div class="text-center py-12">
-                    <div class="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/50 dark:to-orange-950/50 rounded-xl p-8 border border-red-200 dark:border-red-800">
-                        <div class="text-6xl mb-4">⚠️</div>
-                        <h3 class="text-xl font-bold text-red-900 dark:text-red-100 mb-3">Campos incompletos</h3>
-                        <p class="text-red-700 dark:text-red-300 mb-4 text-lg">Debes completar al menos: Monto del Préstamo, Tasa de Interés y Número de Pagos</p>
-                        <div class="bg-red-100 dark:bg-red-900/50 rounded-lg p-4 border border-red-300 dark:border-red-700">
-                            <p class="text-sm text-red-800 dark:text-red-200">
-                                <strong>Recuerda:</strong> Puedes dejar 1 campo vacío para calcularlo automáticamente (solo en sistema Francés)
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            ');
-        }
-
-        return new HtmlString('
             <div class="text-center py-12 text-gray-500 dark:text-gray-400">
                 <div class="text-5xl mb-4">⏳</div>
                 <h3 class="text-xl font-semibold mb-2">Listo para calcular</h3>
                 <p class="text-sm text-gray-400">Presiona el botón "Calcular" para ver los resultados</p>
             </div>
         ');
+        }
+
+        // Inicio HTML
+        $html = '<div class="space-y-5">';
+
+        // ============================================
+        // HEADER - Sistema Seleccionado
+        // ============================================
+        $sistemaInfo = match ($sistemaAmortizacion) {
+            'frances' => ['titulo' => '🇫🇷 Sistema Francés', 'desc' => 'Cuota fija durante todo el período', 'color' => 'purple'],
+            'aleman' => ['titulo' => '🇩🇪 Sistema Alemán', 'desc' => 'Amortización constante, cuota decreciente', 'color' => 'blue'],
+            'americano' => ['titulo' => '🇺🇸 Sistema Americano', 'desc' => 'Solo intereses, capital al final', 'color' => 'indigo'],
+            default => ['titulo' => 'Sistema de Amortización', 'desc' => 'Sistema seleccionado', 'color' => 'gray']
+        };
+
+        $colorClass = $sistemaInfo['color'];
+        $html .= "
+        <div class='bg-gradient-to-r from-{$colorClass}-50 to-{$colorClass}-100 dark:from-{$colorClass}-950/50 dark:to-{$colorClass}-800/50 rounded-xl p-5 border border-{$colorClass}-200 dark:border-{$colorClass}-800'>
+            <div class='flex items-center gap-3'>
+                <span class='text-3xl'>🏦</span>
+                <div>
+                    <h3 class='text-lg font-bold text-{$colorClass}-900 dark:text-{$colorClass}-100'>{$sistemaInfo['titulo']}</h3>
+                    <p class='text-sm text-{$colorClass}-700 dark:text-{$colorClass}-300'>{$sistemaInfo['desc']}</p>
+                </div>
+            </div>
+        </div>
+    ";
+
+        // ============================================
+        // BLOQUE 1: Parámetros Base (Layout Horizontal Compacto)
+        // ============================================
+        $html .= '<div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">';
+        $html .= '<h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+              <span>📋</span> PARÁMETROS DEL PRÉSTAMO
+              </h4>';
+
+        // Grid de 3 columnas para datos base
+        $html .= '<div class="grid grid-cols-3 gap-3 mb-3">';
+
+        // Monto
+        $isCalculated = in_array('monto_prestamo', $camposCalculadosArray);
+        $displayValue = isset($resultadosArray['monto_prestamo'])
+            ? '$'.number_format($resultadosArray['monto_prestamo'], 2)
+            : (is_numeric($montoPrestamo) ? '$'.number_format($montoPrestamo, 2) : '--');
+        $html .= static::buildCard('Monto', '💰', $displayValue, 'Capital', $isCalculated);
+
+        // Tasa
+        $isCalculated = in_array('tasa_interes', $camposCalculadosArray);
+        $displayValue = isset($resultadosArray['tasa_interes'])
+            ? ($resultadosArray['tasa_interes'].'%')
+            : (is_numeric($tasaInteres) ? $tasaInteres.'%' : '--');
+        $html .= static::buildCard('Tasa', '📈', $displayValue, 'Nominal', $isCalculated);
+
+        // Pagos
+        $isCalculated = in_array('numero_pagos', $camposCalculadosArray);
+        $displayValue = isset($resultadosArray['numero_pagos'])
+            ? $resultadosArray['numero_pagos']
+            : (is_numeric($numeroPagos) ? $numeroPagos : '--');
+        $html .= static::buildCard('Pagos', '🔢', $displayValue, 'Cuotas', $isCalculated);
+
+        $html .= '</div>';
+
+        // Periodicidad en línea horizontal
+        $periodicidadTexto = match ((int) $periodicidadTasa) {
+            1 => 'Anual', 2 => 'Semestral', 4 => 'Trimestral', 6 => 'Bimestral',
+            12 => 'Mensual', 24 => 'Quincenal', 52 => 'Semanal',
+            360 => 'Diaria Comercial', 365 => 'Diaria',
+            default => $periodicidadTasa.' veces/año'
+        };
+
+        $html .= "
+        <div class='bg-indigo-50/70 dark:bg-indigo-950/30 rounded-lg p-2.5 border border-indigo-200 dark:border-indigo-800'>
+            <div class='flex items-center justify-between'>
+                <div class='flex items-center gap-2'>
+                    <span class='text-lg'>📊</span>
+                    <span class='text-xs font-semibold text-indigo-900 dark:text-indigo-100'>Periodicidad</span>
+                </div>
+                <div class='text-right'>
+                    <span class='font-bold text-sm text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</span>
+                    <span class='text-xs text-indigo-600 dark:text-indigo-400 ml-2'>({$periodicidadTasa}/año)</span>
+                </div>
+            </div>
+        </div>
+    ";
+
+        $html .= '</div>'; // Fin bloque parámetros
+
+        // ============================================
+        // BLOQUE 2: Estructura de Pagos (Según Sistema)
+        // ============================================
+        $html .= '<div class="space-y-3">';
+        $html .= '<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <span>💳</span> ESTRUCTURA DE PAGOS
+              </h4>';
+
+        if ($sistemaAmortizacion === 'frances' && isset($resultadosArray['cuota_fija'])) {
+            // Sistema Francés: Una sola cuota destacada + detalles de primera y última cuota
+            $isCalculated = in_array('cuota_fija', $camposCalculadosArray);
+            $displayValue = '$'.number_format($resultadosArray['cuota_fija'], 2);
+
+            $html .= '<div class="grid grid-cols-1 gap-3">';
+            $html .= static::buildCard('Cuota Fija', '💳', $displayValue, 'Pago constante (capital + interés)', $isCalculated, 'green');
+            $html .= '</div>';
+
+            // Detalles de amortización e intereses en 2 columnas
+            if (isset($resultadosArray['amortizacion_inicial']) || isset($resultadosArray['interes_inicial'])) {
+                $html .= '<div class="grid grid-cols-2 gap-3 mt-3">';
+
+                if (isset($resultadosArray['amortizacion_inicial'])) {
+                    $html .= static::buildCard('Amortización Inicial', '📉', '$'.number_format($resultadosArray['amortizacion_inicial'], 2), 'Capital en cuota 1', true, 'cyan');
+                }
+
+                if (isset($resultadosArray['amortizacion_final'])) {
+                    $html .= static::buildCard('Amortización Final', '📈', '$'.number_format($resultadosArray['amortizacion_final'], 2), 'Capital en última cuota', true, 'cyan');
+                }
+
+                if (isset($resultadosArray['interes_inicial'])) {
+                    $html .= static::buildCard('Interés Inicial', '💵', '$'.number_format($resultadosArray['interes_inicial'], 2), 'Interés en cuota 1', true, 'orange');
+                }
+
+                if (isset($resultadosArray['interes_final'])) {
+                    $html .= static::buildCard('Interés Final', '💵', '$'.number_format($resultadosArray['interes_final'], 2), 'Interés en última cuota', true, 'orange');
+                }
+
+                $html .= '</div>';
+            }
+        }
+
+        if ($sistemaAmortizacion === 'aleman') {
+            // Sistema Alemán: 3 columnas compactas + amortización constante destacada
+            $html .= '<div class="grid grid-cols-1 gap-3">';
+
+            if (isset($resultadosArray['amortizacion_constante'])) {
+                $displayValue = '$'.number_format($resultadosArray['amortizacion_constante'], 2);
+                $html .= static::buildCard('Amortización Constante', '📊', $displayValue, 'Abono fijo a capital en cada período', true, 'green');
+            }
+
+            $html .= '</div>';
+
+            $html .= '<div class="grid grid-cols-3 gap-3 mt-3">';
+
+            if (isset($resultadosArray['cuota_inicial'])) {
+                $isCalculated = in_array('cuota_inicial', $camposCalculadosArray);
+                $displayValue = '$'.number_format($resultadosArray['cuota_inicial'], 2);
+                $html .= static::buildCard('Cuota Inicial', '💳', $displayValue, 'Primera (máx)', $isCalculated, 'blue');
+            }
+
+            if (isset($resultadosArray['interes_inicial'])) {
+                $html .= static::buildCard('Interés Inicial', '💵', '$'.number_format($resultadosArray['interes_inicial'], 2), 'En cuota 1', true, 'orange');
+            }
+
+            if (isset($resultadosArray['cuota_final'])) {
+                $displayValue = '$'.number_format($resultadosArray['cuota_final'], 2);
+                $html .= static::buildCard('Cuota Final', '💳', $displayValue, 'Última (mín)', true, 'cyan');
+            }
+
+            $html .= '</div>';
+
+            // Interés final en su propia fila si existe
+            if (isset($resultadosArray['interes_final'])) {
+                $html .= '<div class="grid grid-cols-1 gap-3 mt-3">';
+                $html .= static::buildCard('Interés Final', '💵', '$'.number_format($resultadosArray['interes_final'], 2), 'Interés en última cuota', true, 'orange');
+                $html .= '</div>';
+            }
+        }
+
+        if ($sistemaAmortizacion === 'americano') {
+            // Sistema Americano: 2 columnas
+            $html .= '<div class="grid grid-cols-2 gap-3">';
+
+            if (isset($resultadosArray['amortizacion_inicial'])) {
+                $html .= static::buildCard('Amortización Inicial', '📉', '$'.number_format($resultadosArray['amortizacion_inicial'], 2), 'Capital en cuota 1', true, 'cyan');
+            }
+
+            if (isset($resultadosArray['amortizacion_final'])) {
+                $html .= static::buildCard('Amortización Final', '📈', '$'.number_format($resultadosArray['amortizacion_final'], 2), 'Capital en última cuota', true, 'cyan');
+            }
+
+            if (isset($resultadosArray['cuota_interes_periodica'])) {
+                $isCalculated = in_array('cuota_periodica', $camposCalculadosArray);
+                $displayValue = '$'.number_format($resultadosArray['cuota_interes_periodica'], 2);
+                $html .= static::buildCard('Cuota Periódica', '💸', $displayValue, 'Solo interés (períodos 1 al n-1)', $isCalculated, 'amber');
+            }
+
+            if (isset($resultadosArray['cuota_final'])) {
+                $displayValue = '$'.number_format($resultadosArray['cuota_final'], 2);
+                $html .= static::buildCard('Pago Final', '💰', $displayValue, 'Capital + último interés', true, 'purple');
+            }
+
+            $html .= '</div>';
+        }
+
+        $html .= '</div>'; // Fin estructura de pagos
+
+        // ============================================
+        // BLOQUE 3: Resumen Financiero Total (Destacado)
+        // ============================================
+        $html .= '<div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/50 dark:to-pink-950/50 rounded-xl p-4 border-2 border-purple-300 dark:border-purple-700">';
+        $html .= '<h4 class="text-sm font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
+              <span>💎</span> RESUMEN FINANCIERO
+              </h4>';
+
+        $html .= '<div class="grid grid-cols-2 gap-3">';
+
+        if (isset($resultadosArray['total_intereses'])) {
+            $html .= static::buildCard('Total Intereses', '💸', '$'.number_format($resultadosArray['total_intereses'], 2), 'Costo financiero total', true, 'red');
+        }
+
+        if (isset($resultadosArray['total_pagado'])) {
+            $html .= static::buildCard('Total a Pagar', '💎', '$'.number_format($resultadosArray['total_pagado'], 2), 'Capital + Intereses', true, 'purple');
+        }
+
+        $html .= '</div>';
+        $html .= '</div>'; // Fin resumen financiero
+
+        // ============================================
+        // MENSAJE FINAL (Si existe)
+        // ============================================
+        if ($mensaje) {
+            $html .= "
+            <div class='bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 rounded-xl p-4 border border-blue-300 dark:border-blue-700'>
+                <div class='flex items-start gap-3'>
+                    <span class='text-2xl flex-shrink-0'>🎯</span>
+                    <div class='flex-1'>
+                        <h4 class='font-bold text-blue-900 dark:text-blue-100 text-sm mb-1'>RESULTADO</h4>
+                        <p class='text-sm text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensaje}</p>
+                    </div>
+                </div>
+            </div>
+        ";
+        }
+
+        $html .= '</div>'; // Fin contenedor principal
+
+        return new HtmlString($html);
     }
 
     /**

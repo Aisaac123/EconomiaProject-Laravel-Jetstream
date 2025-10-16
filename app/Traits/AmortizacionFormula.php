@@ -30,14 +30,22 @@ trait AmortizacionFormula
         if ($sistemaAmortizacion === 'frances') {
             $camposFlexibles = ['monto_prestamo', 'numero_pagos', 'cuota_fija', 'tasa_interes'];
             $maxCamposVacios = 2;
+        } elseif ($sistemaAmortizacion === 'aleman') {
+            $camposFlexibles = ['monto_prestamo', 'numero_pagos', 'cuota_inicial', 'tasa_interes'];
+            $camposObligatorios = []; // Ahora todos son flexibles
+            $maxCamposVacios = 2;
+        } elseif ($sistemaAmortizacion === 'americano') {
+            $camposFlexibles = ['monto_prestamo', 'cuota_periodica', 'tasa_interes'];
+            $camposObligatorios = ['numero_pagos'];
+            $maxCamposVacios = 2;
         } else {
             $camposFlexibles = ['numero_pagos'];
             $camposObligatorios = ['monto_prestamo', 'tasa_interes'];
             $maxCamposVacios = 1;
         }
 
-        // Validar campos obligatorios (para Alemán y Americano)
-        if ($sistemaAmortizacion !== 'frances') {
+        // Validar campos obligatorios (cuando existen)
+        if (! empty($camposObligatorios)) {
             $camposVacios = [];
             foreach ($camposObligatorios as $field) {
                 if (empty($data[$field])) {
@@ -46,11 +54,18 @@ trait AmortizacionFormula
             }
 
             if (count($camposVacios) > 0) {
-                $camposTexto = implode(', ', $camposVacios);
+                $camposTexto = implode(', ', array_map(function ($field) {
+                    return match ($field) {
+                        'numero_pagos' => 'Número de Pagos',
+                        'monto_prestamo' => 'Monto del Préstamo',
+                        'tasa_interes' => 'Tasa de Interés',
+                        default => $field
+                    };
+                }, $camposVacios));
 
                 return [
                     'error' => true,
-                    'message' => "Los siguientes campos son obligatorios: $camposTexto",
+                    'message' => "Los siguientes campos son obligatorios para este sistema: $camposTexto",
                 ];
             }
         }
@@ -69,6 +84,12 @@ trait AmortizacionFormula
                 'message' => "En el sistema {$sistemaAmortizacion}, solo puedes dejar máximo {$maxCamposVacios} campo(s) vacío(s). Actualmente hay ".count($camposFlexiblesVacios).' vacíos.',
             ];
         }
+        if (count($camposFlexiblesVacios) === 0) {
+            return [
+                'error' => true,
+                'message' => 'Debes dejar al menos 1 campo vacío para que el sistema pueda calcularlo. Actualmente todos los campos están llenos.',
+            ];
+        }
 
         // Inicializar valores
         $values = [
@@ -76,6 +97,8 @@ trait AmortizacionFormula
             'tasa_interes' => ! empty($data['tasa_interes']) ? (float) $data['tasa_interes'] : null,
             'numero_pagos' => ! empty($data['numero_pagos']) ? (int) $data['numero_pagos'] : null,
             'cuota_fija' => ! empty($data['cuota_fija']) ? (float) $data['cuota_fija'] : null,
+            'cuota_inicial' => ! empty($data['cuota_inicial']) ? (float) $data['cuota_inicial'] : null,
+            'cuota_periodica' => ! empty($data['cuota_periodica']) ? (float) $data['cuota_periodica'] : null,
         ];
 
         // Convertir tasa a decimal por periodo
@@ -95,11 +118,11 @@ trait AmortizacionFormula
 
             } elseif ($sistemaAmortizacion === 'aleman') {
                 // SISTEMA ALEMÁN
-                $resultado = $this->calculateSistemaAleman($values, $tasaPorPeriodo, $periodicidadTasa);
+                $resultado = $this->calculateSistemaAleman($values, $tasaPorPeriodo, $periodicidadTasa, $camposCalculados);
 
             } elseif ($sistemaAmortizacion === 'americano') {
                 // SISTEMA AMERICANO
-                $resultado = $this->calculateSistemaAmericano($values, $tasaPorPeriodo, $periodicidadTasa);
+                $resultado = $this->calculateSistemaAmericano($values, $tasaPorPeriodo, $periodicidadTasa, $camposCalculados);
 
             } else {
                 return [
@@ -114,12 +137,17 @@ trait AmortizacionFormula
 
             $resultados = $resultado['data'];
             $messages = array_merge($messages, $resultado['messages']);
+            $camposCalculados = array_merge($camposCalculados, $resultado['campos_calculados'] ?? []);
 
         } catch (\Throwable $e) {
             return [
                 'error' => true,
                 'message' => 'Error en cálculo: '.$e->getMessage(),
             ];
+        }
+
+        if (isset($resultado['campos_calculados'])) {
+            $camposCalculados = array_unique(array_merge($camposCalculados, $resultado['campos_calculados']));
         }
 
         return [
@@ -302,21 +330,85 @@ trait AmortizacionFormula
     /**
      * Sistema Alemán: Amortización constante
      */
-    private function calculateSistemaAleman(array $values, ?float $tasaPorPeriodo, int $periodicidadTasa): array
+    private function calculateSistemaAleman(array &$values, ?float &$tasaPorPeriodo, int $periodicidadTasa, array &$camposCalculados): array
     {
         $messages = [];
+        $camposCalculados = [];
+        $maxIterations = 15;
+        $iteration = 0;
+        $calculated = true;
 
-        if ($values['monto_prestamo'] === null || $tasaPorPeriodo === null) {
-            return [
-                'error' => true,
-                'message' => 'Faltan datos necesarios para calcular el sistema alemán.',
-            ];
+        while ($calculated && $iteration < $maxIterations) {
+            $calculated = false;
+            $iteration++;
+
+            // 1. Calcular MONTO_PRESTAMO desde cuota_inicial
+            // cuota_inicial = (P/n) + (P*r) => P = cuota_inicial / (1/n + r)
+            if ($values['monto_prestamo'] === null && $values['cuota_inicial'] !== null &&
+                $tasaPorPeriodo !== null && $values['numero_pagos'] !== null) {
+
+                $denominador = (1 / $values['numero_pagos']) + $tasaPorPeriodo;
+                if ($denominador > 0) {
+                    $values['monto_prestamo'] = $values['cuota_inicial'] / $denominador;
+                    $camposCalculados[] = 'monto_prestamo';
+                    $messages[] = 'Monto del préstamo calculado: $'.number_format($values['monto_prestamo'], 2);
+                    $calculated = true;
+                }
+            }
+
+            // 2. Calcular NÚMERO_PAGOS desde cuota_inicial
+            // cuota_inicial = (P/n) + (P*r) => n = P / (cuota_inicial - P*r)
+            if ($values['numero_pagos'] === null && $values['monto_prestamo'] !== null &&
+                $values['cuota_inicial'] !== null && $tasaPorPeriodo !== null) {
+
+                $denominador = $values['cuota_inicial'] - ($values['monto_prestamo'] * $tasaPorPeriodo);
+                if ($denominador > 0) {
+                    $values['numero_pagos'] = round($values['monto_prestamo'] / $denominador, 0);
+                    $camposCalculados[] = 'numero_pagos';
+                    $messages[] = 'Número de pagos calculado: '.intval($values['numero_pagos']);
+                    $calculated = true;
+                }
+            }
+
+            // 3. Calcular TASA_INTERES desde cuota_inicial usando Newton-Raphson
+            // cuota_inicial = (P/n) + (P*r) => r = (cuota_inicial - P/n) / P
+            if ($values['tasa_interes'] === null && $values['monto_prestamo'] !== null &&
+                $values['numero_pagos'] !== null && $values['cuota_inicial'] !== null) {
+
+                $amortizacion = $values['monto_prestamo'] / $values['numero_pagos'];
+                $interesInicial = $values['cuota_inicial'] - $amortizacion;
+
+                if ($interesInicial >= 0 && $values['monto_prestamo'] > 0) {
+                    $tasaPorPeriodo = $interesInicial / $values['monto_prestamo'];
+                    $tasaAnual = $tasaPorPeriodo * $periodicidadTasa * 100;
+                    $values['tasa_interes'] = smartRound($tasaAnual / $periodicidadTasa);
+                    $camposCalculados[] = 'tasa_interes';
+                    $messages[] = 'Tasa de interés calculada: '.$values['tasa_interes'].'%';
+                    $calculated = true;
+                }
+            }
+
+            // 4. Calcular CUOTA_INICIAL
+            // cuota_inicial = (P/n) + (P*r)
+            if ($values['cuota_inicial'] === null && $values['monto_prestamo'] !== null &&
+                $tasaPorPeriodo !== null && $values['numero_pagos'] !== null) {
+
+                $amortizacion = $values['monto_prestamo'] / $values['numero_pagos'];
+                $interes = $values['monto_prestamo'] * $tasaPorPeriodo;
+                $values['cuota_inicial'] = $amortizacion + $interes;
+                $camposCalculados[] = 'cuota_inicial';
+                $messages[] = 'Cuota inicial calculada: $'.number_format($values['cuota_inicial'], 2);
+                $calculated = true;
+            }
         }
 
-        // Calcular número de pagos si es el único vacío
-        if ($values['numero_pagos'] === null) {
-            $values['numero_pagos'] = 12; // Default
-            $messages[] = 'Usando número de pagos por defecto: 12';
+        // Validar que todos los valores estén calculados
+        if ($values['monto_prestamo'] === null || $tasaPorPeriodo === null ||
+            $values['numero_pagos'] === null) {
+            return [
+                'error' => true,
+                'message' => 'No fue posible calcular todos los valores necesarios para el sistema alemán. Verifica los datos ingresados.',
+            ];
         }
 
         $amortizacionConstante = $values['monto_prestamo'] / $values['numero_pagos'];
@@ -354,7 +446,9 @@ trait AmortizacionFormula
             'tabla_amortizacion' => $tabla,
         ];
 
-        $messages[] = 'Sistema Alemán: Amortización constante de $'.number_format($amortizacionConstante, 2);
+        if (empty($messages)) {
+            $messages[] = 'Sistema Alemán: Amortización constante de $'.number_format($amortizacionConstante, 2);
+        }
         $messages[] = 'Cuota inicial: $'.number_format($primeraCuota['cuota'], 2);
         $messages[] = 'Cuota final: $'.number_format($ultimaCuota['cuota'], 2);
         $messages[] = 'Total de intereses: $'.number_format($totalIntereses, 2);
@@ -363,26 +457,69 @@ trait AmortizacionFormula
             'error' => false,
             'data' => $resultados,
             'messages' => $messages,
+            'campos_calculados' => $camposCalculados,
         ];
     }
 
     /**
      * Sistema Americano: Solo intereses, capital al final
      */
-    private function calculateSistemaAmericano(array $values, ?float $tasaPorPeriodo, int $periodicidadTasa): array
+    private function calculateSistemaAmericano(array &$values, ?float &$tasaPorPeriodo, int $periodicidadTasa, array &$camposCalculados): array
     {
         $messages = [];
+        $camposCalculados = [];
+        $maxIterations = 15;
+        $iteration = 0;
+        $calculated = true;
 
-        if ($values['monto_prestamo'] === null || $tasaPorPeriodo === null) {
-            return [
-                'error' => true,
-                'message' => 'Faltan datos necesarios para calcular el sistema americano.',
-            ];
+        while ($calculated && $iteration < $maxIterations) {
+            $calculated = false;
+            $iteration++;
+
+            // 1. Calcular MONTO_PRESTAMO desde cuota_periodica
+            // cuota_periodica = P * r => P = cuota_periodica / r
+            if ($values['monto_prestamo'] === null && $values['cuota_periodica'] !== null &&
+                $tasaPorPeriodo !== null && $tasaPorPeriodo > 0) {
+
+                $values['monto_prestamo'] = $values['cuota_periodica'] / $tasaPorPeriodo;
+                $camposCalculados[] = 'monto_prestamo';
+                $messages[] = 'Monto del préstamo calculado: $'.number_format($values['monto_prestamo'], 2);
+                $calculated = true;
+            }
+
+            // 2. Calcular TASA_INTERES desde cuota_periodica
+            // cuota_periodica = P * r => r = cuota_periodica / P
+            if ($values['tasa_interes'] === null && $values['monto_prestamo'] !== null &&
+                $values['cuota_periodica'] !== null && $values['monto_prestamo'] > 0) {
+
+                $tasaPorPeriodo = $values['cuota_periodica'] / $values['monto_prestamo'];
+                $tasaAnual = $tasaPorPeriodo * $periodicidadTasa * 100;
+                $values['tasa_interes'] = smartRound($tasaAnual / $periodicidadTasa);
+                $camposCalculados[] = 'tasa_interes';
+                $messages[] = 'Tasa de interés calculada: '.$values['tasa_interes'].'%';
+                $calculated = true;
+            }
+
+            // 3. Calcular CUOTA_PERIODICA
+            // cuota_periodica = P * r
+            if ($values['cuota_periodica'] === null && $values['monto_prestamo'] !== null &&
+                $tasaPorPeriodo !== null) {
+
+                $values['cuota_periodica'] = $values['monto_prestamo'] * $tasaPorPeriodo;
+                $camposCalculados[] = 'cuota_periodica';
+                $messages[] = 'Cuota periódica calculada: $'.number_format($values['cuota_periodica'], 2);
+                $calculated = true;
+            }
+
         }
 
-        if ($values['numero_pagos'] === null) {
-            $values['numero_pagos'] = 12;
-            $messages[] = 'Usando número de pagos por defecto: 12';
+        // Validar que todos los valores estén calculados
+        if ($values['monto_prestamo'] === null || $tasaPorPeriodo === null ||
+            $values['numero_pagos'] === null) {
+            return [
+                'error' => true,
+                'message' => 'No fue posible calcular todos los valores necesarios para el sistema americano. Verifica los datos ingresados.',
+            ];
         }
 
         $cuotaInteres = $values['monto_prestamo'] * $tasaPorPeriodo;
@@ -419,7 +556,9 @@ trait AmortizacionFormula
             'tabla_amortizacion' => $tabla,
         ];
 
-        $messages[] = 'Sistema Americano: Cuota de interés periódica de $'.number_format($cuotaInteres, 2);
+        if (empty($messages)) {
+            $messages[] = 'Sistema Americano: Cuota de interés periódica de $'.number_format($cuotaInteres, 2);
+        }
         $messages[] = 'Pago final (capital + interés): $'.number_format($ultimaCuota['cuota'], 2);
         $messages[] = 'Total de intereses: $'.number_format($totalIntereses, 2);
 
@@ -427,6 +566,7 @@ trait AmortizacionFormula
             'error' => false,
             'data' => $resultados,
             'messages' => $messages,
+            'campos_calculados' => $camposCalculados,
         ];
     }
 

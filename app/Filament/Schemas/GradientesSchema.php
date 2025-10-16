@@ -599,147 +599,273 @@ class GradientesSchema
         $resultadosArray = $resultados ? json_decode($resultados, true) : [];
         $camposCalculadosArray = $get('campos_calculados') ? json_decode($get('campos_calculados'), true) : [];
 
-        if (! empty($resultadosArray)) {
-            switch ($tipoGradiente) {
-                case 'aritmetico_vencido':
-                    $gradienteTexto = 'Gradiente Aritmético Vencido';
-                    $gradienteDesc = 'Pagos al final de cada período con incremento o decremento constante.';
-                    $colorFrom = 'from-blue-50';
-                    $colorTo = 'to-cyan-100';
-                    $colorDarkFrom = 'from-blue-950/50';
-                    $colorDarkTo = 'to-cyan-700/50';
-                    $borderColor = 'border-blue-200 dark:border-blue-800';
-                    $titleColor = 'text-blue-900 dark:text-blue-100';
-                    $descColor = 'text-blue-600 dark:text-blue-300';
-                    break;
-
-                case 'aritmetico_anticipado':
-                    $gradienteTexto = 'Gradiente Aritmético Anticipado';
-                    $gradienteDesc = 'Pagos al inicio de cada período con incremento o decremento constante.';
-                    $colorFrom = 'from-amber-50';
-                    $colorTo = 'to-yellow-100';
-                    $colorDarkFrom = 'from-amber-950/50';
-                    $colorDarkTo = 'to-yellow-700/50';
-                    $borderColor = 'border-amber-200 dark:border-amber-800';
-                    $titleColor = 'text-amber-900 dark:text-amber-100';
-                    $descColor = 'text-amber-600 dark:text-amber-300';
-                    break;
-
-                case 'geometrico_vencido':
-                    $gradienteTexto = 'Gradiente Geométrico Vencido';
-                    $gradienteDesc = 'Pagos al final de cada período con incremento o decremento porcentual.';
-                    $colorFrom = 'from-blue-50';
-                    $colorTo = 'to-cyan-100';
-                    $colorDarkFrom = 'from-blue-950/50';
-                    $colorDarkTo = 'to-cyan-700/50';
-                    $borderColor = 'border-blue-200 dark:border-blue-800';
-                    $titleColor = 'text-blue-900 dark:text-blue-100';
-                    $descColor = 'text-blue-600 dark:text-blue-300';
-                    break;
-
-                case 'geometrico_anticipado':
-                    $gradienteTexto = 'Gradiente Geométrico Anticipado';
-                    $gradienteDesc = 'Pagos al inicio de cada período con incremento o decremento porcentual.';
-                    $colorFrom = 'from-amber-50';
-                    $colorTo = 'to-yellow-100';
-                    $colorDarkFrom = 'from-amber-950/50';
-                    $colorDarkTo = 'to-yellow-700/50';
-                    $borderColor = 'border-amber-200 dark:border-amber-800';
-                    $titleColor = 'text-amber-900 dark:text-amber-100';
-                    $descColor = 'text-amber-600 dark:text-amber-300';
-                    break;
-            }
-
-            $html = '<div class="space-y-6">';
-            $html .= '<div class="bg-gradient-to-r '.$colorFrom.' '.$colorTo.' dark:'.$colorDarkFrom.' dark:'.$colorDarkTo.' rounded-xl p-6 border '.$borderColor.'">';
-            $html .= '<h3 class="text-xl font-bold '.$titleColor.' flex items-center gap-3">';
-            $html .= '<span class="text-3xl">📈</span><div><div>'.$gradienteTexto.'</div>';
-            $html .= '<div class="text-sm font-normal '.$descColor.'">'.$gradienteDesc.'</div></div></h3></div>';
-
-            $html .= '<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">';
-
-            foreach ($resultadosArray as $key => $value) {
-                $isCalculated = in_array($key, $camposCalculadosArray);
-                $config = match ($key) {
-                    'valor_presente' => ['título' => 'Valor Presente', 'icono' => '💰', 'formato' => 'moneda', 'sub' => 'Valor actual', 'color' => 'green'],
-                    'valor_futuro' => ['título' => 'Valor Futuro', 'icono' => '💎', 'formato' => 'moneda', 'sub' => 'Valor final', 'color' => 'purple'],
-                    'anualidad_inicial' => ['título' => 'Anualidad Inicial', 'icono' => '💵', 'formato' => 'moneda', 'sub' => 'Primer pago', 'color' => 'blue'],
-                    'anualidad_final' => ['título' => 'Anualidad Final', 'icono' => '💳', 'formato' => 'moneda', 'sub' => 'Último pago', 'color' => 'orange'],
-                    'tasa_interes' => ['título' => 'Tasa de Interés', 'icono' => '📈', 'formato' => 'porcentaje', 'sub' => 'Tasa nominal', 'color' => 'gray'],
-                    'numero_pagos' => ['título' => 'Número de Pagos', 'icono' => '🔢', 'formato' => 'numero', 'sub' => 'Total períodos', 'color' => 'gray'],
-                    default => null
-                };
-
-                if ($config) {
-                    $displayValue = match ($config['formato']) {
-                        'moneda' => '$'.number_format($value, 2),
-                        'porcentaje' => $value.'%',
-                        'numero' => $value,
-                        default => $value
-                    };
-                    $html .= static::buildCard($config['título'], $config['icono'], $displayValue, $config['sub'], $isCalculated, $config['color']);
-                }
-            }
-            $html .= '</div>';
-
-            $html .= '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">';
-
-            foreach ($resultadosArray as $key => $value) {
-                $isCalculated = in_array($key, $camposCalculadosArray);
-                $config = match ($key) {
-                    'gradiente_aritmetico' => ['título' => 'Gradiente Aritmético', 'icono' => '📊', 'formato' => 'moneda', 'sub' => $value >= 0 ? '(Incremento)' : '(Decremento)', 'color' => 'cyan'],
-                    'gradiente_geometrico' => ['título' => 'Gradiente Geométrico', 'icono' => '📈', 'formato' => 'porcentaje', 'sub' => $value >= 0 ? '(Incremento)' : '(Decremento)', 'color' => 'cyan'],
-                    'total_pagos' => ['título' => 'Total de Pagos', 'icono' => '💸', 'formato' => 'moneda', 'sub' => 'Suma total', 'color' => 'red'],
-                    default => null
-                };
-
-                if ($config) {
-                    $displayValue = match ($config['formato']) {
-                        'moneda' => '$'.number_format($value, 2),
-                        'porcentaje' => $value.'%',
-                        'numero' => $value,
-                        default => $value
-                    };
-                    $html .= static::buildCard($config['título'], $config['icono'], $displayValue, $config['sub'], $isCalculated, $config['color'], p: 'p-4');
-                }
-            }
-
-            $periodicidadTexto = match ((int) $periodicidadTasa) {
-                1 => 'Anual', 2 => 'Semestral', 4 => 'Trimestral', 6 => 'Bimestral',
-                12 => 'Mensual', 24 => 'Quincenal', 52 => 'Semanal',
-                360 => 'Diaria Comercial', 365 => 'Diaria',
-                default => $periodicidadTasa.' veces/año'
-            };
-
-            $html .= "<div class='rounded-lg p-4 border bg-indigo-50 border-indigo-200 dark:bg-indigo-950/50 dark:border-indigo-700 shadow-sm'>";
-            $html .= "<div class='flex items-center gap-2 mb-2'><span class='text-indigo-600 dark:text-indigo-400'>📊</span>";
-            $html .= "<h4 class='font-semibold text-indigo-900 dark:text-indigo-100 text-sm'>Periodicidad</h4></div>";
-            $html .= "<p class='text-xl font-bold text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</p>";
-            $html .= "<p class='text-xs text-indigo-600 dark:text-indigo-400'>{$periodicidadTasa} períodos/año</p></div>";
-
-            $html .= '</div>';
-
-            if ($mensaje) {
-                $html .= "<div class='bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-xl p-6 border border-blue-200 dark:border-blue-700 shadow-sm'>";
-                $html .= "<div class='flex items-start gap-4'><div class='flex-shrink-0 text-3xl'>🎯</div><div>";
-                $html .= "<h4 class='font-bold text-blue-900 dark:text-blue-100 mb-2 text-lg'>Resultado del Cálculo</h4>";
-                $html .= "<p class='text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensaje}</p></div></div></div>";
-            }
-
-            $html .= '</div>';
-
-            return new HtmlString($html);
-        }
-
+        // Validación: Tipo de gradiente no seleccionado
         if (empty($tipoGradiente)) {
-            return new HtmlString('<div class="text-center py-12"><div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50 rounded-xl p-8 border border-amber-200 dark:border-amber-800">
-                <div class="text-6xl mb-4">⚠️</div><h3 class="text-xl font-bold text-amber-900 dark:text-amber-100 mb-3">Tipo de gradiente no seleccionado</h3>
-                <p class="text-amber-700 dark:text-amber-300 text-lg">Por favor, selecciona el tipo de gradiente (Aritmético o Geométrico)</p></div></div>');
+            return new HtmlString('
+            <div class="text-center py-12">
+                <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50 rounded-xl p-8 border border-amber-200 dark:border-amber-800">
+                    <div class="text-6xl mb-4">⚠️</div>
+                    <h3 class="text-xl font-bold text-amber-900 dark:text-amber-100 mb-3">Tipo de gradiente no seleccionado</h3>
+                    <p class="text-amber-700 dark:text-amber-300 text-lg">Por favor, selecciona el tipo de gradiente</p>
+                </div>
+            </div>
+        ');
         }
 
-        return new HtmlString('<div class="text-center py-12 text-gray-500 dark:text-gray-400">
-            <div class="text-5xl mb-4">⏳</div><h3 class="text-xl font-semibold mb-2">Listo para calcular</h3>
-            <p class="text-sm text-gray-400">Presiona el botón "Calcular" para ver los resultados</p></div>');
+        // Validación: Sin resultados
+        if (empty($resultadosArray)) {
+            return new HtmlString('
+            <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                <div class="text-5xl mb-4">⏳</div>
+                <h3 class="text-xl font-semibold mb-2">Listo para calcular</h3>
+                <p class="text-sm text-gray-400">Presiona el botón "Calcular" para ver los resultados</p>
+            </div>
+        ');
+        }
+
+        // Configuración según tipo de gradiente
+        $gradienteConfig = match ($tipoGradiente) {
+            'aritmetico_vencido' => [
+                'titulo' => '📊 Gradiente Aritmético Vencido',
+                'desc' => 'Pagos al final con incremento/decremento constante',
+                'color' => 'blue',
+                'icono' => '📊',
+            ],
+            'aritmetico_anticipado' => [
+                'titulo' => '📋 Gradiente Aritmético Anticipado',
+                'desc' => 'Pagos al inicio con incremento/decremento constante',
+                'color' => 'amber',
+                'icono' => '📋',
+            ],
+            'geometrico_vencido' => [
+                'titulo' => '📈 Gradiente Geométrico Vencido',
+                'desc' => 'Pagos al final con incremento/decremento porcentual',
+                'color' => 'emerald',
+                'icono' => '📈',
+            ],
+            'geometrico_anticipado' => [
+                'titulo' => '📉 Gradiente Geométrico Anticipado',
+                'desc' => 'Pagos al inicio con incremento/decremento porcentual',
+                'color' => 'orange',
+                'icono' => '📉',
+            ],
+            default => [
+                'titulo' => '📊 Gradiente',
+                'desc' => 'Análisis de gradiente',
+                'color' => 'gray',
+                'icono' => '📊',
+            ]
+        };
+
+        $colorClass = $gradienteConfig['color'];
+
+        // Inicio HTML
+        $html = '<div class="space-y-5">';
+
+        // ============================================
+        // HEADER - Tipo de Gradiente
+        // ============================================
+        $html .= "
+        <div class='bg-gradient-to-r from-{$colorClass}-50 to-{$colorClass}-100 dark:from-{$colorClass}-950/50 dark:to-{$colorClass}-800/50 rounded-xl p-5 border border-{$colorClass}-200 dark:border-{$colorClass}-800'>
+            <div class='flex items-center gap-3'>
+                <span class='text-3xl'>{$gradienteConfig['icono']}</span>
+                <div>
+                    <h3 class='text-lg font-bold text-{$colorClass}-900 dark:text-{$colorClass}-100'>{$gradienteConfig['titulo']}</h3>
+                    <p class='text-sm text-{$colorClass}-700 dark:text-{$colorClass}-300'>{$gradienteConfig['desc']}</p>
+                </div>
+            </div>
+        </div>
+    ";
+
+        // ============================================
+        // BLOQUE 1: Valores Principales (VP y VF)
+        // ============================================
+        $html .= '<div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">';
+        $html .= '<h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+              <span>💰</span> VALORES TEMPORALES
+              </h4>';
+
+        $html .= '<div class="grid grid-cols-2 gap-3">';
+
+        // Valor Presente
+        if (isset($resultadosArray['valor_presente'])) {
+            $isCalculated = in_array('valor_presente', $camposCalculadosArray);
+            $displayValue = '$'.number_format($resultadosArray['valor_presente'], 2);
+
+            $html .= "
+            <div class='rounded-lg p-4 border bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700 shadow-md'>
+                <div class='flex items-center justify-between mb-2'>
+                    <div class='flex items-center gap-2'>
+                        <span class='text-xl'>💰</span>
+                        <h5 class='font-bold text-green-900 dark:text-green-100 text-sm'>Valor Presente</h5>
+                    </div>
+                    ".($isCalculated ? "<span class='px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200'>✨</span>" : '')."
+                </div>
+                <p class='text-2xl font-bold text-green-900 dark:text-green-100'>{$displayValue}</p>
+                <p class='text-xs text-green-600 dark:text-green-400 mt-1'>Valor actual</p>
+            </div>
+        ";
+        }
+
+        // Valor Futuro
+        if (isset($resultadosArray['valor_futuro'])) {
+            $isCalculated = in_array('valor_futuro', $camposCalculadosArray);
+            $displayValue = '$'.number_format($resultadosArray['valor_futuro'], 2);
+
+            $html .= "
+            <div class='rounded-lg p-4 border bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 dark:from-purple-950/50 dark:to-pink-950/50 dark:border-purple-700 shadow-md'>
+                <div class='flex items-center justify-between mb-2'>
+                    <div class='flex items-center gap-2'>
+                        <span class='text-xl'>💎</span>
+                        <h5 class='font-bold text-purple-900 dark:text-purple-100 text-sm'>Valor Futuro</h5>
+                    </div>
+                    ".($isCalculated ? "<span class='px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200'>✨</span>" : '')."
+                </div>
+                <p class='text-2xl font-bold text-purple-900 dark:text-purple-100'>{$displayValue}</p>
+                <p class='text-xs text-purple-600 dark:text-purple-400 mt-1'>Valor final</p>
+            </div>
+        ";
+        }
+
+        $html .= '</div>';
+        $html .= '</div>'; // Fin valores temporales
+
+        // ============================================
+        // BLOQUE 2: Anualidades (Inicial y Final)
+        // ============================================
+        if (isset($resultadosArray['anualidad_inicial']) || isset($resultadosArray['anualidad_final'])) {
+            $html .= '<div class="space-y-3">';
+            $html .= '<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <span>💳</span> FLUJOS DE PAGO
+                  </h4>';
+
+            $html .= '<div class="grid grid-cols-2 gap-3">';
+
+            // Anualidad Inicial
+            if (isset($resultadosArray['anualidad_inicial'])) {
+                $isCalculated = in_array('anualidad_inicial', $camposCalculadosArray);
+                $displayValue = '$'.number_format($resultadosArray['anualidad_inicial'], 2);
+                $html .= static::buildCard('Pago Inicial', '💵', $displayValue, 'Primer pago', $isCalculated, 'blue');
+            }
+
+            // Anualidad Final
+            if (isset($resultadosArray['anualidad_final'])) {
+                $isCalculated = in_array('anualidad_final', $camposCalculadosArray);
+                $displayValue = '$'.number_format($resultadosArray['anualidad_final'], 2);
+                $html .= static::buildCard('Pago Final', '💳', $displayValue, 'Último pago', $isCalculated, 'orange');
+            }
+
+            $html .= '</div>';
+            $html .= '</div>'; // Fin anualidades
+        }
+
+        // ============================================
+        // BLOQUE 3: Parámetros del Gradiente
+        // ============================================
+        $html .= '<div class="space-y-3">';
+        $html .= '<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <span>⚙️</span> PARÁMETROS DEL GRADIENTE
+              </h4>';
+
+        $html .= '<div class="grid grid-cols-3 gap-3">';
+
+        // Gradiente Aritmético o Geométrico
+        if (isset($resultadosArray['gradiente_aritmetico'])) {
+            $isCalculated = in_array('gradiente_aritmetico', $camposCalculadosArray);
+            $valorGradiente = $resultadosArray['gradiente_aritmetico'];
+            $displayValue = '$'.number_format($valorGradiente, 2);
+            $subTexto = $valorGradiente >= 0 ? 'Incremento' : 'Decremento';
+            $html .= static::buildCard('Gradiente', '📊', $displayValue, $subTexto, $isCalculated, 'cyan');
+        }
+
+        if (isset($resultadosArray['gradiente_geometrico'])) {
+            $isCalculated = in_array('gradiente_geometrico', $camposCalculadosArray);
+            $valorGradiente = $resultadosArray['gradiente_geometrico'];
+            $displayValue = $valorGradiente.'%';
+            $subTexto = $valorGradiente >= 0 ? 'Incremento' : 'Decremento';
+            $html .= static::buildCard('Gradiente', '📈', $displayValue, $subTexto, $isCalculated, 'cyan');
+        }
+
+        // Tasa de Interés
+        if (isset($resultadosArray['tasa_interes'])) {
+            $isCalculated = in_array('tasa_interes', $camposCalculadosArray);
+            $displayValue = $resultadosArray['tasa_interes'].'%';
+            $html .= static::buildCard('Tasa', '📈', $displayValue, 'Nominal', $isCalculated);
+        }
+
+        // Número de Pagos
+        if (isset($resultadosArray['numero_pagos'])) {
+            $isCalculated = in_array('numero_pagos', $camposCalculadosArray);
+            $displayValue = $resultadosArray['numero_pagos'];
+            $html .= static::buildCard('Pagos', '🔢', $displayValue, 'Períodos', $isCalculated);
+        }
+
+        $html .= '</div>';
+
+        // Periodicidad en línea horizontal
+        $periodicidadTexto = match ((int) $periodicidadTasa) {
+            1 => 'Anual', 2 => 'Semestral', 4 => 'Trimestral', 6 => 'Bimestral',
+            12 => 'Mensual', 24 => 'Quincenal', 52 => 'Semanal',
+            360 => 'Diaria Comercial', 365 => 'Diaria',
+            default => $periodicidadTasa.' veces/año'
+        };
+
+        $html .= "
+        <div class='bg-indigo-50/70 dark:bg-indigo-950/30 rounded-lg p-2.5 border border-indigo-200 dark:border-indigo-800'>
+            <div class='flex items-center justify-between'>
+                <div class='flex items-center gap-2'>
+                    <span class='text-lg'>🔄</span>
+                    <span class='text-xs font-semibold text-indigo-900 dark:text-indigo-100'>Periodicidad</span>
+                </div>
+                <div class='text-right'>
+                    <span class='font-bold text-sm text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</span>
+                    <span class='text-xs text-indigo-600 dark:text-indigo-400 ml-2'>({$periodicidadTasa}/año)</span>
+                </div>
+            </div>
+        </div>
+    ";
+
+        $html .= '</div>'; // Fin parámetros
+
+        // ============================================
+        // BLOQUE 4: Resumen Total (si existe)
+        // ============================================
+        if (isset($resultadosArray['total_pagos'])) {
+            $html .= '<div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/50 dark:to-pink-950/50 rounded-xl p-4 border-2 border-purple-300 dark:border-purple-700">';
+            $html .= '<h4 class="text-sm font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
+                  <span>💎</span> RESUMEN TOTAL
+                  </h4>';
+
+            $html .= '<div class="grid grid-cols-1 gap-3">';
+
+            $displayValue = '$'.number_format($resultadosArray['total_pagos'], 2);
+            $isCalculated = in_array('total_pagos', $camposCalculadosArray);
+            $html .= static::buildCard('Total de Pagos', '💸', $displayValue, 'Suma de todos los flujos', $isCalculated, 'red');
+
+            $html .= '</div>';
+            $html .= '</div>'; // Fin resumen total
+        }
+
+        // ============================================
+        // MENSAJE FINAL (Si existe)
+        // ============================================
+        if ($mensaje) {
+            $html .= "
+            <div class='bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 rounded-xl p-4 border border-blue-300 dark:border-blue-700'>
+                <div class='flex items-start gap-3'>
+                    <span class='text-2xl flex-shrink-0'>🎯</span>
+                    <div class='flex-1'>
+                        <h4 class='font-bold text-blue-900 dark:text-blue-100 text-sm mb-1'>RESULTADO</h4>
+                        <p class='text-sm text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensaje}</p>
+                    </div>
+                </div>
+            </div>
+        ";
+        }
+
+        $html .= '</div>'; // Fin contenedor principal
+
+        return new HtmlString($html);
     }
 
     private static function buildTablaGradienteHtml(callable $get): Htmlable

@@ -571,266 +571,295 @@ class InteresCompuestoSchema
         $periodicidadTasa, $frecuencia, $interesGenerado,
         $mensaje, $campoCalculado, $tipoTasa, $resultado, $resultado2 = null
     ): Htmlable {
-        $html = '<div class="space-y-6">';
 
-        // Header con título dinámico
+        // Inicio HTML
+        $html = '<div class="space-y-5">';
+
+        // ============================================
+        // HEADER - Interés Compuesto
+        // ============================================
         $html .= '
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-200 dark:from-blue-950/50 dark:to-indigo-700/50 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
-            <h3 class="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-3">
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-blue-950/50 dark:to-indigo-800/50 rounded-xl p-5 border border-blue-200 dark:border-blue-800">
+            <div class="flex items-center gap-3">
                 <span class="text-3xl">🏦</span>
                 <div>
-                    <div>Resumen de Interés Compuesto</div>
-                    <div class="text-sm font-normal text-blue-600 dark:text-blue-300">Cálculos financieros completados</div>
+                    <h3 class="text-lg font-bold text-blue-900 dark:text-blue-100">Cálculo de Interés Compuesto</h3>
+                    <p class="text-sm text-blue-700 dark:text-blue-300">Interés sobre capital e intereses acumulados</p>
                 </div>
-            </h3>
+            </div>
         </div>
     ';
 
         // Determinar qué campos fueron calculados
         $camposCalculados = explode(',', $campoCalculado);
 
-        // Grid de valores principales
-        $html .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
+        // ============================================
+        // BLOQUE 1: Parámetros Principales
+        // ============================================
+        $html .= '<div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">';
+        $html .= '<h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+              <span>📋</span> PARÁMETROS DE INVERSIÓN
+              </h4>';
+
+        $html .= '<div class="grid grid-cols-2 gap-3">';
 
         // Capital Inicial
         $isCalculated = in_array('capital', $camposCalculados);
-        $bgClass = $isCalculated ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700' : 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700';
-        $textClass = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-gray-100';
-        $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
-
-        // Determinar el valor a mostrar para capital
         if ($isCalculated) {
-            $displayValue = number_format($resultado, 2);
+            $displayValue = '$'.number_format($resultado, 2);
         } else {
-            $displayValue = is_numeric($capital) ? number_format($capital, 2) : '--';
+            $displayValue = is_numeric($capital) ? '$'.number_format($capital, 2) : '--';
         }
 
+        $bgColor = $isCalculated ? 'from-green-50 to-emerald-50 border-green-200 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700' : 'from-blue-50 to-cyan-50 border-blue-200 dark:from-blue-950/50 dark:to-cyan-950/50 dark:border-blue-700';
+        $textColor = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-blue-900 dark:text-blue-100';
+        $subColor = $isCalculated ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400';
+        $badgeColor = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
+
         $html .= "
-        <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
-            <div class='flex items-center justify-between mb-3'>
-                <h4 class='font-semibold {$textClass} flex items-center gap-2'>
-                    <span>💵</span>
-                    Capital Inicial
-                </h4>
-                ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
+        <div class='rounded-lg p-4 border bg-gradient-to-br {$bgColor} shadow-md'>
+            <div class='flex items-center justify-between mb-2'>
+                <div class='flex items-center gap-2'>
+                    <span class='text-xl'>💵</span>
+                    <h5 class='font-bold {$textColor} text-sm'>Capital</h5>
+                </div>
+                ".($isCalculated ? "<span class='px-2 py-0.5 text-xs font-medium rounded-full {$badgeColor}'>✨</span>" : "<span class='px-2 py-0.5 text-xs font-medium rounded-full {$badgeColor}'>📝</span>")."
             </div>
-            <p class='text-3xl font-bold {$textClass} mb-2'>$".$displayValue."</p>
-            <p class='text-sm text-gray-600 dark:text-gray-400'>Inversión inicial</p>
+            <p class='text-2xl font-bold {$textColor}'>{$displayValue}</p>
+            <p class='text-xs {$subColor} mt-1'>Inversión inicial</p>
         </div>
     ";
 
         // Monto Final
         $isCalculated = in_array('monto_final', $camposCalculados);
-        $bgClass = $isCalculated ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700' : 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700';
-        $textClass = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-gray-100';
-        $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
-
-        // Determinar el valor a mostrar para monto final
         if ($isCalculated) {
-            // Si monto_final fue calculado, podría estar en resultado o resultado2
             if (in_array('capital', $camposCalculados) && $resultado2) {
+                $displayValue = '$'.number_format($resultado2, 2);
+            } else {
+                $displayValue = '$'.number_format($resultado, 2);
+            }
+        } else {
+            $displayValue = is_numeric($montoFinal) ? '$'.number_format($montoFinal, 2) : '--';
+        }
+
+        $bgColor = $isCalculated ? 'from-purple-50 to-pink-50 border-purple-200 dark:from-purple-950/50 dark:to-pink-950/50 dark:border-purple-700' : 'from-blue-50 to-cyan-50 border-blue-200 dark:from-blue-950/50 dark:to-cyan-950/50 dark:border-blue-700';
+        $textColor = $isCalculated ? 'text-purple-900 dark:text-purple-100' : 'text-blue-900 dark:text-blue-100';
+        $subColor = $isCalculated ? 'text-purple-600 dark:text-purple-400' : 'text-blue-600 dark:text-blue-400';
+        $badgeColor = $isCalculated ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
+
+        $html .= "
+        <div class='rounded-lg p-4 border bg-gradient-to-br {$bgColor} shadow-md'>
+            <div class='flex items-center justify-between mb-2'>
+                <div class='flex items-center gap-2'>
+                    <span class='text-xl'>🎯</span>
+                    <h5 class='font-bold {$textColor} text-sm'>Monto Final</h5>
+                </div>
+                ".($isCalculated ? "<span class='px-2 py-0.5 text-xs font-medium rounded-full {$badgeColor}'>✨</span>" : "<span class='px-2 py-0.5 text-xs font-medium rounded-full {$badgeColor}'>📝</span>")."
+            </div>
+            <p class='text-2xl font-bold {$textColor}'>{$displayValue}</p>
+            <p class='text-xs {$subColor} mt-1'>Valor al vencimiento</p>
+        </div>
+    ";
+
+        $html .= '</div>';
+        $html .= '</div>'; // Fin parámetros principales
+
+        // ============================================
+        // BLOQUE 2: Condiciones del Préstamo
+        // ============================================
+        $html .= '<div class="space-y-3">';
+        $html .= '<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <span>⚙️</span> CONDICIONES
+              </h4>';
+
+        $html .= '<div class="grid grid-cols-2 gap-3">';
+
+        // Tasa de Interés
+        $isCalculated = in_array('tasa_interes', $camposCalculados);
+        if ($isCalculated) {
+            if (in_array('monto_final', $camposCalculados) && $resultado2) {
+                $displayValue = number_format($resultado2, 4).'%';
+            } elseif (in_array('capital', $camposCalculados) && $resultado2) {
+                $displayValue = number_format($resultado2, 4).'%';
+            } else {
+                $displayValue = number_format($resultado, 4).'%';
+            }
+        } else {
+            $displayValue = is_numeric($tasaInteres) ? number_format($tasaInteres, 4).'%' : '--';
+        }
+
+        $tipoTasaTexto = $tipoTasa === 'nominal' ? 'Nominal' : 'Efectiva';
+        $html .= static::buildCard('Tasa '.$tipoTasaTexto, '📈', $displayValue, 'Según periodicidad', $isCalculated);
+
+        // Tiempo
+        $isCalculated = in_array('tiempo', $camposCalculados);
+        if ($isCalculated) {
+            if (in_array('capital', $camposCalculados) && $resultado2) {
+                $displayValue = number_format($resultado2, 2);
+            } elseif (in_array('monto_final', $camposCalculados) && $resultado2) {
                 $displayValue = number_format($resultado2, 2);
             } else {
                 $displayValue = number_format($resultado, 2);
             }
         } else {
-            $displayValue = is_numeric($montoFinal) ? number_format($montoFinal, 2) : '--';
+            $displayValue = is_numeric($tiempo) ? number_format($tiempo, 2) : '--';
         }
 
-        $html .= "
-        <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
-            <div class='flex items-center justify-between mb-3'>
-                <h4 class='font-semibold {$textClass} flex items-center gap-2'>
-                    <span>🎯</span>
-                    Monto Final
-                </h4>
-                ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
+        $html .= static::buildCard('Tiempo', '⏱️', $displayValue, 'Años', $isCalculated);
+
+        $html .= '</div>';
+
+        // Periodicidad, Frecuencia y Tipo de Tasa
+        $html .= '<div class="grid grid-cols-3 gap-3">';
+
+        // Periodicidad
+        if ($periodicidadTasa) {
+            $periodicidadTexto = match ((int) $periodicidadTasa) {
+                1 => 'Anual', 2 => 'Semestral', 4 => 'Trimestral', 6 => 'Bimestral',
+                12 => 'Mensual', 24 => 'Quincenal', 52 => 'Semanal',
+                360 => 'Diaria Comercial', 365 => 'Diaria',
+                default => $periodicidadTasa.' veces/año'
+            };
+
+            $html .= "
+            <div class='bg-indigo-50/70 dark:bg-indigo-950/30 rounded-lg p-2.5 border border-indigo-200 dark:border-indigo-800'>
+                <div class='flex flex-col'>
+                    <div class='flex items-center gap-1 mb-1'>
+                        <span class='text-sm'>📊</span>
+                        <span class='text-xs font-semibold text-indigo-900 dark:text-indigo-100'>Periodicidad</span>
+                    </div>
+                    <span class='font-bold text-sm text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</span>
+                    <span class='text-xs text-indigo-600 dark:text-indigo-400'>({$periodicidadTasa}/año)</span>
+                </div>
             </div>
-            <p class='text-3xl font-bold {$textClass} mb-2'>$".$displayValue."</p>
-            <p class='text-sm text-gray-600 dark:text-gray-400'>Valor al vencimiento</p>
-        </div>
-    ";
-
-        // Tasa de Interés
-        $isCalculated = in_array('tasa_interes', $camposCalculados);
-        $bgClass = $isCalculated ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700' : 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700';
-        $textClass = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-gray-100';
-        $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
-
-        // Determinar el valor a mostrar para tasa
-        if ($isCalculated) {
-            // La tasa calculada podría estar en resultado o resultado2
-            if (in_array('monto_final', $camposCalculados) && $resultado2) {
-                $displayValue = number_format($resultado2, 2).'%';
-            } elseif (in_array('capital', $camposCalculados) && $resultado2) {
-                $displayValue = number_format($resultado2, 2).'%';
-            } else {
-                $displayValue = number_format($resultado, 2).'%';
-            }
-        } else {
-            $displayValue = is_numeric($tasaInteres) ? number_format($tasaInteres, 2).'%' : '--';
+        ";
         }
 
-        $tipoTasaTexto = $tipoTasa === 'nominal' ? 'Nominal' : 'Efectiva';
+        // Frecuencia de Capitalización
+        if ($frecuencia) {
+            $frecuenciaTexto = match ((int) $frecuencia) {
+                1 => 'Anual', 2 => 'Semestral', 4 => 'Trimestral', 6 => 'Bimestral',
+                12 => 'Mensual', 24 => 'Quincenal', 52 => 'Semanal',
+                360 => 'Diaria Comercial', 365 => 'Diaria',
+                default => $frecuencia.' veces/año'
+            };
 
-        $html .= "
-        <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
-            <div class='flex items-center justify-between mb-3'>
-                <h4 class='font-semibold {$textClass} flex items-center gap-2'>
-                    <span>📈</span>
-                    Tasa de Interés ({$tipoTasaTexto})
-                </h4>
-                ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
+            $html .= "
+            <div class='bg-purple-50/70 dark:bg-purple-950/30 rounded-lg p-2.5 border border-purple-200 dark:border-purple-800'>
+                <div class='flex flex-col'>
+                    <div class='flex items-center gap-1 mb-1'>
+                        <span class='text-sm'>🔄</span>
+                        <span class='text-xs font-semibold text-purple-900 dark:text-purple-100'>Capitalización</span>
+                    </div>
+                    <span class='font-bold text-sm text-purple-900 dark:text-purple-100'>{$frecuenciaTexto}</span>
+                    <span class='text-xs text-purple-600 dark:text-purple-400'>({$frecuencia}/año)</span>
+                </div>
             </div>
-            <p class='text-3xl font-bold {$textClass} mb-2'>".$displayValue."</p>
-            <p class='text-sm text-gray-600 dark:text-gray-400'>Según periodicidad seleccionada</p>
-        </div>
-    ";
-
-        // Tiempo
-        $isCalculated = in_array('tiempo', $camposCalculados);
-        $bgClass = $isCalculated ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700' : 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700';
-        $textClass = $isCalculated ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-gray-100';
-        $badgeClass = $isCalculated ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
-
-        // Determinar el valor a mostrar para tiempo
-        if ($isCalculated) {
-            // El tiempo calculado podría estar en resultado o resultado2
-            if (in_array('capital', $camposCalculados) && $resultado2) {
-                $displayValue = number_format($resultado2, 2).' años';
-            } elseif (in_array('monto_final', $camposCalculados) && $resultado2) {
-                $displayValue = number_format($resultado2, 2).' años';
-            } else {
-                $displayValue = number_format($resultado, 2).' años';
-            }
-        } else {
-            $displayValue = is_numeric($tiempo) ? number_format($tiempo, 2).' años' : '--';
+        ";
         }
 
-        $html .= "
-        <div class='rounded-xl p-6 border {$bgClass} shadow-sm'>
-            <div class='flex items-center justify-between mb-3'>
-                <h4 class='font-semibold {$textClass} flex items-center gap-2'>
-                    <span>⏰</span>
-                    Tiempo
-                </h4>
-                ".($isCalculated ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>✨ Calculado</span>" : "<span class='px-3 py-1 text-xs font-medium rounded-full {$badgeClass}'>📝 Ingresado</span>")."
+        // Tipo de Tasa
+        if ($tipoTasa) {
+            $tipoTasaDisplay = $tipoTasa === 'efectiva' ? 'Efectiva' : 'Nominal';
+            $tipoTasaIcon = $tipoTasa === 'efectiva' ? '✨' : '📋';
+
+            $html .= "
+            <div class='bg-slate-50/70 dark:bg-slate-950/30 rounded-lg p-2.5 border border-slate-200 dark:border-slate-800'>
+                <div class='flex flex-col'>
+                    <div class='flex items-center gap-1 mb-1'>
+                        <span class='text-sm'>{$tipoTasaIcon}</span>
+                        <span class='text-xs font-semibold text-slate-900 dark:text-slate-100'>Tipo de Tasa</span>
+                    </div>
+                    <span class='font-bold text-sm text-slate-900 dark:text-slate-100'>{$tipoTasaDisplay}</span>
+                    <span class='text-xs text-slate-600 dark:text-slate-400'>Tasa aplicada</span>
+                </div>
             </div>
-            <p class='text-3xl font-bold {$textClass} mb-2'>".$displayValue."</p>
-            <p class='text-sm text-gray-600 dark:text-gray-400'>Período de inversión</p>
-        </div>
-    ";
+        ";
+        }
 
-        $html .= '</div>'; // Fin del grid principal
+        $html .= '</div>';
+        $html .= '</div>'; // Fin condiciones
 
-        // Información adicional
-        if ($periodicidadTasa || $frecuencia || $interesGenerado) {
-            $html .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+        // ============================================
+        // BLOQUE 3: Interés Generado (Destacado)
+        // ============================================
+        if ($interesGenerado) {
+            $html .= '<div class="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/50 dark:to-yellow-950/50 rounded-xl p-4 border-2 border-amber-300 dark:border-amber-700">';
+            $html .= '<h4 class="text-sm font-bold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2">
+                  <span>💎</span> GANANCIA
+                  </h4>';
 
-            // Periodicidad de la tasa
-            if ($periodicidadTasa) {
-                $periodicidadTexto = match ((int) $periodicidadTasa) {
-                    1 => 'Anual',
-                    2 => 'Semestral',
-                    4 => 'Trimestral',
-                    6 => 'Bimestral',
-                    12 => 'Mensual',
-                    24 => 'Quincenal',
-                    52 => 'Semanal',
-                    360 => 'Diaria Comercial',
-                    365 => 'Diaria',
-                    default => $periodicidadTasa.' veces/año'
-                };
-
-                $html .= "
-                <div class='rounded-lg p-4 border bg-indigo-50 border-indigo-200 dark:bg-indigo-950/50 dark:border-indigo-700 shadow-sm'>
-                    <div class='flex items-center gap-2 mb-2'>
-                        <span class='text-indigo-600 dark:text-indigo-400'>📊</span>
-                        <h4 class='font-semibold text-indigo-900 dark:text-indigo-100 text-sm'>Periodicidad Tasa</h4>
-                    </div>
-                    <p class='text-lg font-bold text-indigo-900 dark:text-indigo-100'>{$periodicidadTexto}</p>
-                    <p class='text-xs text-indigo-600 dark:text-indigo-400'>{$periodicidadTasa} períodos/año</p>
-                </div>
-            ";
-            }
-
-            // Frecuencia de capitalización
-            if ($frecuencia) {
-                $frecuenciaTexto = match ((int) $frecuencia) {
-                    1 => 'Anual',
-                    2 => 'Semestral',
-                    4 => 'Trimestral',
-                    6 => 'Bimestral',
-                    12 => 'Mensual',
-                    24 => 'Quincenal',
-                    52 => 'Semanal',
-                    360 => 'Diaria Comercial',
-                    365 => 'Diaria',
-                    default => $frecuencia.' veces/año'
-                };
-
-                $html .= "
-                <div class='rounded-lg p-4 border bg-purple-50 border-purple-200 dark:bg-purple-950/50 dark:border-purple-700 shadow-sm'>
-                    <div class='flex items-center gap-2 mb-2'>
-                        <span class='text-purple-600 dark:text-purple-400'>🔄</span>
-                        <h4 class='font-semibold text-purple-900 dark:text-purple-100 text-sm'>Capitalización</h4>
-                    </div>
-                    <p class='text-lg font-bold text-purple-900 dark:text-purple-100'>{$frecuenciaTexto}</p>
-                    <p class='text-xs text-purple-600 dark:text-purple-400'>{$frecuencia} veces/año</p>
-                </div>
-            ";
-            }
-
-            // Tipo de tasa
-            if ($tipoTasa) {
-                $html .= "
-                    <div class='rounded-lg p-4 border bg-slate-50 border-slate-200 dark:bg-slate-950/50 dark:border-slate-700 shadow-sm'>
-                        <div class='flex items-center gap-2 mb-2'>
-                            <span class='text-slate-600 dark:text-slate-400'>💸</span>
-                            <h4 class='font-semibold text-slate-900 dark:text-slate-100 text-sm'>Tipo de tasa</h4>
-                        </div>
-                        <p class='text-lg font-bold text-slate-900 dark:text-slate-100'>"
-                    .($tipoTasa === 'efectiva' ? 'Tasa Efectiva' : 'Tasa Nominal').
-                    "</p>
-                        <p class='text-xs text-slate-600 dark:text-slate-400'>Ganancia total</p>
-                    </div>
-                    ";
-            }
-
-            // Interés generado
-            if ($interesGenerado) {
-                $html .= "
-                <div class='rounded-lg p-4 border bg-amber-50 border-amber-200 dark:bg-amber-950/50 dark:border-amber-700 shadow-sm'>
-                    <div class='flex items-center gap-2 mb-2'>
-                        <span class='text-amber-600 dark:text-amber-400'>💎</span>
-                        <h4 class='font-semibold text-amber-900 dark:text-amber-100 text-sm'>Interés Generado</h4>
-                    </div>
-                    <p class='text-lg font-bold text-amber-900 dark:text-amber-100'>$".number_format($interesGenerado, 2)."</p>
-                    <p class='text-xs text-amber-600 dark:text-amber-400'>Ganancia total</p>
-                </div>
-            ";
-            }
-
+            $html .= '<div class="grid grid-cols-1 gap-3">';
+            $html .= static::buildCard('Interés Generado', '💸', '$'.number_format($interesGenerado, 2), 'Ganancia total por capitalización', true, 'amber');
             $html .= '</div>';
+            $html .= '</div>'; // Fin interés generado
         }
 
-        // Mensaje de resultado
+        // ============================================
+        // MENSAJE FINAL (Si existe)
+        // ============================================
         if ($mensaje) {
             $html .= "
-            <div class='bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-xl p-6 border border-blue-200 dark:border-blue-700 shadow-sm'>
-                <div class='flex items-start gap-4'>
-                    <div class='flex-shrink-0 text-3xl'>🎯</div>
-                    <div>
-                        <h4 class='font-bold text-blue-900 dark:text-blue-100 mb-2 text-lg'>Resultado del Cálculo</h4>
-                        <p class='text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensaje}</p>
+            <div class='bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 rounded-xl p-4 border border-blue-300 dark:border-blue-700'>
+                <div class='flex items-start gap-3'>
+                    <span class='text-2xl flex-shrink-0'>🎯</span>
+                    <div class='flex-1'>
+                        <h4 class='font-bold text-blue-900 dark:text-blue-100 text-sm mb-1'>RESULTADO</h4>
+                        <p class='text-sm text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensaje}</p>
                     </div>
                 </div>
             </div>
         ";
         }
 
-        $html .= '</div>'; // Fin del contenedor principal
+        $html .= '</div>'; // Fin contenedor principal
 
         return new HtmlString($html);
+    }
+
+    private static function buildCard(string $title, string $icon, string $value, string $subtitle, bool $isCalculated, string $color = 'gray', string $p = 'p-6'): string
+    {
+        $colorClasses = match ($color) {
+            'green' => ['bg' => 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 dark:from-green-950/50 dark:to-emerald-950/50 dark:border-green-700',
+                'text' => 'text-green-900 dark:text-green-100', 'badge' => 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200',
+                'subtitle' => 'text-green-600 dark:text-green-400'],
+            'blue' => ['bg' => 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-300 dark:from-blue-950/50 dark:to-cyan-950/50 dark:border-blue-700',
+                'text' => 'text-blue-900 dark:text-blue-100', 'badge' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200',
+                'subtitle' => 'text-blue-600 dark:text-blue-400'],
+            'purple' => ['bg' => 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-300 dark:from-purple-950/50 dark:to-pink-950/50 dark:border-purple-700',
+                'text' => 'text-purple-900 dark:text-purple-100', 'badge' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200',
+                'subtitle' => 'text-purple-600 dark:text-purple-400'],
+            'red' => ['bg' => 'bg-gradient-to-br from-red-50 to-rose-50 border-red-300 dark:from-red-950/50 dark:to-rose-950/50 dark:border-red-700',
+                'text' => 'text-red-900 dark:text-red-100', 'badge' => 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200',
+                'subtitle' => 'text-red-600 dark:text-red-400'],
+            'orange' => ['bg' => 'bg-gradient-to-br from-orange-50 to-red-50 border-orange-300 dark:from-orange-950/50 dark:to-red-950/50 dark:border-orange-700',
+                'text' => 'text-orange-900 dark:text-orange-100', 'badge' => 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200',
+                'subtitle' => 'text-orange-600 dark:text-orange-400'],
+            'cyan' => ['bg' => 'bg-gradient-to-br from-cyan-50 to-teal-50 border-cyan-300 dark:from-cyan-950/50 dark:to-teal-950/50 dark:border-cyan-700',
+                'text' => 'text-cyan-900 dark:text-cyan-100', 'badge' => 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-200',
+                'subtitle' => 'text-cyan-600 dark:text-cyan-400'],
+            'slate' => ['bg' => 'bg-gradient-to-br from-slate-50 to-gray-50 border-slate-300 dark:from-slate-950/50 dark:to-gray-950/50 dark:border-slate-700',
+                'text' => 'text-slate-900 dark:text-slate-100', 'badge' => 'bg-slate-100 text-slate-800 dark:bg-slate-900/50 dark:text-slate-200',
+                'subtitle' => 'text-slate-600 dark:text-slate-400'],
+            'amber' => ['bg' => 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-300 dark:from-amber-950/50 dark:to-orange-950/50 dark:border-amber-700',
+                'text' => 'text-amber-900 dark:text-amber-100', 'badge' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200',
+                'subtitle' => 'text-amber-600 dark:text-amber-400'],
+            default => ['bg' => 'bg-gray-50 border-gray-200 dark:bg-gray-900/50 dark:border-gray-700',
+                'text' => 'text-gray-900 dark:text-gray-100', 'badge' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200',
+                'subtitle' => 'text-gray-600 dark:text-gray-400']
+        };
+
+        $badgeHtml = $isCalculated
+            ? "<span class='px-3 py-1 text-xs font-medium rounded-full {$colorClasses['badge']}'>✨ Calculado</span>"
+            : "<span class='px-3 py-1 text-xs font-medium rounded-full {$colorClasses['badge']}'>📝 Ingresado</span>";
+
+        return "<div class='rounded-xl $p border {$colorClasses['bg']} shadow-sm'>
+            <div class='flex items-center justify-between mb-3'>
+                <h4 class='font-semibold {$colorClasses['text']} flex items-center gap-2'><span>{$icon}</span>{$title}</h4>
+                {$badgeHtml}
+            </div>
+            <p class='text-2xl font-bold {$colorClasses['text']} mb-2'>{$value}</p>
+            <p class='text-sm {$colorClasses['subtitle']}'>{$subtitle}</p>
+        </div>";
     }
 }
