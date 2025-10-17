@@ -218,7 +218,8 @@ class TasaInternaRetornoSchema
                                                 $set('tabla_flujos', null);
                                                 $set('mensaje_calculado', null);
                                             }),
-                                    ])->visible(fn (callable $get) => $get('tipo_flujo') === 'variables'),                                ]),
+                                    ])->visible(fn (callable $get) => $get('tipo_flujo') === 'variables'),                                ])
+                                ->collapsible(),
                             // Subsección para configurar número de períodos en flujo constante
 
                             Section::make('Configuración del Número de Períodos')
@@ -537,38 +538,25 @@ class TasaInternaRetornoSchema
                                 ->icon('heroicon-o-percent-badge')
                                 ->description('Configure la tasa de descuento para el cálculo del VPN (dejar vacío para calcular TIR)')
                                 ->schema([
-                                    Grid::make(12)->schema([
+                                    Grid::make(2)->schema([
                                         TextInput::make('tasa_descuento')
-                                            ->rules(['nullable', 'numeric'])
                                             ->label('Tasa de Descuento')
-                                            ->numeric()
                                             ->suffix('%')
-                                            ->placeholder('Ejemplo: 10 (dejar vacío para calcular TIR)')
                                             ->step(0.01)
+                                            ->placeholder('Ejemplo: 10.5 (dejar vacío para calcular TIR)')
                                             ->hint('Tasa de oportunidad (%)')
                                             ->helperText('Dejar vacío si deseas calcular la TIR')
-                                            ->columnSpan(5)
+                                            ->columnSpan(1)
                                             ->live(onBlur: true)
-                                            ->afterStateUpdated(function (callable $set) {
-                                                $set('campos_calculados', null);
-                                                $set('resultados_calculados', null);
-                                                $set('tabla_flujos', null);
-                                                $set('mensaje_calculado', null);
-                                            }),
-
-                                        TextInput::make('periodicidad_tasa')
-                                            ->rules(['nullable', 'numeric', 'min:1'])
+                                            ->rules([
+                                                'nullable',
+                                                'regex:/^\d+(\.\d{1,4})?$/', // Acepta decimales con hasta 4 dígitos
+                                                'min:0',
+                                            ])
                                             ->validationMessages([
-                                                'min' => 'La periodicidad debe ser mayor o igual a 1',
+                                                'regex' => 'La tasa de descuento debe ser un número válido con hasta 4 decimales',
+                                                'min' => 'La tasa de descuento debe ser mayor o igual a 0',
                                             ])
-                                            ->label('Periodicidad (numérica)')
-                                            ->numeric()
-                                            ->placeholder('12 para mensual')
-                                            ->hint('Períodos por año')
-                                            ->default(1)
-                                            ->columnSpan(4)
-                                            ->visible(fn (callable $get) => ! $get('usar_select_periodicidad_tasa'))
-                                            ->live(onBlur: true)
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('campos_calculados', null);
                                                 $set('resultados_calculados', null);
@@ -576,44 +564,6 @@ class TasaInternaRetornoSchema
                                                 $set('mensaje_calculado', null);
                                             }),
 
-                                        Select::make('periodicidad_tasa')
-                                            ->label('Periodicidad de la Tasa')
-                                            ->options([
-                                                1 => 'Anual (1 vez/año)',
-                                                2 => 'Semestral (2 veces/año)',
-                                                4 => 'Trimestral (4 veces/año)',
-                                                6 => 'Bimestral (6 veces/año)',
-                                                12 => 'Mensual (12 veces/año)',
-                                                24 => 'Quincenal (24 veces/año)',
-                                                52 => 'Semanal (52 veces/año)',
-                                                365 => 'Diaria (365 veces/año)',
-                                                360 => 'Diaria Comercial (360 veces/año)',
-                                            ])
-                                            ->default(1)
-                                            ->searchable()
-                                            ->columnSpan(4)
-                                            ->visible(fn (callable $get) => $get('usar_select_periodicidad_tasa'))
-                                            ->live(onBlur: true)
-                                            ->afterStateUpdated(function (callable $set) {
-                                                $set('campos_calculados', null);
-                                                $set('resultados_calculados', null);
-                                                $set('tabla_flujos', null);
-                                                $set('mensaje_calculado', null);
-                                            }),
-
-                                        Toggle::make('usar_select_periodicidad_tasa')
-                                            ->label('Selector de periodicidad')
-                                            ->default(true)
-                                            ->live(onBlur: true)
-                                            ->inline(false)
-                                            ->columnSpan(3)
-                                            ->extraAttributes(['class' => 'text-center items-center ml-14 mt-1'])
-                                            ->afterStateUpdated(function (callable $set) {
-                                                $set('campos_calculados', null);
-                                                $set('resultados_calculados', null);
-                                                $set('tabla_flujos', null);
-                                                $set('mensaje_calculado', null);
-                                            }),
                                     ]),
                                 ]),
                         ]),

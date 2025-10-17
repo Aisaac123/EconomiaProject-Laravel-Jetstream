@@ -626,31 +626,31 @@ class GradientesSchema
         // Configuración según tipo de gradiente
         $gradienteConfig = match ($tipoGradiente) {
             'aritmetico_vencido' => [
-                'titulo' => '📊 Gradiente Aritmético Vencido',
+                'titulo' => 'Gradiente Aritmético Vencido',
                 'desc' => 'Pagos al final con incremento/decremento constante',
                 'color' => 'blue',
                 'icono' => '📊',
             ],
             'aritmetico_anticipado' => [
-                'titulo' => '📋 Gradiente Aritmético Anticipado',
+                'titulo' => 'Gradiente Aritmético Anticipado',
                 'desc' => 'Pagos al inicio con incremento/decremento constante',
                 'color' => 'amber',
                 'icono' => '📋',
             ],
             'geometrico_vencido' => [
-                'titulo' => '📈 Gradiente Geométrico Vencido',
+                'titulo' => 'Gradiente Geométrico Vencido',
                 'desc' => 'Pagos al final con incremento/decremento porcentual',
                 'color' => 'emerald',
                 'icono' => '📈',
             ],
             'geometrico_anticipado' => [
-                'titulo' => '📉 Gradiente Geométrico Anticipado',
+                'titulo' => 'Gradiente Geométrico Anticipado',
                 'desc' => 'Pagos al inicio con incremento/decremento porcentual',
                 'color' => 'orange',
                 'icono' => '📉',
             ],
             default => [
-                'titulo' => '📊 Gradiente',
+                'titulo' => 'Gradiente',
                 'desc' => 'Análisis de gradiente',
                 'color' => 'gray',
                 'icono' => '📊',
