@@ -83,7 +83,7 @@ class TasaInternaRetornoSchema
                                             ->columnSpan(1),
                                         TextInput::make('inversion_inicial')
                                             ->rules(['nullable', 'numeric'])
-                                            ->label('Inversión Inicial (I₀)')
+                                            ->label('Inversión Inicial (C₀)')
                                             ->numeric()
                                             ->prefix('$')
                                             ->placeholder('Ejemplo: 1000')

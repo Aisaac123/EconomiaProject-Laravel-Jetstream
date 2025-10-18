@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="space-y-6 min-h-[1750px]">
+    <div class="space-y-6">
         {{-- Título principal --}}
         <x-sections.heading-title
             title="Anualidad"

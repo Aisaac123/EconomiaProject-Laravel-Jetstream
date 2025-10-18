@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="space-y-6 min-h-[2200px]">
+    <div class="space-y-6">
         {{-- Título principal --}}
         <x-sections.heading-title
             title="Sistemas de Capitalización"

@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="space-y-4  min-h-[2800px]">
+    <div class="space-y-4">
         {{-- Título principal --}}
         <x-sections.heading-title
             title="Tasa Interna de Retorno (TIR)"

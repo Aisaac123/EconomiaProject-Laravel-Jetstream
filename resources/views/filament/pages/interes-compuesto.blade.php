@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="space-y-6 min-h-[1650px]">
+    <div class="space-y-6">
         <x-sections.heading-title
             title="Interés Compuesto"
             quote='“El interés compuesto es la fuerza más poderosa del universo. Quien lo entiende, lo gana; quien no, lo paga.” — Albert Einstein'

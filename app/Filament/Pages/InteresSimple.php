@@ -9,6 +9,8 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
+use Illuminate\Contracts\View\View;
 
 class InteresSimple extends Page implements HasForms
 {
@@ -52,5 +54,15 @@ class InteresSimple extends Page implements HasForms
     public function getHeading(): \Illuminate\Contracts\Support\Htmlable|string
     {
         return '';
+    }
+
+    public function getFooter(): ?View
+    {
+        return view('filament.settings.custom-footer');
+    }
+
+    public function getMaxContentWidth(): Width
+    {
+        return Width::ScreenTwoExtraLarge;
     }
 }

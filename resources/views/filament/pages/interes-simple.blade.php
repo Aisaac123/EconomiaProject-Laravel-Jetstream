@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="space-y-6 min-h-[1650px]">
+    <div class="space-y-6">
         <x-sections.heading-title
             title="Interés Simple"
             quote='El dinero tiene un precio, y ese precio depende del tiempo.” — Gabriel Baca'

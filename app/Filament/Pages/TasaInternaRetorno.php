@@ -7,7 +7,9 @@ use App\Filament\Schemas\TasaInternaRetornoSchema;
 use App\Traits\FormCalculations;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\View\View;
 
 class TasaInternaRetorno extends Page
 {
@@ -40,5 +42,15 @@ class TasaInternaRetorno extends Page
         return TasaInternaRetornoSchema::configure($schema)
             ->statePath('data')
             ->operation('calculate');
+    }
+
+    public function getFooter(): ?View
+    {
+        return view('filament.settings.custom-footer');
+    }
+
+    public function getMaxContentWidth(): Width
+    {
+        return Width::ScreenTwoExtraLarge;
     }
 }

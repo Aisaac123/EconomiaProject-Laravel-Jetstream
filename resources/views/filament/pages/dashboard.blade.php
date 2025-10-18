@@ -268,10 +268,10 @@
 
                 <x-filament::section>
                     <x-slot name="heading" class="text-2xl font-bold text-primary-600 dark:text-primary-400 flex items-center justify-between">
-            <span class="flex items-center">
-                <span class="mr-3 text-3xl transition-all duration-700" x-text="showFundamental ? '📚' : '🚀'"></span>
-                <span class="transition-all duration-700" x-text="showFundamental ? 'Modelos Financieros Fundamentales' : 'Modelos Financieros Avanzados'"></span>
-            </span>
+                        <span class="flex items-center">
+                            <span class="mr-3 text-3xl transition-all duration-700" x-text="showFundamental ? '📚' : '🚀'"></span>
+                            <span class="transition-all duration-700" x-text="showFundamental ? 'Modelos Financieros Fundamentales' : 'Modelos Financieros Avanzados'"></span>
+                        </span>
                     </x-slot>
 
                     <!-- Toggle con animaciones fluidas -->
@@ -588,6 +588,12 @@
                     }
                 </script>
             @endpush
+            <x-filament::section class="mt-4 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-xl">
+                <p class="text-center text-lg text-primary-700 dark:text-primary-300 font-medium col-span-full">
+                    🎯 Esta herramienta ha sido desarrollada con fines educativos para apoyar el aprendizaje de conceptos financieros
+                    en el ámbito universitario. Siempre verifica tus cálculos con múltiples fuentes.
+                </p>
+            </x-filament::section>
         </div>
 
         <!-- Sidebar con información adicional -->
@@ -716,13 +722,9 @@
                 </div>
             </x-filament::section>
         </div>
+
     </div>
 
     <!-- Nota final -->
-    <x-filament::section class="mt-8 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-xl">
-        <p class="text-center text-lg text-primary-700 dark:text-primary-300 font-medium">
-            🎯 Esta herramienta ha sido desarrollada con fines educativos para apoyar el aprendizaje de conceptos financieros
-            en el ámbito universitario. Siempre verifica tus cálculos con múltiples fuentes para aplicaciones del mundo real.
-        </p>
-    </x-filament::section>
+
 </x-filament-panels::page>

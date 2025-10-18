@@ -9,6 +9,8 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
+use Illuminate\Contracts\View\View;
 
 class InteresCompuesto extends Page implements HasForms
 {
@@ -48,5 +50,15 @@ class InteresCompuesto extends Page implements HasForms
         return InteresCompuestoSchema::configure($schema)
             ->statePath('data')
             ->operation('calculate');
+    }
+
+    public function getFooter(): ?View
+    {
+        return view('filament.settings.custom-footer');
+    }
+
+    public function getMaxContentWidth(): Width
+    {
+        return Width::ScreenTwoExtraLarge;
     }
 }
