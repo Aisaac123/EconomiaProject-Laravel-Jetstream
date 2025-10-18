@@ -600,15 +600,22 @@ class GradientesSchema
             ]);
     }
 
-    private static function buildResultHtml(callable $get): Htmlable
+    public static function buildResultHtml(callable|array $data): Htmlable
     {
+        // Soporte mixto: callable $get o array $data
+        $get = is_callable($data)
+            ? $data
+            : fn(string $key) => $data[$key] ?? null;
+
         $resultados = $get('resultados_calculados');
         $mensaje = $get('mensaje_calculado');
         $tipoGradiente = $get('tipo_gradiente');
         $periodicidadTasa = $get('periodicidad_tasa') ?: 12;
 
         $resultadosArray = $resultados ? json_decode($resultados, true) : [];
-        $camposCalculadosArray = $get('campos_calculados') ? json_decode($get('campos_calculados'), true) : [];
+        $camposCalculadosArray = $get('campos_calculados')
+            ? json_decode($get('campos_calculados'), true)
+            : [];
 
         // Validación: Tipo de gradiente no seleccionado
         if (empty($tipoGradiente)) {
@@ -879,8 +886,13 @@ class GradientesSchema
         return new HtmlString($html);
     }
 
-    private static function buildTablaGradienteHtml(callable $get): Htmlable
+    public static function buildTablaGradienteHtml(callable|array $data): Htmlable
     {
+        // Soporte mixto: callable $get o array $data
+        $get = is_callable($data)
+            ? $data
+            : fn(string $key) => $data[$key] ?? null;
+
         $tablaJson = $get('tabla_gradiente');
 
         if (! $tablaJson) {

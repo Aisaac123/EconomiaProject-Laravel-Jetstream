@@ -4,8 +4,8 @@
         <x-sections.heading-title
             title="Simulación Registro de Crédito"
             quote=''
-            button-text="Registrar Crédito"
-            href="#registrar"
+            button-text="Gestionar Créditos"
+            href="{{ url(\App\Filament\Pages\Creditos\ListCredits::getUrl()) }}"
         >
             <x-slot:icon>
                 <x-heroicon-c-calendar-days class="size-16 text-white" aria-hidden="true" />

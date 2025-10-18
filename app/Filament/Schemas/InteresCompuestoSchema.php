@@ -829,6 +829,25 @@ class InteresCompuestoSchema
         return new HtmlString($html);
     }
 
+    public static function buildResultHtmlFromData(array $data): Htmlable
+    {
+        return static::buildResultHtmlCompuesto(
+            $data['capital'] ?? 0,
+            $data['monto_final'] ?? null,
+            $data['tasa_interes'] ?? 0,
+            $data['tiempo'] ?? 0,
+            $data['periodicidad_tasa'] ?? null,
+            $data['frecuencia'] ?? null,
+            $data['interes_generado_calculado'] ?? null,
+            $data['mensaje_calculado'] ?? '',
+            $data['campo_calculado'] ?? '',
+            $data['tipo_tasa'] ?? '',
+            $data['resultado_calculado'] ?? null,
+            $data['resultado_calculado_2'] ?? null,
+        );
+    }
+
+
     private static function buildCard(string $title, string $icon, string $value, string $subtitle, bool $isCalculated, string $color = 'gray', string $p = 'p-6'): string
     {
         $colorClasses = match ($color) {

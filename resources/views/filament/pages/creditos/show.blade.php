@@ -72,6 +72,15 @@
                                 @case(\App\Enums\CalculationType::ANUALIDAD)
                                     Anualidad
                                     @break
+                                @case(\App\Enums\CalculationType::TIR)
+                                    Tasa Interna de Retorno (TIR)
+                                    @break
+                                @case(\App\Enums\CalculationType::GRADIENTES)
+                                    Gradiente
+                                    @break
+                                @case(\App\Enums\CalculationType::AMORTIZACION)
+                                    Amortización
+                                    @break
                                 @default
                                     {{ $this->record->type->value }}
                             @endswitch
@@ -127,39 +136,13 @@
             <div class="p-6">
                 @php
                     $inputs = $this->record->inputs ?? [];
-                    $results = $this->record->results ?? [];
-
-                    // Extraer datos del array inputs
-                    $capital = $inputs['capital'] ?? null;
-                    $montoFinal = $inputs['monto_final'] ?? null;
-                    $tasaInteres = $inputs['tasa_interes'] ?? null;
-                    $tiempo = $inputs['tiempo'] ?? null;
-                    $periodicidadTasa = $inputs['periodicidad_tasa'] ?? 1;
-                    $frecuencia = $inputs['frecuencia'] ?? 12;
-                    $interesGenerado = $inputs['interes_generado'] ?? null;
-
                     // Extraer datos de results
-                    $campoCalculado = $inputs['campo_calculado'] ?? null;
                     $resultadoCalculado = $inputs['resultado_calculado'] ?? null;
-                    $resultadoCalculado2 = $inputs['resultado_calculado_2'] ?? null;
-                    $interesGeneradoCalculado = $inputs['interes_generado_calculado'] ?? null;
-                    $mensajeCalculado = $inputs['mensaje_calculado'] ?? null;
+                    $resultadosCalculados = $inputs['resultados_calculados'] ?? null;
                 @endphp
-                @if($campoCalculado && ($resultadoCalculado || $resultadoCalculado2))
+                @if($resultadoCalculado || $resultadosCalculados)
                     {{-- Usar el método buildResultHtml de InteresSimpleSchema --}}
-                    {!! \App\Filament\Schemas\InteresSimpleSchema::buildResultHtml(
-                        $capital,
-                        $montoFinal,
-                        $tasaInteres,
-                        $tiempo,
-                        $periodicidadTasa,
-                        $frecuencia,
-                        $interesGeneradoCalculado ?? $interesGenerado,
-                        $mensajeCalculado,
-                        $campoCalculado,
-                        $resultadoCalculado,
-                        $resultadoCalculado2
-                    ) !!}
+                    {!! \App\Filament\Schemas\CreditSchemaFactory::buildResultHtml($this->record->type->value, $this->record->inputs ?? []) !!}
                 @else
                     <div class="text-center py-12 text-slate-500 dark:text-slate-400">
                         <div class="text-5xl mb-4">📊</div>

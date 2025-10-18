@@ -370,7 +370,7 @@ class InteresSimpleSchema
                                                 $montoFinal = $get('monto_final');
                                                 $tasaInteres = $get('tasa_interes');
                                                 $tiempo = $get('tiempo');
-                                                $interesGenerado = $get('interes_generado'); // ← Agregar esta línea
+                                                $interesGenerado = $get('interes_generado');
 
                                                 $campoCalculado = $get('campo_calculado');
                                                 $resultado = $get('resultado_calculado');
@@ -378,7 +378,6 @@ class InteresSimpleSchema
                                                 $interesGeneradoCalculado = $get('interes_generado_calculado');
                                                 $mensaje = $get('mensaje_calculado');
 
-                                                $frecuencia = $get('frecuencia') ?: 12;
                                                 $periodicidadTasa = $get('periodicidad_tasa') ?: 1;
 
                                                 // Contar campos vacíos CORRECTAMENTE
@@ -402,7 +401,7 @@ class InteresSimpleSchema
                                                 if ($campoCalculado && ($resultado || $resultado2)) {
                                                     return static::buildResultHtml(
                                                         $capital, $montoFinal, $tasaInteres, $tiempo,
-                                                        $periodicidadTasa, $frecuencia,
+                                                        $periodicidadTasa,
                                                         $interesGeneradoCalculado ?? $interesGenerado,
                                                         $mensaje, $campoCalculado, $resultado, $resultado2
                                                     );
@@ -499,7 +498,7 @@ class InteresSimpleSchema
      */
     public static function buildResultHtml(
         $capital, $montoFinal, $tasaInteres, $tiempo,
-        $periodicidadTasa, $frecuencia, $interesGenerado,
+        $periodicidadTasa, $interesGenerado,
         $mensaje, $campoCalculado, $resultado, $resultado2 = null
     ): Htmlable {
 
@@ -706,7 +705,19 @@ class InteresSimpleSchema
 
         return new HtmlString($html);
     }
-
+    public static function buildResultHtmlFromData(array $data): Htmlable{
+        $capital = $data['capital'];
+        $montoFinal = $data['monto_final'];
+        $tasaInteres = $data['tasa_interes'];
+        $tiempo = $data['tiempo'];
+        $periodicidadTasa = $data['periodicidad_tasa'];
+        $interesGenerado = $data['interes_generado_calculado'];
+        $mensaje = $data['mensaje_calculado'];
+        $campoCalculado = $data['campo_calculado'];
+        $resultado = $data['resultado_calculado'];
+        $resultado2 = $data['resultado_calculado_2'] ?? null;
+        return static::buildResultHtml($capital, $montoFinal, $tasaInteres, $tiempo, $periodicidadTasa, $interesGenerado, $mensaje, $campoCalculado, $resultado, $resultado2);
+    }
     private static function buildCard(string $title, string $icon, string $value, string $subtitle, bool $isCalculated, string $color = 'gray', string $p = 'p-6'): string
     {
         $colorClasses = match ($color) {

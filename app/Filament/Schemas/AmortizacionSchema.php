@@ -683,20 +683,30 @@ class AmortizacionSchema
     /**
      * Construye el HTML para mostrar los resultados del sistema de amortización
      */
-    private static function buildResultHtml(callable $get): Htmlable
+    public static function buildResultHtml(callable|array $get): Htmlable
     {
-        $montoPrestamo = $get('monto_prestamo');
-        $tasaInteres = $get('tasa_interes');
-        $numeroPagos = $get('numero_pagos');
-        $sistemaAmortizacion = $get('sistema_amortizacion');
+        // 🧩 Adaptador mixto: permite callable o array
+        $value = is_callable($get)
+            ? fn(string $key) => $get($key)
+            : fn(string $key) => $get[$key] ?? null;
 
-        $camposCalculados = $get('campos_calculados');
-        $resultados = $get('resultados_calculados');
-        $mensaje = $get('mensaje_calculado');
-        $periodicidadTasa = $get('periodicidad_tasa') ?: 12;
+        $montoPrestamo = $value('monto_prestamo');
+        $tasaInteres = $value('tasa_interes');
+        $numeroPagos = $value('numero_pagos');
+        $sistemaAmortizacion = $value('sistema_amortizacion');
 
-        $camposCalculadosArray = $camposCalculados ? json_decode($camposCalculados, true) : [];
-        $resultadosArray = $resultados ? json_decode($resultados, true) : [];
+        $camposCalculados = $value('campos_calculados');
+        $resultados = $value('resultados_calculados');
+        $mensaje = $value('mensaje_calculado');
+        $periodicidadTasa = $value('periodicidad_tasa') ?: 12;
+
+        $camposCalculadosArray = $camposCalculados
+            ? (is_array($camposCalculados) ? $camposCalculados : json_decode($camposCalculados, true))
+            : [];
+
+        $resultadosArray = $resultados
+            ? (is_array($resultados) ? $resultados : json_decode($resultados, true))
+            : [];
 
         // Validaciones iniciales
         if (empty($montoPrestamo) && empty($tasaInteres) && empty($numeroPagos) && empty($sistemaAmortizacion)) {
@@ -969,9 +979,17 @@ class AmortizacionSchema
     /**
      * Construye el HTML para la tabla de amortización
      */
-    private static function buildTablaAmortizacionHtml(callable $get): Htmlable
+    public static function buildTablaAmortizacionHtml(callable|array $get): Htmlable
     {
-        $tablaJson = $get('tabla_amortizacion');
+        // 🧩 Adaptador mixto
+        $value = is_callable($get)
+            ? fn(string $key) => $get($key)
+            : fn(string $key) => $get[$key] ?? null;
+
+        $tablaJson = $value('tabla_amortizacion');
+        $tabla = $tablaJson
+            ? (is_array($tablaJson) ? $tablaJson : json_decode($tablaJson, true))
+            : [];
 
         if (! $tablaJson) {
             return new HtmlString('

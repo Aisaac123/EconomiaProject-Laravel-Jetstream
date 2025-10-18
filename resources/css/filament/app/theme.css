@@ -87,3 +87,13 @@ select option {
     background-color: #fff;
     border: none;
 }
+
+input.fi-input {
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    input.fi-input {
+        width: 20rem;
+    }
+}

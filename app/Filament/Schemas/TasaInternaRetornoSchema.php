@@ -635,16 +635,22 @@ class TasaInternaRetornoSchema
             ]);
     }
 
-    private static function buildResultHtml(callable $get): Htmlable
+    public static function buildResultHtml(callable|array $data): Htmlable
     {
+        // Soporte mixto: callable $get o array $data
+        $get = is_callable($data)
+            ? $data
+            : fn(string $key) => $data[$key] ?? null;
+
         $resultados = $get('resultados_calculados');
         $mensaje = $get('mensaje_calculado');
         $periodicidadTasa = $get('periodicidad_tasa') ?: 1;
         $tasaDescuento = $get('tasa_descuento');
 
         $resultadosArray = $resultados ? json_decode($resultados, true) : [];
-        $camposCalculadosArray = $get('campos_calculados') ? json_decode($get('campos_calculados'), true) : [];
-
+        $camposCalculadosArray = $get('campos_calculados')
+            ? json_decode($get('campos_calculados'), true)
+            : [];
         if (empty($resultadosArray)) {
             return new HtmlString('
             <div class="text-center py-12 text-gray-500 dark:text-gray-400">
@@ -938,8 +944,13 @@ class TasaInternaRetornoSchema
         return new HtmlString($html);
     }
 
-    private static function buildTablaFlujosHtml(callable $get): Htmlable
+    public static function buildTablaFlujosHtml(callable|array $data): Htmlable
     {
+        // Soporte mixto: callable $get o array $data
+        $get = is_callable($data)
+            ? $data
+            : fn(string $key) => $data[$key] ?? null;
+
         $tablaJson = $get('tabla_flujos');
 
         if (! $tablaJson) {

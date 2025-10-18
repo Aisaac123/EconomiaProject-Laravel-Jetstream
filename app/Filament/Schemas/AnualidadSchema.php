@@ -965,6 +965,27 @@ class AnualidadSchema
         return new HtmlString($html);
     }
 
+    public static function buildResultHtmlFromData(array $data): Htmlable
+    {
+        $camposCalculados = json_decode($data['campos_calculados'] ?? '[]', true);
+        $resultados = json_decode($data['resultados_calculados'] ?? '{}', true);
+
+        return static::buildResultHtml(
+            $data['pago_periodico'] ?? 0,
+            $data['valor_presente'] ?? null,
+            $data['valor_futuro'] ?? null,
+            $data['tasa_interes'] ?? 0,
+            $data['numero_pagos'] ?? 0,
+            $data['periodicidad_tasa'] ?? null,
+            $camposCalculados,
+            $resultados,
+            $data['interes_generado_calculado_VP'] ?? null,
+            $data['interes_generado_calculado_VF'] ?? null,
+            $data['mensaje_calculado'] ?? '',
+        );
+    }
+
+
     private static function buildCard(string $title, string $icon, string $value, string $subtitle, bool $isCalculated, string $color = 'gray', string $p = 'p-6'): string
     {
         $colorClasses = match ($color) {
