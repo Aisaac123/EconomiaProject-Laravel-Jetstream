@@ -20,7 +20,7 @@ use Illuminate\Support\HtmlString;
 
 class InteresCompuestoSchema
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Schema $schema, bool $showSaveButton = false): Schema
     {
         return $schema
             ->schema([
@@ -548,20 +548,32 @@ class InteresCompuestoSchema
                     ->startOnStep(1)
                     ->contained(false)
                     ->submitAction(new HtmlString(Blade::render(<<<'BLADE'
-                            <div class="items-center space-x-4">
-                                <x-filament::button
-                                    type="submit"
-                                    color="primary"
-                                    class="text-white"
-                                >
-                                    <x-slot:icon>
-                                        <x-heroicon-o-calculator class="size-5 text-white" />
-                                    </x-slot:icon>
-                                    Calcular
-                                </x-filament::button>
-                            </div>
-                    BLADE
-                    ))),
+                        <div class="flex items-center gap-4">
+                            <x-filament::button
+                                type="submit"
+                                color="primary"
+                                class="text-white"
+                            >
+                                <x-slot:icon>
+                                    <x-heroicon-o-calculator class="size-5 text-white" />
+                                </x-slot:icon>
+                                Calcular
+                            </x-filament::button>
+
+                            @if($showSave)
+                            <x-filament::button
+                                wire:click="saveCredito"
+                                color="success"
+                                class="text-white"
+                            >
+                                <x-slot:icon>
+                                    <x-heroicon-o-check class="size-5 text-white" />
+                                </x-slot:icon>
+                                Guardar Crédito
+                            </x-filament::button>
+                            @endif
+                        </div>
+                    BLADE, ['showSave' => $showSaveButton]))),
             ]);
     }
 

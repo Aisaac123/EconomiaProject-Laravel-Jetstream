@@ -17,7 +17,7 @@
             {{ $title }}
         </h1>
 
-        <p class="text-xl font-medium text-white/85 max-w-3xl mx-auto px-12 italic">
+        <p class="text-xl font-medium text-white/85 max-w-6xl px-12 mx-auto italic">
             {{ $quote }}
         </p>
 

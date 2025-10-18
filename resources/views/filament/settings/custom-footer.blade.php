@@ -1,4 +1,4 @@
-<footer class="text-gray-800 py-6 mt-2 w-full mx-auto items-center text-center">
+<footer class="text-gray-800 py-4 mt-2 w-full mx-auto items-center text-center">
     <div class="container mx-auto px-4 text-center">
         <h2 class="text-xl font-semibold tracking-wide">{{ config('app.name') }}</h2>
         <p class="text-sm mt-2 opacity-90">

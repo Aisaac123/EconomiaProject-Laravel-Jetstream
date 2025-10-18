@@ -35,7 +35,7 @@ class AppPanelProvider extends PanelProvider
                 ])
                 ->homeUrl('/dashboard')
                 ->colors(['primary' => Color::Teal[950]])
-                ->brandLogo('assets/app-icon.png')
+                ->brandLogo(asset('assets/app-icon.png'))
                 ->favicon('assets/app-icon.png')
                 ->brandLogoHeight('40px')
                 ->login()
