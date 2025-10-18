@@ -12,13 +12,13 @@ use Illuminate\Contracts\Support\Htmlable;
 
 class ShowCredit extends Page
 {
-
     public Credit $record;
 
     public function mount(int $recordId): void
     {
         $this->record = Credit::findOrFail($recordId);
     }
+
     protected static bool $shouldRegisterNavigation = false;
 
     protected string $view = 'filament.pages.creditos.show';
@@ -28,7 +28,6 @@ class ShowCredit extends Page
     protected static string|null|\UnitEnum $navigationGroup = PageGroupType::CREDIT->value;
 
     protected static ?string $slug = 'creditos/{recordId}';
-
 
     public static function getNavigationLabel(): string
     {

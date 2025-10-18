@@ -20,7 +20,7 @@ use Illuminate\Support\HtmlString;
 
 class InteresSimpleSchema
 {
-    public static function configure(Schema $schema, bool $showSaveButton = false): Schema
+    public static function configure(Schema $schema, bool $showSaveButton = false, bool $showUpdateButton = false): Schema
     {
         return $schema
             ->schema([
@@ -488,8 +488,21 @@ class InteresSimpleSchema
                                 Guardar Crédito
                             </x-filament::button>
                             @endif
+
+                            @if($showUpdate)
+                            <x-filament::button
+                                wire:click="updateCredito"
+                                color="success"
+                                class="text-white"
+                            >
+                                <x-slot:icon>
+                                    <x-heroicon-o-check class="size-5 text-white" />
+                                </x-slot:icon>
+                                Actualizar Crédito
+                            </x-filament::button>
+                            @endif
                         </div>
-                    BLADE, ['showSave' => $showSaveButton]))),
+                    BLADE, ['showSave' => $showSaveButton, 'showUpdate' => $showUpdateButton]))),
             ]);
     }
 
@@ -705,7 +718,9 @@ class InteresSimpleSchema
 
         return new HtmlString($html);
     }
-    public static function buildResultHtmlFromData(array $data): Htmlable{
+
+    public static function buildResultHtmlFromData(array $data): Htmlable
+    {
         $capital = $data['capital'];
         $montoFinal = $data['monto_final'];
         $tasaInteres = $data['tasa_interes'];
@@ -716,8 +731,10 @@ class InteresSimpleSchema
         $campoCalculado = $data['campo_calculado'];
         $resultado = $data['resultado_calculado'];
         $resultado2 = $data['resultado_calculado_2'] ?? null;
+
         return static::buildResultHtml($capital, $montoFinal, $tasaInteres, $tiempo, $periodicidadTasa, $interesGenerado, $mensaje, $campoCalculado, $resultado, $resultado2);
     }
+
     private static function buildCard(string $title, string $icon, string $value, string $subtitle, bool $isCalculated, string $color = 'gray', string $p = 'p-6'): string
     {
         $colorClasses = match ($color) {

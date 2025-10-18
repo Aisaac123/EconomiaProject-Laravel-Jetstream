@@ -22,7 +22,7 @@ use Illuminate\Support\HtmlString;
 
 class AmortizacionSchema
 {
-    public static function configure(Schema $schema, bool $showSaveButton = false): Schema
+    public static function configure(Schema $schema, bool $showSaveButton = false, bool $showUpdateButton = false): Schema
     {
         return $schema
             ->schema([
@@ -675,8 +675,21 @@ class AmortizacionSchema
                                 Guardar Crédito
                             </x-filament::button>
                             @endif
+
+                            @if($showUpdate)
+                            <x-filament::button
+                                wire:click="updateCredito"
+                                color="success"
+                                class="text-white"
+                            >
+                                <x-slot:icon>
+                                    <x-heroicon-o-check class="size-5 text-white" />
+                                </x-slot:icon>
+                                Actualizar Crédito
+                            </x-filament::button>
+                            @endif
                         </div>
-                    BLADE, ['showSave' => $showSaveButton]))),
+                    BLADE, ['showSave' => $showSaveButton, 'showUpdate' => $showUpdateButton]))),
             ]);
     }
 
@@ -687,8 +700,8 @@ class AmortizacionSchema
     {
         // 🧩 Adaptador mixto: permite callable o array
         $value = is_callable($get)
-            ? fn(string $key) => $get($key)
-            : fn(string $key) => $get[$key] ?? null;
+            ? fn (string $key) => $get($key)
+            : fn (string $key) => $get[$key] ?? null;
 
         $montoPrestamo = $value('monto_prestamo');
         $tasaInteres = $value('tasa_interes');
@@ -983,8 +996,8 @@ class AmortizacionSchema
     {
         // 🧩 Adaptador mixto
         $value = is_callable($get)
-            ? fn(string $key) => $get($key)
-            : fn(string $key) => $get[$key] ?? null;
+            ? fn (string $key) => $get($key)
+            : fn (string $key) => $get[$key] ?? null;
 
         $tablaJson = $value('tabla_amortizacion');
         $tabla = $tablaJson

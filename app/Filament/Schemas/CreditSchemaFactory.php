@@ -75,4 +75,3 @@ class CreditSchemaFactory
         return '<p class="text-slate-500 dark:text-slate-400 text-center py-4">⚠️ Tipo de cálculo no soportado.</p>';
     }
 }
-

@@ -28,6 +28,7 @@ class CreateCredit extends Page implements HasForms
     use InteractsWithForms;
 
     protected string $view = 'filament.pages.creditos.create';
+
     protected static ?string $slug = 'creditos/registrar';
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-document-plus';

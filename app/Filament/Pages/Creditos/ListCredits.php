@@ -26,6 +26,7 @@ class ListCredits extends Page implements HasTable
     use InteractsWithTable;
 
     protected string $view = 'filament.pages.creditos.index';
+
     protected static ?string $slug = 'creditos';
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-document-text';
@@ -193,19 +194,25 @@ class ListCredits extends Page implements HasTable
             ])
             ->actions([
                 Action::make('view')
-                    ->label('Ver')
+                    ->label('')
                     ->icon('heroicon-o-eye')
                     ->color('primary')
                     ->url(fn (Credit $record): string => ShowCredit::getUrl(['recordId' => $record->id]))
                     ->tooltip('Ver detalles completos del crédito'),
+                Action::make('edit')
+                    ->label('')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('secondary')
+                    ->url(fn (Credit $record): string => EditCredit::getUrl(['recordId' => $record->id]))
+                    ->tooltip('Ver detalles completos del crédito'),
 
                 Action::make('duplicate')
-                    ->label('Duplicar')
+                    ->label('')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('primary')
                     ->action(function (Credit $record) {
                         $newCredit = $record->replicate()->fill([
-                            'reference_code' => 'COPY-'.uniqid(),
+                            'reference_code' => 'COPY-'.$record->reference_code,
                             'status' => 'pending',
                         ]);
                         $newCredit->save();
@@ -214,7 +221,7 @@ class ListCredits extends Page implements HasTable
                     ->successNotificationTitle('Crédito duplicado exitosamente'),
 
                 DeleteAction::make()
-                    ->label('Eliminar')
+                    ->label('')
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->requiresConfirmation()

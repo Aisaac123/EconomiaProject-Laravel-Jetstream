@@ -1,10 +1,10 @@
 <x-filament-panels::page>
     <div class="space-y-6">
-        {{-- Título principal --}}
+        {{-- 🔹 Título principal --}}
         <x-sections.heading-title
-            title="Simulación Registro de Crédito"
+            :title="$credit ? 'Editar Registro de Crédito' : 'Simulación Registro de Crédito'"
             quote=''
-            button-text="Gestionar Créditos"
+            :button-text="$credit ? 'Volver a Créditos' : 'Gestionar Créditos'"
             href="{{ url(\App\Filament\Pages\Creditos\ListCredits::getUrl()) }}"
         >
             <x-slot:icon>
@@ -12,8 +12,9 @@
             </x-slot:icon>
         </x-sections.heading-title>
 
+        {{-- 🔹 Información general --}}
         <x-sections.content title="Información del crédito" :is-collapsible="false" class="grid-cols-12 grid gap-4">
-            <div class="lg:col-span-4 col-span-12 " id="registrar" :is-collapsible="false">
+            <div class="lg:col-span-5 col-span-12 " id="registrar" :is-collapsible="false">
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-300 dark:border-white/10">
                     <div class="py-6 px-4 min-h-[11.5rem]">
                         <div class="flex items-start gap-4">
@@ -27,7 +28,7 @@
                                     Modelo Financiero
                                 </h3>
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                    Seleccione el modelo de cálculo financiero que desea realizar
+                                    Seleccione el modelo de cálculo financiero que desea {{ $credit ? 'actualizar o revisar' : 'realizar' }}
                                 </p>
                                 <label for="debtor_names" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Modelo <span class="text-red-500">*</span>
@@ -51,8 +52,8 @@
                 </div>
             </div>
 
-            {{-- Sección de datos del deudor --}}
-            <div class="lg:col-span-8 col-span-12">
+            {{-- 🔹 Datos del cliente --}}
+            <div class="lg:col-span-7 col-span-12">
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-300 dark:border-white/10">
                     <div class="p-6 min-h-[11.5rem]">
                         <div class="flex items-start gap-4 mb-4">
@@ -66,7 +67,7 @@
                                     Información del Cliente
                                 </h3>
                                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    Complete los datos personales del deudor o cliente
+                                    {{ $credit ? 'Revise o modifique los datos del deudor' : 'Complete los datos personales del deudor o cliente' }}
                                 </p>
                             </div>
                         </div>
@@ -83,6 +84,7 @@
                                         type="text"
                                         wire:model="debtorNames"
                                         placeholder="Ej: Juan Carlos"
+                                        :disabled="$credit"
                                         class="fi-input block w-full border-gray-300 rounded-lg shadow-sm transition duration-75 focus:border-primary-600 focus:ring-1 focus:ring-inset focus:ring-primary-600 dark:border-white/10 dark:bg-white/5 dark:text-white"
                                     />
                                 </x-filament::input.wrapper>
@@ -99,6 +101,7 @@
                                         type="text"
                                         wire:model="debtorLastNames"
                                         placeholder="Ej: Pérez García"
+                                        :disabled="$credit"
                                         class="fi-input block w-full border-gray-300 rounded-lg shadow-sm transition duration-75 focus:border-primary-600 focus:ring-1 focus:ring-inset focus:ring-primary-600 dark:border-white/10 dark:bg-white/5 dark:text-white"
                                     />
                                 </x-filament::input.wrapper>
@@ -115,6 +118,7 @@
                                         type="text"
                                         wire:model="debtorIdNumber"
                                         placeholder="Ej: 1234567890"
+                                        :disabled="$credit"
                                         class="fi-input block w-full border-gray-300 rounded-lg shadow-sm transition duration-75 focus:border-primary-600 focus:ring-1 focus:ring-inset focus:ring-primary-600 dark:border-white/10 dark:bg-white/5 dark:text-white"
                                     />
                                 </x-filament::input.wrapper>
@@ -123,13 +127,11 @@
                     </div>
                 </div>
             </div>
-
         </x-sections.content>
 
-        {{-- Formulario dinámico --}}
-        <x-sections.content title="Registrar Crédito" :is-collapsible="false">
-            {{-- Select para cambiar tipo de cálculo --}}
-            <form wire:submit="formSubmit" class="space-y-6">
+        {{-- 🔹 Formulario dinámico --}}
+        <x-sections.content :title="$credit ? 'Actualizar Crédito' : 'Registrar Crédito'" :is-collapsible="false">
+            <form wire:submit="{{ 'formSubmit' }}" class="space-y-6">
                 <div class="flex justify-between items-start gap-4">
                     <div class="flex items-start gap-3 flex-1">
                         <div class="flex-shrink-0">
@@ -137,13 +139,17 @@
                         </div>
                         <div class="text-sm">
                             <p class="text-gray-900 dark:text-white font-medium mb-2">
-                                ¿Cómo usar el Sistema de créditos?
+                                {{ $credit ? '¿Cómo actualizar el crédito?' : '¿Cómo usar el Sistema de créditos?' }}
                             </p>
                             <ul class="text-gray-700 dark:text-gray-300 space-y-1.5 list-disc pl-5">
                                 <li>Seleccione el método de cálculo en el selector de arriba</li>
-                                <li>Complete todos los campos conocidos <strong>y deje vacío</strong> el campo que desee calcular</li>
+                                <li>Complete todos los campos conocidos y deje vacío el campo que desee calcular</li>
                                 <li>El sistema calculará automáticamente el valor faltante</li>
-                                <li>Al finalizar, puede guardar con el botón Guardar</li>
+                                @if(!$credit)
+                                    <li>Al finalizar, puede guardar con el botón <strong>Guardar</strong></li>
+                                @else
+                                    <li>Al finalizar, presione <strong>Actualizar</strong> para guardar los cambios</li>
+                                @endif
                             </ul>
                             <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-primary-50 dark:bg-primary-500/10 rounded-lg">
                                 <x-heroicon-s-check-circle class="w-6 h-6 text-primary-600 dark:text-primary-400" />

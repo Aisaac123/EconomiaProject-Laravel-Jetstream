@@ -23,7 +23,7 @@ use Illuminate\Support\HtmlString;
 
 class TasaInternaRetornoSchema
 {
-    public static function configure(Schema $schema, bool $showSaveButton = false): Schema
+    public static function configure(Schema $schema, bool $showSaveButton = false, bool $showUpdateButton = false): Schema
     {
         return $schema
             ->schema([
@@ -630,8 +630,21 @@ class TasaInternaRetornoSchema
                                 Guardar Crédito
                             </x-filament::button>
                             @endif
+
+                            @if($showUpdate)
+                            <x-filament::button
+                                wire:click="updateCredito"
+                                color="success"
+                                class="text-white"
+                            >
+                                <x-slot:icon>
+                                    <x-heroicon-o-check class="size-5 text-white" />
+                                </x-slot:icon>
+                                Actualizar Crédito
+                            </x-filament::button>
+                            @endif
                         </div>
-                    BLADE, ['showSave' => $showSaveButton]))),
+                    BLADE, ['showSave' => $showSaveButton, 'showUpdate' => $showUpdateButton]))),
             ]);
     }
 
@@ -640,7 +653,7 @@ class TasaInternaRetornoSchema
         // Soporte mixto: callable $get o array $data
         $get = is_callable($data)
             ? $data
-            : fn(string $key) => $data[$key] ?? null;
+            : fn (string $key) => $data[$key] ?? null;
 
         $resultados = $get('resultados_calculados');
         $mensaje = $get('mensaje_calculado');
@@ -949,7 +962,7 @@ class TasaInternaRetornoSchema
         // Soporte mixto: callable $get o array $data
         $get = is_callable($data)
             ? $data
-            : fn(string $key) => $data[$key] ?? null;
+            : fn (string $key) => $data[$key] ?? null;
 
         $tablaJson = $get('tabla_flujos');
 
