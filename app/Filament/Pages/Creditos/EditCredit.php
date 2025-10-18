@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Creditos;
 
 use App\Enums\CalculationType;
+use App\Enums\CreditStatusType;
 use App\Enums\PageGroupType;
 use App\Models\Credit;
 use App\Traits\FormCalculations;
@@ -13,6 +14,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\View\View;
 
 class EditCredit extends Page implements HasForms
 {
@@ -178,7 +180,7 @@ class EditCredit extends Page implements HasForms
                 'debtor_id_number' => trim($this->debtorIdNumber),
                 'type' => CalculationType::from($this->calculationType),
                 'inputs' => $this->creditInputs,
-                'status' => 'updated',
+                'status' => CreditStatusType::CALCULATED_UPDATED->value,
                 'calculated_at' => now(),
             ]);
 
@@ -205,5 +207,10 @@ class EditCredit extends Page implements HasForms
     public function getMaxContentWidth(): Width
     {
         return Width::ScreenTwoExtraLarge;
+    }
+
+    public function getFooter(): ?View
+    {
+        return view('filament.settings.custom-footer');
     }
 }

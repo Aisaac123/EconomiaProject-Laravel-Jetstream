@@ -2,16 +2,17 @@
     <div class="space-y-6">
         {{-- 🔹 Título principal --}}
         <x-sections.heading-title
-            :title="isset($credit) ? 'Editar Registro de Crédito' : 'Simulación Registro de Crédito'"
-            quote=''
+            :title="isset($credit) ? 'Editar Crédito' : 'Registrar de Crédito'"
+            :quote="isset($credit)
+        ? '“Revisar y ajustar un crédito es proteger la estabilidad financiera futura.” — Banco de España'
+        : '“El crédito bien otorgado es el primer paso hacia una relación financiera saludable.” — CONDUSEF'"
             :button-text="isset($credit) ? 'Volver a Créditos' : 'Gestionar Créditos'"
             href="{{ url(\App\Filament\Pages\Creditos\ListCredits::getUrl()) }}"
         >
             <x-slot:icon>
-                <x-heroicon-c-calendar-days class="size-16 text-white" aria-hidden="true" />
+                <x-heroicon-c-document-plus class="size-16 text-white" aria-hidden="true" />
             </x-slot:icon>
         </x-sections.heading-title>
-
         {{-- 🔹 Información general --}}
         <x-sections.content title="Información del crédito" :is-collapsible="false" class="grid-cols-12 grid gap-4">
             <div class="lg:col-span-5 col-span-12 " id="registrar" :is-collapsible="false">

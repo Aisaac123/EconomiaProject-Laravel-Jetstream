@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Creditos;
 
 use App\Enums\CalculationType;
+use App\Enums\CreditStatusType;
 use App\Enums\PageGroupType;
 use App\Models\Credit;
 use Carbon\Carbon;
@@ -100,14 +101,12 @@ class ListCredits extends Page implements HasTable
                         CalculationType::GRADIENTES => 'Gradientes',
                     })
                     ->color(fn (CalculationType $state): string => match ($state) {
-                        CalculationType::SIMPLE => 'green',
-                        CalculationType::COMPUESTO => 'blue',
-                        CalculationType::ANUALIDAD => 'orange',
-                        CalculationType::AMORTIZACION => 'red',
-                        CalculationType::TIR => 'purple',
-                        CalculationType::CAPITALIZACION => 'cyan',
-                        CalculationType::TASA_INTERES => 'indigo',
-                        CalculationType::GRADIENTES => 'pink',
+                        CalculationType::SIMPLE, CalculationType::TIR => 'success',
+                        CalculationType::COMPUESTO, CalculationType::TASA_INTERES => 'info',
+                        CalculationType::ANUALIDAD => 'warning',
+                        CalculationType::AMORTIZACION => 'danger',
+                        CalculationType::CAPITALIZACION => 'gray',
+                        CalculationType::GRADIENTES => 'primary',
                     })
                     ->sortable()
                     ->toggleable(),
@@ -116,16 +115,18 @@ class ListCredits extends Page implements HasTable
                     ->label('Estado')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'calculated' => '✓ Calculado',
+                        'calculated-updated' => '🔄 Calculado (actualizado)',
+                        'calculated-copied' => '📋 Calculado (Copia)',
                         'pending' => '⏳ Pendiente',
                         'paid' => '✓ Pagado',
-                        'cancelled' => '✗ Cancelado',
+                        'rejected' => '✗ Rechazado',
                         default => $state,
                     })
                     ->colors([
-                        'info' => 'calculated',
+                        'info' => ['calculated', 'calculated-updated'],
                         'warning' => 'pending',
                         'success' => 'paid',
-                        'danger' => 'cancelled',
+                        'danger' => 'rejected',
                     ])
                     ->sortable()
                     ->toggleable(),
@@ -213,7 +214,7 @@ class ListCredits extends Page implements HasTable
                     ->action(function (Credit $record) {
                         $newCredit = $record->replicate()->fill([
                             'reference_code' => 'COPY-'.$record->reference_code,
-                            'status' => 'pending',
+                            'status' => CreditStatusType::CALCULATED_COPIED->value,
                         ]);
                         $newCredit->save();
                     })

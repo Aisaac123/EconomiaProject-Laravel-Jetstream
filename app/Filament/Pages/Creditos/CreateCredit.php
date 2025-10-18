@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Creditos;
 
 use App\Enums\CalculationType;
+use App\Enums\CreditStatusType;
 use App\Enums\PageGroupType;
 use App\Filament\Schemas\AmortizacionSchema;
 use App\Filament\Schemas\AnualidadSchema;
@@ -242,7 +243,7 @@ class CreateCredit extends Page implements HasForms
                     'type' => CalculationType::from($this->calculationType),
                     'inputs' => $this->data,
                     'results' => null,
-                    'status' => 'calculated',
+                    'status' => CreditStatusType::CALCULATED->value,
                     'reference_code' => $referenceCode,
                     'calculated_at' => now(),
                 ]);
