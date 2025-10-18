@@ -497,7 +497,7 @@ class InteresSimpleSchema
     /**
      * Construye el HTML para mostrar los resultados
      */
-    protected static function buildResultHtml(
+    public static function buildResultHtml(
         $capital, $montoFinal, $tasaInteres, $tiempo,
         $periodicidadTasa, $frecuencia, $interesGenerado,
         $mensaje, $campoCalculado, $resultado, $resultado2 = null

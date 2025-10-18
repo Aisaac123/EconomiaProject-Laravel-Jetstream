@@ -21,12 +21,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 
-class Index extends Page implements HasTable
+class ListCredits extends Page implements HasTable
 {
     use InteractsWithTable;
 
     protected string $view = 'filament.pages.creditos.index';
-
     protected static ?string $slug = 'creditos';
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-document-text';
@@ -64,7 +63,7 @@ class Index extends Page implements HasTable
                     ->icon('heroicon-o-hashtag')
                     ->weight('bold')
                     ->color('primary')
-                    ->url(fn (Credit $record): string => '#')
+                    ->url(fn (Credit $record): string => ShowCredit::getUrl(['recordId' => $record->id]))
                     ->tooltip('Hacer clic para ver detalles')
                     ->toggleable(),
 
@@ -197,15 +196,8 @@ class Index extends Page implements HasTable
                     ->label('Ver')
                     ->icon('heroicon-o-eye')
                     ->color('primary')
-                    ->url(fn (Credit $record): string => '#')
+                    ->url(fn (Credit $record): string => ShowCredit::getUrl(['recordId' => $record->id]))
                     ->tooltip('Ver detalles completos del crédito'),
-
-                Action::make('edit')
-                    ->label('Editar')
-                    ->icon('heroicon-o-pencil')
-                    ->color('primary')
-                    ->url(fn (Credit $record): string => '#')
-                    ->tooltip('Editar información del crédito'),
 
                 Action::make('duplicate')
                     ->label('Duplicar')

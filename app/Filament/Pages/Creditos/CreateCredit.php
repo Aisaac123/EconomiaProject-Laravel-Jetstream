@@ -22,13 +22,12 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Str;
 
-class Create extends Page implements HasForms
+class CreateCredit extends Page implements HasForms
 {
     use FormCalculations;
     use InteractsWithForms;
 
     protected string $view = 'filament.pages.creditos.create';
-
     protected static ?string $slug = 'creditos/registrar';
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-document-plus';
