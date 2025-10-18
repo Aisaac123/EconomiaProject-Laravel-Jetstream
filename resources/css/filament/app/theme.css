@@ -3,7 +3,6 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
-
 html { scroll-behavior: smooth; }
 
 /* Si tienes header fijo, ajusta el offset */
@@ -78,4 +77,13 @@ html { scroll-behavior: smooth; }
     flex: 1;
     grid-auto-columns: minmax(0, 1fr);
     row-gap: calc(var(--spacing) * 0);
+}
+
+select option {
+    font-size: 0.9rem;
+    font-family: inherit;
+    padding: 0.4rem 0.6rem;
+    color: #333;
+    background-color: #fff;
+    border: none;
 }
