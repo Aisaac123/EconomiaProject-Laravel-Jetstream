@@ -79,21 +79,3 @@ html { scroll-behavior: smooth; }
     row-gap: calc(var(--spacing) * 0);
 }
 
-select option {
-    font-size: 0.9rem;
-    font-family: inherit;
-    padding: 0.4rem 0.6rem;
-    color: #333;
-    background-color: #fff;
-    border: none;
-}
-
-input.fi-input {
-    width: 100%;
-}
-
-@media (min-width: 768px) {
-    input.fi-input {
-        width: 20rem;
-    }
-}

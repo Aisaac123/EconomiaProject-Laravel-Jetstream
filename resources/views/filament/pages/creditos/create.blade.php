@@ -2,9 +2,9 @@
     <div class="space-y-6">
         {{-- 🔹 Título principal --}}
         <x-sections.heading-title
-            :title="$credit ? 'Editar Registro de Crédito' : 'Simulación Registro de Crédito'"
+            :title="isset($credit) ? 'Editar Registro de Crédito' : 'Simulación Registro de Crédito'"
             quote=''
-            :button-text="$credit ? 'Volver a Créditos' : 'Gestionar Créditos'"
+            :button-text="isset($credit) ? 'Volver a Créditos' : 'Gestionar Créditos'"
             href="{{ url(\App\Filament\Pages\Creditos\ListCredits::getUrl()) }}"
         >
             <x-slot:icon>
@@ -28,7 +28,7 @@
                                     Modelo Financiero
                                 </h3>
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                    Seleccione el modelo de cálculo financiero que desea {{ $credit ? 'actualizar o revisar' : 'realizar' }}
+                                    Seleccione el modelo de cálculo financiero que desea {{ isset($credit) ? 'actualizar o revisar' : 'realizar' }}
                                 </p>
                                 <label for="debtor_names" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Modelo <span class="text-red-500">*</span>
@@ -67,7 +67,7 @@
                                     Información del Cliente
                                 </h3>
                                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    {{ $credit ? 'Revise o modifique los datos del deudor' : 'Complete los datos personales del deudor o cliente' }}
+                                    {{ isset($credit)  ? 'Revise o modifique los datos del deudor' : 'Complete los datos personales del deudor o cliente' }}
                                 </p>
                             </div>
                         </div>
@@ -84,8 +84,7 @@
                                         type="text"
                                         wire:model="debtorNames"
                                         placeholder="Ej: Juan Carlos"
-                                        :disabled="$credit"
-                                        class="fi-input block w-full border-gray-300 rounded-lg shadow-sm transition duration-75 focus:border-primary-600 focus:ring-1 focus:ring-inset focus:ring-primary-600 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                                        :disabled="isset($credit)"
                                     />
                                 </x-filament::input.wrapper>
                             </div>
@@ -101,8 +100,7 @@
                                         type="text"
                                         wire:model="debtorLastNames"
                                         placeholder="Ej: Pérez García"
-                                        :disabled="$credit"
-                                        class="fi-input block w-full border-gray-300 rounded-lg shadow-sm transition duration-75 focus:border-primary-600 focus:ring-1 focus:ring-inset focus:ring-primary-600 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                                        :disabled="isset($credit)"
                                     />
                                 </x-filament::input.wrapper>
                             </div>
@@ -118,8 +116,7 @@
                                         type="text"
                                         wire:model="debtorIdNumber"
                                         placeholder="Ej: 1234567890"
-                                        :disabled="$credit"
-                                        class="fi-input block w-full border-gray-300 rounded-lg shadow-sm transition duration-75 focus:border-primary-600 focus:ring-1 focus:ring-inset focus:ring-primary-600 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                                        :disabled="isset($credit)"
                                     />
                                 </x-filament::input.wrapper>
                             </div>
@@ -130,7 +127,7 @@
         </x-sections.content>
 
         {{-- 🔹 Formulario dinámico --}}
-        <x-sections.content :title="$credit ? 'Actualizar Crédito' : 'Registrar Crédito'" :is-collapsible="false">
+        <x-sections.content :title="isset($credit) ? 'Actualizar Crédito' : 'Registrar Crédito'" :is-collapsible="false">
             <form wire:submit="{{ 'formSubmit' }}" class="space-y-6">
                 <div class="flex justify-between items-start gap-4">
                     <div class="flex items-start gap-3 flex-1">
@@ -139,13 +136,13 @@
                         </div>
                         <div class="text-sm">
                             <p class="text-gray-900 dark:text-white font-medium mb-2">
-                                {{ $credit ? '¿Cómo actualizar el crédito?' : '¿Cómo usar el Sistema de créditos?' }}
+                                {{ isset($credit) ? '¿Cómo actualizar el crédito?' : '¿Cómo usar el Sistema de créditos?' }}
                             </p>
                             <ul class="text-gray-700 dark:text-gray-300 space-y-1.5 list-disc pl-5">
                                 <li>Seleccione el método de cálculo en el selector de arriba</li>
                                 <li>Complete todos los campos conocidos y deje vacío el campo que desee calcular</li>
                                 <li>El sistema calculará automáticamente el valor faltante</li>
-                                @if(!$credit)
+                                @if(!isset($credit))
                                     <li>Al finalizar, puede guardar con el botón <strong>Guardar</strong></li>
                                 @else
                                     <li>Al finalizar, presione <strong>Actualizar</strong> para guardar los cambios</li>
