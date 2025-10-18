@@ -10,6 +10,7 @@ use App\Filament\Schemas\GradientesSchema;
 use App\Filament\Schemas\InteresCompuestoSchema;
 use App\Filament\Schemas\InteresSimpleSchema;
 use App\Filament\Schemas\TasaInternaRetornoSchema;
+use App\Models\Credit;
 use App\Traits\FormCalculations;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -19,6 +20,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
+use Str;
 
 class Create extends Page implements HasForms
 {
@@ -35,6 +37,9 @@ class Create extends Page implements HasForms
     protected static string|null|\UnitEnum $navigationGroup = PageGroupType::CREDIT->value;
 
     public string $calculationType = 'simple';
+    public string $debtorNames = '';
+    public string $debtorLastNames = '';
+    public string $debtorIdNumber = '';
 
     public static function getNavigationSort(): ?int
     {
@@ -170,5 +175,93 @@ class Create extends Page implements HasForms
     public function getMaxContentWidth(): Width
     {
         return Width::ScreenTwoExtraLarge;
+    }
+
+    public function saveCredito()
+    {
+        $validationErrors = [];
+
+        if (empty(trim($this->debtorNames))) {
+            $validationErrors[] = 'El campo Nombres es obligatorio';
+        }
+
+        if (empty(trim($this->debtorLastNames))) {
+            $validationErrors[] = 'El campo Apellidos es obligatorio';
+        }
+
+        if (empty(trim($this->debtorIdNumber))) {
+            $validationErrors[] = 'El campo Cédula es obligatorio';
+        }
+
+        // Validar formato de cédula (solo números)
+        if (!empty($this->debtorIdNumber) && !ctype_digit($this->debtorIdNumber)) {
+            $validationErrors[] = 'La Cédula debe contener solo números';
+        }
+
+        // Si hay errores de validación del deudor
+        if (!empty($validationErrors)) {
+            Notification::make()
+                ->title('Datos del deudor incompletos')
+                ->body(implode('<br>', $validationErrors))
+                ->warning()
+                ->send();
+            return;
+        }
+
+        if ((isset($this->data['resultado_calculado']) &&
+                $this->data['resultado_calculado'] !== null) ||
+            (isset($this->data['resultados_calculados']) &&
+                $this->data['resultados_calculados'] !== null)) {
+
+            try {
+                // Generar código de referencia
+                $prefix = match($this->calculationType) {
+                    CalculationType::SIMPLE->value => 'IS',
+                    CalculationType::COMPUESTO->value => 'IC',
+                    CalculationType::ANUALIDAD->value => 'AN',
+                    CalculationType::TASA_INTERES->value => 'TI',
+                    CalculationType::AMORTIZACION->value => 'AM',
+                    CalculationType::CAPITALIZACION->value => 'CP',
+                    CalculationType::TIR->value => 'TR',
+                    CalculationType::GRADIENTES->value => 'GR',
+                };
+
+                $referenceCode = $prefix . '-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+
+                // Guardar el crédito
+                Credit::create([
+                    'user_id' => auth()->id(),
+                    'debtor_names' => trim($this->debtorNames),
+                    'debtor_last_names' => trim($this->debtorLastNames),
+                    'debtor_id_number' => trim($this->debtorIdNumber),
+                    'type' => CalculationType::from($this->calculationType),
+                    'inputs' => $this->data,
+                    'results' => null,
+                    'status' => 'calculated',
+                    'reference_code' => $referenceCode,
+                    'calculated_at' => now(),
+                ]);
+
+                Notification::make()
+                    ->title('Crédito guardado')
+                    ->body('Código: ' . $referenceCode)
+                    ->success()
+                    ->send();
+
+            } catch (\Exception $e) {
+                Notification::make()
+                    ->title('Error al guardar')
+                    ->body($e->getMessage())
+                    ->danger()
+                    ->send();
+            }
+        }else {
+            Notification::make()
+                ->title('Error al guardar')
+                ->body('Por favor, primero calcula el resultado antes de guardarlo.')
+                ->warning()
+                ->send();
+        }
+
     }
 }

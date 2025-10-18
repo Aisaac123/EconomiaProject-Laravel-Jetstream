@@ -3,7 +3,7 @@
         {{-- Título principal --}}
         <x-sections.heading-title
             title="Simulación Registro de Crédito"
-            quote='"Un dólar hoy vale más que un dólar mañana, pero los pagos periódicos bien planificados crean riqueza constante." — Benjamin Graham"'
+            quote=''
             button-text="Registrar Crédito"
             href="#registrar"
         >
@@ -12,39 +12,118 @@
             </x-slot:icon>
         </x-sections.heading-title>
 
-        <x-sections.content id="registrar" title="Sistema financiero" :is-collapsible="false">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-300 dark:border-white/10">
-            <div class="p-6">
-                <div class="flex items-start gap-4">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-500/10">
-                            <x-heroicon-o-calculator class="w-6 h-6 text-primary-600 dark:text-primary-400" />
-                        </div>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">
-                            Método Financiero
-                        </h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Seleccione el metodo de cálculo financiero que desea realizar
-                        </p>
-                        <div class="">
-                            <x-filament::input.wrapper suffix-icon="heroicon-o-building-library" class="mb-3">
-                                <x-filament::input.select
-                                    id="calculation-type"
-                                    wire:model.live="calculationType"
-                                    class="fi-select-input block w-full border-gray-300 rounded-lg shadow-sm transition duration-75 focus:border-primary-600 focus:ring-1 focus:ring-inset focus:ring-primary-600 disabled:opacity-70 dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-primary-500"
-                                >
-                                    @foreach($this->getCalculationTypeOptions() as $value => $label)
-                                        <option value="{{ $value }}">{{ $label }}</option>
-                                    @endforeach
-                                </x-filament::input.select>
-                            </x-filament::input.wrapper>
+        <x-sections.content title="Información del crédito" :is-collapsible="false" class="grid-cols-12 grid gap-4">
+            <div class="lg:col-span-4 col-span-12 " id="registrar" :is-collapsible="false">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-300 dark:border-white/10">
+                    <div class="py-6 px-4 min-h-[11.5rem]">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-500/10">
+                                    <x-heroicon-o-calculator class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">
+                                    Modelo Financiero
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                    Seleccione el modelo de cálculo financiero que desea realizar
+                                </p>
+                                <label for="debtor_names" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Modelo <span class="text-red-500">*</span>
+                                </label>
+                                <div class="">
+                                    <x-filament::input.wrapper suffix-icon="heroicon-o-building-library" class="mb-3">
+                                        <x-filament::input.select
+                                            id="calculation-type"
+                                            wire:model.live="calculationType"
+                                            class="fi-select-input block w-full border-gray-300 rounded-lg shadow-sm transition duration-75 focus:border-primary-600 focus:ring-1 focus:ring-inset focus:ring-primary-600 disabled:opacity-70 dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-primary-500"
+                                        >
+                                            @foreach($this->getCalculationTypeOptions() as $value => $label)
+                                                <option value="{{ $value }}">{{ $label }}</option>
+                                            @endforeach
+                                        </x-filament::input.select>
+                                    </x-filament::input.wrapper>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            {{-- Sección de datos del deudor --}}
+            <div class="lg:col-span-8 col-span-12">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-300 dark:border-white/10">
+                    <div class="p-6 min-h-[11.5rem]">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-500/10">
+                                    <x-heroicon-o-user class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">
+                                    Información del Cliente
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    Complete los datos personales del deudor o cliente
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {{-- Nombres --}}
+                            <div>
+                                <label for="debtor_names" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Nombres <span class="text-red-500">*</span>
+                                </label>
+                                <x-filament::input.wrapper prefix-icon="heroicon-o-user">
+                                    <x-filament::input
+                                        id="debtor_names"
+                                        type="text"
+                                        wire:model="debtorNames"
+                                        placeholder="Ej: Juan Carlos"
+                                        class="fi-input block w-full border-gray-300 rounded-lg shadow-sm transition duration-75 focus:border-primary-600 focus:ring-1 focus:ring-inset focus:ring-primary-600 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                                    />
+                                </x-filament::input.wrapper>
+                            </div>
+
+                            {{-- Apellidos --}}
+                            <div>
+                                <label for="debtor_last_names" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Apellidos <span class="text-red-500">*</span>
+                                </label>
+                                <x-filament::input.wrapper prefix-icon="heroicon-o-user">
+                                    <x-filament::input
+                                        id="debtor_last_names"
+                                        type="text"
+                                        wire:model="debtorLastNames"
+                                        placeholder="Ej: Pérez García"
+                                        class="fi-input block w-full border-gray-300 rounded-lg shadow-sm transition duration-75 focus:border-primary-600 focus:ring-1 focus:ring-inset focus:ring-primary-600 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                                    />
+                                </x-filament::input.wrapper>
+                            </div>
+
+                            {{-- Cédula --}}
+                            <div>
+                                <label for="debtor_id_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Cédula <span class="text-red-500">*</span>
+                                </label>
+                                <x-filament::input.wrapper prefix-icon="heroicon-o-identification">
+                                    <x-filament::input
+                                        id="debtor_id_number"
+                                        type="text"
+                                        wire:model="debtorIdNumber"
+                                        placeholder="Ej: 1234567890"
+                                        class="fi-input block w-full border-gray-300 rounded-lg shadow-sm transition duration-75 focus:border-primary-600 focus:ring-1 focus:ring-inset focus:ring-primary-600 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                                    />
+                                </x-filament::input.wrapper>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </x-sections.content>
 
         {{-- Formulario dinámico --}}
