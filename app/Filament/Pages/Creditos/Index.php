@@ -5,21 +5,21 @@ namespace App\Filament\Pages\Creditos;
 use App\Enums\CalculationType;
 use App\Enums\PageGroupType;
 use App\Models\Credit;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Pages\Page;
 use Filament\Support\Enums\Width;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
 
 class Index extends Page implements HasTable
 {
@@ -68,7 +68,6 @@ class Index extends Page implements HasTable
                     ->tooltip('Hacer clic para ver detalles')
                     ->toggleable(),
 
-
                 TextColumn::make('debtor_names')
                     ->label('Nombre del Deudor')
                     ->searchable()
@@ -76,7 +75,6 @@ class Index extends Page implements HasTable
                     ->icon('heroicon-o-user')
                     ->description(fn (Credit $record): string => $record->debtor_last_names)
                     ->toggleable(),
-
 
                 TextColumn::make('debtor_id_number')
                     ->label('Cédula')
@@ -88,11 +86,10 @@ class Index extends Page implements HasTable
                     ->badge()
                     ->toggleable(),
 
-
                 TextColumn::make('type')
                     ->label('Tipo de Cálculo')
                     ->badge()
-                    ->formatStateUsing(fn (CalculationType $state): string => match($state) {
+                    ->formatStateUsing(fn (CalculationType $state): string => match ($state) {
                         CalculationType::SIMPLE => 'Interés Simple',
                         CalculationType::COMPUESTO => 'Interés Compuesto',
                         CalculationType::ANUALIDAD => 'Anualidad',
@@ -102,7 +99,7 @@ class Index extends Page implements HasTable
                         CalculationType::TIR => 'TIR',
                         CalculationType::GRADIENTES => 'Gradientes',
                     })
-                    ->color(fn (CalculationType $state): string => match($state) {
+                    ->color(fn (CalculationType $state): string => match ($state) {
                         CalculationType::SIMPLE => 'green',
                         CalculationType::COMPUESTO => 'blue',
                         CalculationType::ANUALIDAD => 'orange',
@@ -115,10 +112,9 @@ class Index extends Page implements HasTable
                     ->sortable()
                     ->toggleable(),
 
-
                 BadgeColumn::make('status')
                     ->label('Estado')
-                    ->formatStateUsing(fn (string $state): string => match($state) {
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
                         'calculated' => '✓ Calculado',
                         'pending' => '⏳ Pendiente',
                         'paid' => '✓ Pagado',
@@ -133,7 +129,6 @@ class Index extends Page implements HasTable
                     ])
                     ->sortable()
                     ->toggleable(),
-
 
                 TextColumn::make('user.name')
                     ->label('Creado Por')
@@ -218,7 +213,7 @@ class Index extends Page implements HasTable
                     ->color('primary')
                     ->action(function (Credit $record) {
                         $newCredit = $record->replicate()->fill([
-                            'reference_code' => 'COPY-' . uniqid(),
+                            'reference_code' => 'COPY-'.uniqid(),
                             'status' => 'pending',
                         ]);
                         $newCredit->save();
@@ -245,7 +240,7 @@ class Index extends Page implements HasTable
             ->emptyStateIcon('heroicon-o-inbox')
             ->defaultSort('calculated_at', 'desc')
             ->striped()
-            ->recordClasses(fn (Credit $record) => match($record->status) {
+            ->recordClasses(fn (Credit $record) => match ($record->status) {
                 'pending' => 'opacity-75',
                 default => '',
             })

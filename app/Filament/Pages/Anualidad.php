@@ -7,8 +7,8 @@ use App\Filament\Schemas\AnualidadSchema;
 use App\Traits\FormCalculations;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
-use Illuminate\Contracts\Support\Htmlable;
 use Filament\Support\Enums\Width;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 
 class Anualidad extends Page

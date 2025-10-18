@@ -24,10 +24,11 @@ use Str;
 
 class Create extends Page implements HasForms
 {
-    use InteractsWithForms;
     use FormCalculations;
+    use InteractsWithForms;
 
     protected string $view = 'filament.pages.creditos.create';
+
     protected static ?string $slug = 'creditos/registrar';
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-document-plus';
@@ -37,8 +38,11 @@ class Create extends Page implements HasForms
     protected static string|null|\UnitEnum $navigationGroup = PageGroupType::CREDIT->value;
 
     public string $calculationType = 'simple';
+
     public string $debtorNames = '';
+
     public string $debtorLastNames = '';
+
     public string $debtorIdNumber = '';
 
     public static function getNavigationSort(): ?int
@@ -64,7 +68,7 @@ class Create extends Page implements HasForms
     public function form(Schema $schema): Schema
     {
         // Seleccionar el schema según el tipo de cálculo
-        $schemaClass = match($this->calculationType) {
+        $schemaClass = match ($this->calculationType) {
             'compuesto' => InteresCompuestoSchema::class,
             'anualidad' => AnualidadSchema::class,
             'amortizacion' => AmortizacionSchema::class,
@@ -194,17 +198,18 @@ class Create extends Page implements HasForms
         }
 
         // Validar formato de cédula (solo números)
-        if (!empty($this->debtorIdNumber) && !ctype_digit($this->debtorIdNumber)) {
+        if (! empty($this->debtorIdNumber) && ! ctype_digit($this->debtorIdNumber)) {
             $validationErrors[] = 'La Cédula debe contener solo números';
         }
 
         // Si hay errores de validación del deudor
-        if (!empty($validationErrors)) {
+        if (! empty($validationErrors)) {
             Notification::make()
                 ->title('Datos del deudor incompletos')
                 ->body(implode('<br>', $validationErrors))
                 ->warning()
                 ->send();
+
             return;
         }
 
@@ -215,7 +220,7 @@ class Create extends Page implements HasForms
 
             try {
                 // Generar código de referencia
-                $prefix = match($this->calculationType) {
+                $prefix = match ($this->calculationType) {
                     CalculationType::SIMPLE->value => 'IS',
                     CalculationType::COMPUESTO->value => 'IC',
                     CalculationType::ANUALIDAD->value => 'AN',
@@ -226,7 +231,7 @@ class Create extends Page implements HasForms
                     CalculationType::GRADIENTES->value => 'GR',
                 };
 
-                $referenceCode = $prefix . '-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+                $referenceCode = $prefix.'-'.now()->format('Ymd').'-'.strtoupper(Str::random(6));
 
                 // Guardar el crédito
                 Credit::create([
@@ -244,7 +249,7 @@ class Create extends Page implements HasForms
 
                 Notification::make()
                     ->title('Crédito guardado')
-                    ->body('Código: ' . $referenceCode)
+                    ->body('Código: '.$referenceCode)
                     ->success()
                     ->send();
 
@@ -255,7 +260,7 @@ class Create extends Page implements HasForms
                     ->danger()
                     ->send();
             }
-        }else {
+        } else {
             Notification::make()
                 ->title('Error al guardar')
                 ->body('Por favor, primero calcula el resultado antes de guardarlo.')

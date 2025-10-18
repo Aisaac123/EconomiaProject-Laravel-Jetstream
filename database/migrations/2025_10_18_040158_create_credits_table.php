@@ -39,7 +39,7 @@ return new class extends Migration
                 ->comment('Usuario que generó el cálculo o crédito');
 
             // Tipo de cálculo o crédito (simple, compuesto, etc.)
-            $table->enum('type', array_map(fn($e) => $e->value, \App\Enums\CalculationType::cases()))
+            $table->enum('type', array_map(fn ($e) => $e->value, \App\Enums\CalculationType::cases()))
                 ->index()
                 ->comment('Tipo de cálculo financiero');
 
