@@ -180,6 +180,7 @@ class EditCredit extends Page implements HasForms
                 'debtor_id_number' => trim($this->debtorIdNumber),
                 'type' => CalculationType::from($this->calculationType),
                 'inputs' => $this->creditInputs,
+                'results' => $this->creditInputs,
                 'status' => CreditStatusType::CALCULATED_UPDATED->value,
                 'calculated_at' => now(),
             ]);

@@ -242,7 +242,7 @@ class CreateCredit extends Page implements HasForms
                     'debtor_id_number' => trim($this->debtorIdNumber),
                     'type' => CalculationType::from($this->calculationType),
                     'inputs' => $this->data,
-                    'results' => null,
+                    'results' => $this->data,
                     'status' => CreditStatusType::CALCULATED->value,
                     'reference_code' => $referenceCode,
                     'calculated_at' => now(),
