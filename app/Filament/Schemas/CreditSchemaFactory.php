@@ -36,7 +36,7 @@ class CreditSchemaFactory
                 }
             } catch (\Exception $e) {
                 // Si hay error, simplemente no mostrar pagos
-                $pagosHtml = null;
+                throw $e;
             }
         }
 
@@ -105,11 +105,11 @@ class CreditSchemaFactory
                 return new HtmlString(
                     Blade::render(<<<'BLADE'
                     <div class="space-y-4">
-                    <x-sections.content title="Cálculo Inicial"  class="space-y-4">
+                    <x-sections.content title="Cálculo Inicial" class="space-y-4">
                         {!! $resultHtml !!}
                     </x-sections.content>
 
-                    <x-sections.content title="Resultado de Pagos" class="space-y-4">
+                    <x-sections.content collapsed="true" title="Resultado de Pagos" class="space-y-4">
                         {!! $pagosHtml !!}
                     </x-sections.content>
                     </div>

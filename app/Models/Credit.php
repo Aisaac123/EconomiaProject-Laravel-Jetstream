@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\CalculationType;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Model;
 
 class Credit extends Model
@@ -39,151 +41,37 @@ class Credit extends Model
 
     /*
     |--------------------------------------------------------------------------
-    | Métodos para datos de pagos (buildPagosHtml)
+    | Métodos para datos de pagos
     |--------------------------------------------------------------------------
     */
 
     /**
      * Prepara los datos para buildPagosHtml según el tipo de crédito
      */
-    public function getPagosData(): array
+    public function getPagosData(?array $data = null): array
     {
         return match ($this->type) {
-            CalculationType::SIMPLE => $this->getPagosDataSimple(),
-            CalculationType::COMPUESTO => $this->getPagosDataCompuesto(),
-            CalculationType::AMORTIZACION => $this->getPagosDataAmortizacion(),
-            CalculationType::ANUALIDAD => $this->getPagosDataAnualidad(),
-            CalculationType::GRADIENTES => $this->getPagosDataGradientes(),
-            CalculationType::TIR => $this->getPagosDataTIR(),
+            CalculationType::SIMPLE => $this->getPagosDataSimple($data['amount'] ?? null),
+            CalculationType::COMPUESTO => $this->getPagosDataCompuesto($data['amount'] ?? null),
+            CalculationType::AMORTIZACION => $this->getPagosDataAmortizacion($data['amount']),
+            CalculationType::ANUALIDAD => $this->getPagosDataAnualidad($data['amount']),
+            CalculationType::GRADIENTES => $this->getPagosDataGradientes($data['amount']),
+            CalculationType::TIR => $this->getPagosDataTIR($data['amount']),
             default => [],
         };
     }
 
-    /**
-     * Datos para Interés Simple
-     */
-    /**
-     * Datos para Interés Simple - Información de Pagos
-     */
-    public function getPagosDataSimple(): array
+    public function calculatePaymentDistribution(Get $get, Set $set, ?array $data = null): void
     {
-        $inputs = $this->inputs ?? [];
-
-        // Datos del crédito original
-        $capitalInicial = $inputs['capital'] ?? 0;
-        $montoTotal = $inputs['resultado_calculado'] ?? $inputs['monto_final'] ?? 0;
-        $interesTotal = $inputs['interes_generado_calculado'] ?? $inputs['interes_generado'] ?? 0;
-
-        // Obtener todos los pagos completados
-        $pagosCompletados = $this->payments()->where('status', 'completed')->orderBy('payment_date')->get();
-
-        // Calcular totales de pagos
-        $totalPagado = $pagosCompletados->sum('amount');
-        $totalCapitalPagado = $pagosCompletados->sum('principal_paid');
-        $totalInteresPagado = $pagosCompletados->sum('interest_paid');
-        $numeroPagosRealizados = $pagosCompletados->count();
-
-        // Calcular saldos pendientes
-        $saldoRestante = max(0, $montoTotal - $totalPagado);
-        $capitalPendiente = max(0, $capitalInicial - $totalCapitalPagado);
-        $interesPendiente = max(0, $interesTotal - $totalInteresPagado);
-
-        // Obtener último pago
-        $ultimoPago = $pagosCompletados->last();
-        $fechaUltimoPago = $ultimoPago ? $ultimoPago->payment_date->format('Y-m-d') : null;
-        $montoUltimoPago = $ultimoPago ? $ultimoPago->amount : null;
-
-        // Calcular promedio de pago
-        $promedioMontoPago = $numeroPagosRealizados > 0 ? $totalPagado / $numeroPagosRealizados : 0;
-
-        // Estimar pagos restantes (si se mantiene el promedio)
-        $pagosEstimadosRestantes = $promedioMontoPago > 0 ? ceil($saldoRestante / $promedioMontoPago) : null;
-
-        // Calcular fechas
-        $fechaInicio = null;
-        $fechaVencimiento = null;
-
-        if ($inputs['usar_fechas_tiempo'] ?? false) {
-            $fechaInicio = $inputs['fecha_inicio'] ?? null;
-            $fechaVencimiento = $inputs['fecha_final'] ?? null;
-        } else {
-            if ($this->created_at) {
-                $fechaInicio = $this->created_at->format('Y-m-d');
-                $carbon = $this->created_at->copy();
-
-                if ($inputs['anio'] ?? null) {
-                    $carbon->addYears($inputs['anio']);
-                }
-                if ($inputs['mes'] ?? null) {
-                    $carbon->addMonths($inputs['mes']);
-                }
-                if ($inputs['dia'] ?? null) {
-                    $carbon->addDays($inputs['dia']);
-                }
-
-                $fechaVencimiento = $carbon->format('Y-m-d');
-            }
-        }
-
-        // Determinar estado
-        $estadoCredito = $this->determinarEstadoCredito($saldoRestante, $fechaVencimiento);
-
-        // Calcular porcentajes
-        $porcentajePagado = $montoTotal > 0 ? round(($totalPagado / $montoTotal) * 100, 2) : 0;
-        $porcentajeCapitalPagado = $capitalInicial > 0 ? round(($totalCapitalPagado / $capitalInicial) * 100, 2) : 0;
-        $porcentajeInteresPagado = $interesTotal > 0 ? round(($totalInteresPagado / $interesTotal) * 100, 2) : 0;
-
-        // Calcular días transcurridos y restantes
-        $diasTranscurridos = $this->created_at ? smartRound($this->created_at->diffInDays(now())) : null;
-        $diasRestantes = $fechaVencimiento ? smartRound(now()->diffInDays(\Carbon\Carbon::parse($fechaVencimiento), false)) : null;
-
-        // Generar mensaje contextual
-        $mensajeFinal = $this->generarMensajeFinalPagos(
-            $estadoCredito,
-            $saldoRestante,
-            $numeroPagosRealizados,
-            $porcentajePagado,
-            $diasRestantes
-        );
-
-        return [
-            // Información del crédito
-            'capital_inicial' => $capitalInicial,
-            'monto_total_credito' => $montoTotal,
-            'interes_total_credito' => $interesTotal,
-
-            // Totales pagados
-            'total_pagado' => $totalPagado,
-            'capital_pagado' => $totalCapitalPagado,
-            'interes_pagado' => $totalInteresPagado,
-
-            // Saldos pendientes
-            'saldo_restante' => $saldoRestante,
-            'capital_pendiente' => $capitalPendiente,
-            'interes_pendiente' => $interesPendiente,
-
-            // Información de pagos
-            'numero_pagos_realizados' => $numeroPagosRealizados,
-            'promedio_monto_pago' => $promedioMontoPago,
-            'pagos_estimados_restantes' => $pagosEstimadosRestantes,
-            'fecha_ultimo_pago' => $fechaUltimoPago,
-            'monto_ultimo_pago' => $montoUltimoPago,
-
-            // Porcentajes
-            'porcentaje_pagado' => $porcentajePagado,
-            'porcentaje_capital_pagado' => $porcentajeCapitalPagado,
-            'porcentaje_interes_pagado' => $porcentajeInteresPagado,
-
-            // Fechas
-            'fecha_inicio' => $fechaInicio,
-            'fecha_vencimiento' => $fechaVencimiento,
-            'dias_transcurridos' => $diasTranscurridos,
-            'dias_restantes' => $diasRestantes,
-
-            // Estado y mensaje
-            'estado_credito' => $estadoCredito,
-            'mensaje_final' => $mensajeFinal,
-        ];
+        match ($this->type) {
+            CalculationType::SIMPLE => $this->calculatePaymentDistributionSimple($get, $set, $data),
+            CalculationType::COMPUESTO => $this->calculatePaymentDistributionCompuesto($get, $set, $data),
+            CalculationType::AMORTIZACION => $this->getPagosDataAmortizacion($data['amount']),
+            CalculationType::ANUALIDAD => $this->getPagosDataAnualidad($data['amount']),
+            CalculationType::GRADIENTES => $this->getPagosDataGradientes($data['amount']),
+            CalculationType::TIR => $this->getPagosDataTIR($data['amount']),
+            default => [],
+        };
     }
 
     /**
@@ -232,13 +120,333 @@ class Credit extends Model
                 return null;
         }
     }
+
+    /**
+     * Datos para Interés Simple
+     */
+    public function getPagosDataSimple(?float $amount = null): array
+    {
+        $inputs = $this->inputs ?? [];
+
+        // Datos del crédito original
+        $capitalInicial = $inputs['capital'] ?? 0;
+        $montoTotal = $inputs['resultado_calculado'] ?? $inputs['monto_final'] ?? 0;
+        $interesTotal = $inputs['interes_generado_calculado'] ?? $inputs['interes_generado'] ?? 0;
+
+        // Obtener todos los pagos completados
+        $pagosCompletados = $this->payments()->where('status', 'completed')->orderBy('payment_date')->get();
+
+        // Calcular totales de pagos
+        $totalPagado = $pagosCompletados->sum('amount');
+        $totalCapitalPagado = $pagosCompletados->sum('principal_paid');
+        $totalInteresPagado = $pagosCompletados->sum('interest_paid');
+        $numeroPagosRealizados = $pagosCompletados->count();
+
+        // Calcular saldos pendientes
+        $saldoRestante = max(0, $montoTotal - $totalPagado);
+        $capitalPendiente = max(0, $capitalInicial - $totalCapitalPagado);
+        $interesPendiente = max(0, $interesTotal - $totalInteresPagado);
+
+        // Si se pasó un amount, calcular distribución del pago y retornar datos para Payment
+        if ($amount !== null) {
+            // Primero se paga el interés pendiente
+            $interesPagado = min($amount, $interesPendiente);
+
+            // Lo que sobra se aplica al capital
+            $capitalPagado = max(0, $amount - $interesPagado);
+
+            // Calcular nuevo saldo
+            $nuevoSaldo = max(0, $saldoRestante - $amount);
+
+            // Calcular porcentaje completado
+            $porcentajeCompletado = $montoTotal > 0
+                ? round((($totalPagado + $amount) / $montoTotal) * 100, 2)
+                : 0;
+
+            // Retornar array listo para Payment::create()
+            return [
+                'principal_paid' => round($capitalPagado, 2),
+                'interest_paid' => round($interesPagado, 2),
+                'remaining_balance' => round($nuevoSaldo, 2),
+                'metadata' => [
+                    'saldo_anterior' => $saldoRestante,
+                    'saldo_nuevo' => round($nuevoSaldo, 2),
+                    'capital_pendiente_anterior' => $capitalPendiente,
+                    'capital_pendiente_nuevo' => max(0, $capitalPendiente - $capitalPagado),
+                    'interes_pendiente_anterior' => $interesPendiente,
+                    'interes_pendiente_nuevo' => max(0, $interesPendiente - $interesPagado),
+                    'numero_pago' => $numeroPagosRealizados + 1,
+                    'porcentaje_completado' => $porcentajeCompletado,
+                    'tipo_calculo' => $this->type->value,
+                    'fecha_registro' => now()->toDateTimeString(),
+                ],
+            ];
+        }
+
+        // Si no se pasó amount, retornar información general (comportamiento actual)
+        $ultimoPago = $pagosCompletados->last();
+        $fechaUltimoPago = $ultimoPago ? $ultimoPago->payment_date->format('Y-m-d') : null;
+        $montoUltimoPago = $ultimoPago ? $ultimoPago->amount : null;
+
+        $promedioMontoPago = $numeroPagosRealizados > 0 ? $totalPagado / $numeroPagosRealizados : 0;
+        $pagosEstimadosRestantes = $promedioMontoPago > 0 ? ceil($saldoRestante / $promedioMontoPago) : null;
+
+        // Calcular fechas
+        $fechaInicio = null;
+        $fechaVencimiento = null;
+
+        if ($inputs['usar_fechas_tiempo'] ?? false) {
+            $fechaInicio = $inputs['fecha_inicio'] ?? null;
+            $fechaVencimiento = $inputs['fecha_final'] ?? null;
+        } else {
+            if ($this->created_at) {
+                $fechaInicio = $this->created_at->format('Y-m-d');
+                $carbon = $this->created_at->copy();
+
+                if ($inputs['anio'] ?? null) {
+                    $carbon->addYears($inputs['anio']);
+                }
+                if ($inputs['mes'] ?? null) {
+                    $carbon->addMonths($inputs['mes']);
+                }
+                if ($inputs['dia'] ?? null) {
+                    $carbon->addDays($inputs['dia']);
+                }
+
+                $fechaVencimiento = $carbon->format('Y-m-d');
+            }
+        }
+
+        $estadoCredito = $this->determinarEstadoCredito($saldoRestante, $fechaVencimiento);
+        $porcentajePagado = $montoTotal > 0 ? round(($totalPagado / $montoTotal) * 100, 2) : 0;
+        $porcentajeCapitalPagado = $capitalInicial > 0 ? round(($totalCapitalPagado / $capitalInicial) * 100, 2) : 0;
+        $porcentajeInteresPagado = $interesTotal > 0 ? round(($totalInteresPagado / $interesTotal) * 100, 2) : 0;
+
+        $diasTranscurridos = $this->created_at ? smartRound($this->created_at->diffInDays(now())) : null;
+        $diasRestantes = $fechaVencimiento ? smartRound(now()->diffInDays(\Carbon\Carbon::parse($fechaVencimiento), false)) : null;
+
+        $mensajeFinal = $this->generarMensajeFinalPagos(
+            $estadoCredito,
+            $saldoRestante,
+            $numeroPagosRealizados,
+            $porcentajePagado,
+            $diasRestantes
+        );
+
+        return [
+            'capital_inicial' => $capitalInicial,
+            'monto_total_credito' => $montoTotal,
+            'interes_total_credito' => $interesTotal,
+            'total_pagado' => $totalPagado,
+            'capital_pagado' => $totalCapitalPagado,
+            'interes_pagado' => $totalInteresPagado,
+            'saldo_restante' => $saldoRestante,
+            'capital_pendiente' => $capitalPendiente,
+            'interes_pendiente' => $interesPendiente,
+            'numero_pagos_realizados' => $numeroPagosRealizados,
+            'promedio_monto_pago' => $promedioMontoPago,
+            'pagos_estimados_restantes' => $pagosEstimadosRestantes,
+            'fecha_ultimo_pago' => $fechaUltimoPago,
+            'monto_ultimo_pago' => $montoUltimoPago,
+            'porcentaje_pagado' => $porcentajePagado,
+            'porcentaje_capital_pagado' => $porcentajeCapitalPagado,
+            'porcentaje_interes_pagado' => $porcentajeInteresPagado,
+            'fecha_inicio' => $fechaInicio,
+            'fecha_vencimiento' => $fechaVencimiento,
+            'dias_transcurridos' => $diasTranscurridos,
+            'dias_restantes' => $diasRestantes,
+            'estado_credito' => $estadoCredito,
+            'mensaje_final' => $mensajeFinal,
+        ];
+    }
+    private function calculatePaymentDistributionSimple(Get $get, Set $set, ?array $data = null): void
+    {
+        $amount = $data['amount'] ?? 0;
+        if (!$amount || $amount <= 0) {
+            $set('interest_paid', 0);
+            $set('principal_paid', 0);
+            $set('remaining_balance', $this->record->saldo_restante ?? 0);
+            return;
+        }
+
+        $pagosData = $this->getPagosDataSimple($amount);
+        $interesPendiente = $pagosData['interest_paid'] ?? 0;
+        $saldoRestante = $pagosData['remaining_balance'] ?? 0;
+        $capitalPendiente = $saldoRestante ?? 0 - $interesPendiente ?? 0;
+
+        // Primero se paga el interés pendiente
+        $interesPagado = min($amount, $interesPendiente);
+
+        // Lo que sobra se aplica al capital
+        $capitalPagado = max(0, $amount - $interesPagado);
+
+        // Calcular nuevo saldo
+        $nuevoSaldo = max(0, $saldoRestante - $amount);
+
+        $set('interest_paid', round($interesPagado, 2));
+        $set('principal_paid', round($capitalPagado, 2));
+        $set('remaining_balance', round($nuevoSaldo, 2));
+    }
+
+
     /**
      * Datos para Interés Compuesto (placeholder - implementar según necesidad)
      */
-    public function getPagosDataCompuesto(): array
+    public function getPagosDataCompuesto(?float $amount = null): array
     {
-        // Implementar lógica específica para compuesto
-        return [];
+        $inputs = $this->inputs ?? [];
+
+        // Datos del crédito original
+        $capitalInicial = $inputs['capital'] ?? 0;
+        $montoTotal = $inputs['resultado_calculado'] ?? $inputs['monto_final'] ?? 0;
+        $interesTotal = $inputs['interes_generado_calculado'] ?? $inputs['interes_generado'] ?? 0;
+
+        // Obtener todos los pagos completados
+        $pagosCompletados = $this->payments()->where('status', 'completed')->orderBy('payment_date')->get();
+
+        // Calcular totales de pagos
+        $totalPagado = $pagosCompletados->sum('amount');
+        $totalCapitalPagado = $pagosCompletados->sum('principal_paid');
+        $totalInteresPagado = $pagosCompletados->sum('interest_paid');
+        $numeroPagosRealizados = $pagosCompletados->count();
+
+        // Calcular saldos pendientes
+        $saldoRestante = max(0, $montoTotal - $totalPagado);
+        $capitalPendiente = max(0, $capitalInicial - $totalCapitalPagado);
+        $interesPendiente = max(0, $interesTotal - $totalInteresPagado);
+
+        // Si se pasó un amount, calcular distribución del pago y retornar datos para Payment
+        if ($amount !== null) {
+            // En interés compuesto, también se paga primero el interés
+            $interesPagado = min($amount, $interesPendiente);
+
+            // Lo que sobra se aplica al capital
+            $capitalPagado = max(0, $amount - $interesPagado);
+
+            // Calcular nuevo saldo
+            $nuevoSaldo = max(0, $saldoRestante - $amount);
+
+            // Calcular porcentaje completado
+            $porcentajeCompletado = $montoTotal > 0
+                ? round((($totalPagado + $amount) / $montoTotal) * 100, 2)
+                : 0;
+
+            // Retornar array listo para Payment::create()
+            return [
+                'principal_paid' => round($capitalPagado, 2),
+                'interest_paid' => round($interesPagado, 2),
+                'remaining_balance' => round($nuevoSaldo, 2),
+                'metadata' => [
+                    'saldo_anterior' => $saldoRestante,
+                    'saldo_nuevo' => round($nuevoSaldo, 2),
+                    'capital_pendiente_anterior' => $capitalPendiente,
+                    'capital_pendiente_nuevo' => max(0, $capitalPendiente - $capitalPagado),
+                    'interes_pendiente_anterior' => $interesPendiente,
+                    'interes_pendiente_nuevo' => max(0, $interesPendiente - $interesPagado),
+                    'numero_pago' => $numeroPagosRealizados + 1,
+                    'porcentaje_completado' => $porcentajeCompletado,
+                    'tipo_calculo' => $this->type->value,
+                    'fecha_registro' => now()->toDateTimeString(),
+                ],
+            ];
+        }
+
+        // Si no se pasó amount, retornar información general
+        $ultimoPago = $pagosCompletados->last();
+        $fechaUltimoPago = $ultimoPago ? $ultimoPago->payment_date->format('Y-m-d') : null;
+        $montoUltimoPago = $ultimoPago ? $ultimoPago->amount : null;
+
+        $promedioMontoPago = $numeroPagosRealizados > 0 ? $totalPagado / $numeroPagosRealizados : 0;
+        $pagosEstimadosRestantes = $promedioMontoPago > 0 ? ceil($saldoRestante / $promedioMontoPago) : null;
+
+        // Calcular fechas
+        $fechaInicio = null;
+        $fechaVencimiento = null;
+
+        if ($inputs['usar_fechas_tiempo'] ?? false) {
+            $fechaInicio = $inputs['fecha_inicio'] ?? null;
+            $fechaVencimiento = $inputs['fecha_final'] ?? null;
+        } else {
+            if ($this->created_at) {
+                $fechaInicio = $this->created_at->format('Y-m-d');
+                $carbon = $this->created_at->copy();
+
+                if ($inputs['anio'] ?? null) {
+                    $carbon->addYears($inputs['anio']);
+                }
+                if ($inputs['mes'] ?? null) {
+                    $carbon->addMonths($inputs['mes']);
+                }
+                if ($inputs['dia'] ?? null) {
+                    $carbon->addDays($inputs['dia']);
+                }
+
+                $fechaVencimiento = $carbon->format('Y-m-d');
+            }
+        }
+
+        $estadoCredito = $this->determinarEstadoCredito($saldoRestante, $fechaVencimiento);
+        $porcentajePagado = $montoTotal > 0 ? round(($totalPagado / $montoTotal) * 100, 2) : 0;
+        $porcentajeCapitalPagado = $capitalInicial > 0 ? round(($totalCapitalPagado / $capitalInicial) * 100, 2) : 0;
+        $porcentajeInteresPagado = $interesTotal > 0 ? round(($totalInteresPagado / $interesTotal) * 100, 2) : 0;
+
+        $diasTranscurridos = $this->created_at ? smartRound($this->created_at->diffInDays(now())) : null;
+        $diasRestantes = $fechaVencimiento ? smartRound(now()->diffInDays(\Carbon\Carbon::parse($fechaVencimiento), false)) : null;
+
+        $mensajeFinal = $this->generarMensajeFinalPagos(
+            $estadoCredito,
+            $saldoRestante,
+            $numeroPagosRealizados,
+            $porcentajePagado,
+            $diasRestantes
+        );
+
+        return [
+            'capital_inicial' => $capitalInicial,
+            'monto_total_credito' => $montoTotal,
+            'interes_total_credito' => $interesTotal,
+            'total_pagado' => $totalPagado,
+            'capital_pagado' => $totalCapitalPagado,
+            'interes_pagado' => $totalInteresPagado,
+            'saldo_restante' => $saldoRestante,
+            'capital_pendiente' => $capitalPendiente,
+            'interes_pendiente' => $interesPendiente,
+            'numero_pagos_realizados' => $numeroPagosRealizados,
+            'promedio_monto_pago' => $promedioMontoPago,
+            'pagos_estimados_restantes' => $pagosEstimadosRestantes,
+            'fecha_ultimo_pago' => $fechaUltimoPago,
+            'monto_ultimo_pago' => $montoUltimoPago,
+            'porcentaje_pagado' => $porcentajePagado,
+            'porcentaje_capital_pagado' => $porcentajeCapitalPagado,
+            'porcentaje_interes_pagado' => $porcentajeInteresPagado,
+            'fecha_inicio' => $fechaInicio,
+            'fecha_vencimiento' => $fechaVencimiento,
+            'dias_transcurridos' => $diasTranscurridos,
+            'dias_restantes' => $diasRestantes,
+            'estado_credito' => $estadoCredito,
+            'mensaje_final' => $mensajeFinal,
+        ];
+    }
+
+    /**
+     * Calcula distribución para Interés Compuesto en el formulario
+     */
+    private function calculatePaymentDistributionCompuesto(Get $get, Set $set, ?array $data = null): void
+    {
+        $amount = $data['amount'] ?? 0;
+        if (!$amount || $amount <= 0) {
+            $pagosData = $this->getPagosDataCompuesto();
+            $set('interest_paid', 0);
+            $set('principal_paid', 0);
+            $set('remaining_balance', $pagosData['saldo_restante'] ?? 0);
+            return;
+        }
+
+        $paymentData = $this->getPagosDataCompuesto($amount);
+
+        $set('interest_paid', $paymentData['interest_paid']);
+        $set('principal_paid', $paymentData['principal_paid']);
+        $set('remaining_balance', $paymentData['remaining_balance']);
     }
 
     /**

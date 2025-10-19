@@ -2,7 +2,7 @@
     <div class="space-y-6">
         {{-- 🔹 Título principal --}}
         <x-sections.heading-title
-            :title="isset($credit) ? 'Editar Crédito' : 'Registrar de Crédito'"
+            :title="isset($credit) ? 'Editar Crédito' : 'Registrar Crédito'"
             :quote="isset($credit)
         ? '“Revisar y ajustar un crédito es proteger la estabilidad financiera futura.” — Banco de España'
         : '“El crédito bien otorgado es el primer paso hacia una relación financiera saludable.” — CONDUSEF'"

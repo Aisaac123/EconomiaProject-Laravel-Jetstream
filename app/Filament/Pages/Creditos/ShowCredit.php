@@ -125,6 +125,7 @@ class ShowCredit extends Page implements HasTable
      */
     protected function getPaymentFormSchema(): array
     {
+        $record = $this->record;
         return [
             Section::make('Información del Pago')
                 ->schema([
@@ -158,8 +159,9 @@ class ShowCredit extends Page implements HasTable
                         ->minValue(0.01)
                         ->step(0.01)
                         ->live(onBlur: true)
-                        ->afterStateUpdated(function (Get $get, Set $set, ?float $state) {
-                            $this->calculatePaymentDistribution($get, $set, $state);
+                        ->afterStateUpdated(function (Get $get, Set $set) use ($record) {
+                            $formData = $get('../../');
+                            $record->calculatePaymentDistribution($get, $set, $formData[0]["data"]);
                         })
                         ->helperText('Ingresa el monto total que se va a pagar'),
                 ])->collapsible(),
@@ -225,74 +227,25 @@ class ShowCredit extends Page implements HasTable
     }
 
     /**
-     * Calcula la distribución del pago entre capital e interés
-     */
-    protected function calculatePaymentDistribution(Get $get, Set $set, ?float $amount): void
-    {
-        if (!$amount || $amount <= 0) {
-            $set('interest_paid', 0);
-            $set('principal_paid', 0);
-            $set('remaining_balance', $this->record->saldo_restante);
-            return;
-        }
-
-        $pagosData = $this->record->getPagosData();
-        $interesPendiente = $pagosData['interes_pendiente'] ?? 0;
-        $capitalPendiente = $pagosData['capital_pendiente'] ?? 0;
-        $saldoRestante = $pagosData['saldo_restante'] ?? 0;
-
-        // Primero se paga el interés pendiente
-        $interesPagado = min($amount, $interesPendiente);
-
-        // Lo que sobra se aplica al capital
-        $capitalPagado = max(0, $amount - $interesPagado);
-
-        // Calcular nuevo saldo
-        $nuevoSaldo = max(0, $saldoRestante - $amount);
-
-        $set('interest_paid', round($interesPagado, 2));
-        $set('principal_paid', round($capitalPagado, 2));
-        $set('remaining_balance', round($nuevoSaldo, 2));
-    }
-
-    /**
      * Crea un nuevo pago
      */
     protected function createPayment(array $data): void
     {
         try {
-            // Obtener datos actuales del crédito
-            $pagosData = $this->record->getPagosData();
+            // Obtener datos del pago calculados por el modelo
+            $paymentData = $this->record->getPagosData($data);
 
-            $amount = $data['amount'];
-            $interesPendiente = $pagosData['interes_pendiente'] ?? 0;
-            $capitalPendiente = $pagosData['capital_pendiente'] ?? 0;
-            $saldoRestante = $pagosData['saldo_restante'] ?? 0;
-
-            // Calcular distribución del pago
-            // Primero se paga el interés pendiente
-            $interesPagado = min($amount, $interesPendiente);
-
-            // Lo que sobra se aplica al capital
-            $capitalPagado = max(0, $amount - $interesPagado);
-
-            // Calcular nuevo saldo
-            $nuevoSaldo = max(0, $saldoRestante - $amount);
-
-            // Crear el pago con los valores calculados
+            // Crear el pago
             Payment::create([
                 'credit_id' => $this->record->id,
-                'amount' => $amount,
-                'principal_paid' => round($capitalPagado, 2),
-                'interest_paid' => round($interesPagado, 2),
-                'remaining_balance' => round($nuevoSaldo, 2),
+                'amount' => $data['amount'],
+                ...$paymentData,
                 'payment_date' => $data['payment_date'],
                 'status' => $data['status'],
-                'metadata' => null,
             ]);
 
             // Actualizar estado del crédito si está completamente pagado
-            if ($nuevoSaldo <= 0) {
+            if ($paymentData['remaining_balance'] <= 0) {
                 $this->record->update(['status' => 'completed']);
             }
 

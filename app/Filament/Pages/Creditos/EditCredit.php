@@ -132,9 +132,7 @@ class EditCredit extends Page implements HasForms
         return [
             'simple' => 'Interés Simple',
             'compuesto' => 'Interés Compuesto',
-            'anualidad' => 'Anualidad',
             'amortizacion' => 'Amortización',
-            'tir' => 'Tasa Interna de Retorno (TIR)',
             'gradientes' => 'Gradientes',
         ];
     }
