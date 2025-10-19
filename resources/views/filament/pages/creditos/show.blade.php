@@ -1,16 +1,18 @@
 <x-filament-panels::page>
     {{-- Botón flotante de acción rápida --}}
-    <div class="fixed bottom-6 right-6 z-50">
-        <button
-            wire:click="mountAction('create_payment')"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all">
-            <x-heroicon-o-plus-circle class="w-5 h-5" />
-            Registrar Pago
-        </button>
+    <div class="fixed bottom-6 right-6 z-50 flex gap-x-4">
+        <div class="flex gap-2 mb-4">
+            @foreach ($this->getHeaderActions() as $action)
+                {{ $action }}
+            @endforeach
+        </div>
     </div>
+
+
 
     <div class="space-y-4 my-4">
         {{-- Información del Deudor --}}
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {{-- Card Principal: Información Básica --}}
             <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">

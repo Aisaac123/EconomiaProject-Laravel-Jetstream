@@ -77,14 +77,11 @@ class CreditSchemaFactory
                     <div class="space-y-4">
                         <x-sections.content title="Cálculo Inicial"  class="space-y-4">
                             {!! $resultHtml !!}
+                            {!! $tablaHtml !!}
                         </x-sections.content>
 
                         <x-sections.content title="Resultado de Pagos" class="space-y-4">
                             {!! $pagosHtml !!}
-                        </x-sections.content>
-
-                        <x-sections.content title="Registro de Pagos" class="space-y-4">
-                            {!! $tablaHtml !!}
                         </x-sections.content>
                     </div>
                 BLADE, [

@@ -1145,6 +1145,230 @@ class AmortizacionSchema
         return new HtmlString($html);
     }
 
+    public static function buildPagosHtml(array $data): Htmlable
+    {
+        $html = '<div class="space-y-5">';
+
+        // HEADER
+        $sistemaAmortizacion = $data['sistema_amortizacion'] ?? 'Francés';
+        $tablaModificada = $data['tabla_modificada'] ?? false;
+
+        $html .= '
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-blue-950/50 dark:to-indigo-800/50 rounded-xl p-5 border border-indigo-200 dark:border-indigo-800">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl">📊</span>
+                <div>
+                    <h3 class="text-lg font-bold text-indigo-900 dark:text-indigo-100">Tabla de Amortización</h3>
+                    <p class="text-sm text-indigo-700 dark:text-indigo-300">Sistema '.ucfirst($sistemaAmortizacion).' - Cuotas fijas</p>
+                </div>
+            </div>';
+
+        if ($tablaModificada) {
+            $cuotasOriginal = $data['numero_cuotas_original'] ?? 0;
+            $cuotasActual = $data['numero_cuotas_actual'] ?? 0;
+            $html .= '
+            <div class="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 px-3 py-2 rounded-lg text-xs font-semibold">
+                <div class="flex items-center gap-2">
+                    <span>⚠️</span>
+                    <div>
+                        <div>Tabla Recalculada</div>
+                        <div class="text-[10px]">'.$cuotasOriginal.' → '.$cuotasActual.' cuotas</div>
+                    </div>
+                </div>
+            </div>';
+        }
+
+        $html .= '
+        </div>
+    </div>';
+
+        // RESUMEN DE SALDOS
+        $html .= '<div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">';
+        $html .= '<h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2"><span>💰</span> RESUMEN DEL CRÉDITO</h4>';
+        $html .= '<div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
+
+        $cuotaFija = $data['cuota_fija_original'] ?? 0;
+        $html .= static::buildCard('Cuota Fija', '💳', '$'.number_format($cuotaFija, 2), 'Pago mensual', true, 'blue');
+
+        $numeroCuotas = $data['numero_cuotas_actual'] ?? 0;
+        $html .= static::buildCard('Total Cuotas', '🔢', (string) $numeroCuotas, 'Número de pagos', false, 'indigo');
+
+        $capitalInicial = $data['capital_inicial'] ?? 0;
+        $html .= static::buildCard('Capital Inicial', '💼', '$'.number_format($capitalInicial, 2), 'Monto prestado', false, 'purple');
+
+        $saldoRestante = $data['saldo_restante'] ?? 0;
+        $html .= static::buildCard('Saldo Restante', '💵', '$'.number_format($saldoRestante, 2), 'Por pagar', true, $saldoRestante > 0 ? 'red' : 'green');
+
+        $html .= '</div></div>';
+
+        // PROGRESO
+        $cuotasPagadas = $data['cuotas_pagadas'] ?? 0;
+        $cuotasRestantes = $data['cuotas_restantes'] ?? 0;
+        $porcentajePagado = $data['porcentaje_pagado'] ?? 0;
+        $totalPagado = $data['total_pagado'] ?? 0;
+
+        $html .= '<div class="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/50 dark:to-green-950/50 rounded-xl p-4 border-2 border-emerald-300 dark:border-emerald-700">';
+        $html .= '<h4 class="text-sm font-bold text-emerald-900 dark:text-emerald-100 mb-3 flex items-center gap-2"><span>📈</span> PROGRESO DE AMORTIZACIÓN</h4>';
+        $html .= '<div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
+
+        $html .= static::buildCard('Cuotas Pagadas', '✅', "$cuotasPagadas/$numeroCuotas", 'Completadas', false, 'emerald');
+        $html .= static::buildCard('Cuotas Restantes', '⏳', (string) $cuotasRestantes, 'Pendientes', false, 'yellow');
+        $html .= static::buildCard('Progreso', '📊', number_format($porcentajePagado, 1).'%', 'Del total', true, 'green');
+        $html .= static::buildCard('Total Pagado', '💵', '$'.number_format($totalPagado, 2), 'Acumulado', false, 'teal');
+
+        $html .= '</div></div>';
+
+        // DESGLOSE CAPITAL E INTERÉS
+        $capitalPagado = $data['capital_pagado'] ?? 0;
+        $interesPagado = $data['interes_pagado'] ?? 0;
+        $capitalPendiente = $data['capital_pendiente'] ?? 0;
+        $interesPendiente = $data['interes_pendiente'] ?? 0;
+
+        $html .= '<div class="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/50 dark:to-yellow-950/50 rounded-xl p-4 border border-amber-300 dark:border-amber-700">';
+        $html .= '<h4 class="text-sm font-bold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2"><span>💎</span> DESGLOSE CAPITAL E INTERÉS</h4>';
+        $html .= '<div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
+
+        $html .= static::buildCard('Capital Pagado', '🏦', '$'.number_format($capitalPagado, 2), 'Amortizado', false, 'amber');
+        $html .= static::buildCard('Capital Pendiente', '📊', '$'.number_format($capitalPendiente, 2), 'Por amortizar', false, 'yellow');
+        $html .= static::buildCard('Interés Pagado', '📈', '$'.number_format($interesPagado, 2), 'Abonado', false, 'orange');
+        $html .= static::buildCard('Interés Pendiente', '💹', '$'.number_format($interesPendiente, 2), 'Por pagar', false, 'red');
+
+        $html .= '</div></div>';
+
+        // TABLA DE AMORTIZACIÓN
+        $tablaAmortizacion = $data['tabla_amortizacion'] ?? [];
+        if (! empty($tablaAmortizacion)) {
+            $html .= '<div class="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-700 overflow-x-auto">';
+            $html .= '<h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2"><span>📋</span> DETALLE DE CUOTAS</h4>';
+            $html .= '<table class="w-full text-xs md:text-sm">';
+            $html .= '<thead class="bg-slate-100 dark:bg-slate-800 sticky top-0">';
+            $html .= '<tr>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">Periodo</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">Saldo Inicial</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">Cuota</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">Interés</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">Capital</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">Saldo Final</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-center font-bold">Estado</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-center font-bold">Tipo</th>';
+            $html .= '</tr></thead><tbody class="divide-y divide-slate-200 dark:divide-slate-700">';
+
+            foreach ($tablaAmortizacion as $cuota) {
+                $pagado = $cuota['pagado'] ?? false;
+                $tipoPago = $cuota['tipo_pago'] ?? 'normal';
+                $diferenciaCuota = $cuota['diferencia_cuota'] ?? 0;
+
+                $rowClass = 'bg-white dark:bg-slate-900';
+                if ($pagado) {
+                    $rowClass = match ($tipoPago) {
+                        'abono_extra' => 'bg-green-50 dark:bg-green-900/20',
+                        'pago_parcial' => 'bg-yellow-50 dark:bg-yellow-900/20',
+                        'liquidacion' => 'bg-blue-50 dark:bg-blue-900/20',
+                        default => 'bg-emerald-50 dark:bg-emerald-900/20',
+                    };
+                }
+
+                $html .= "<tr class='$rowClass hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors'>";
+                $html .= '<td class="px-2 md:px-3 py-2 font-semibold">'.$cuota['periodo'].'</td>';
+                $html .= '<td class="px-2 md:px-3 py-2 text-right">$'.number_format($cuota['saldo_inicial'], 2).'</td>';
+
+                // Cuota con indicador
+                $cuotaHtml = '$'.number_format($cuota['cuota'], 2);
+                if (abs($diferenciaCuota) > 0.01 && $pagado) {
+                    $colorDif = $diferenciaCuota > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                    $simbolo = $diferenciaCuota > 0 ? '+' : '';
+                    $cuotaHtml .= "<br><span class='text-[10px] $colorDif'>($simbolo".number_format($diferenciaCuota, 2).')</span>';
+                }
+                $html .= '<td class="px-2 md:px-3 py-2 text-right font-bold text-blue-600 dark:text-blue-400">'.$cuotaHtml.'</td>';
+
+                $interesHtml = '';
+                if ($pagado) {
+                    $interesPagadoReal = $cuota['interes_pagado'] ?? 0;
+                    $interesCalculado = $cuota['interes'];
+                    $excesoInteres = $interesPagadoReal - $interesCalculado;
+
+                    // Mostrar el interés realmente pagado
+                    $interesHtml = '$'.number_format($interesPagadoReal, 2);
+
+                    // Si hay diferencia, mostrarla
+                    if (abs($excesoInteres) > 0.01) {
+                        $colorInt = $excesoInteres > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-amber-600 dark:text-amber-400';
+                        $simboloInt = $excesoInteres > 0 ? '+' : '';
+                        $interesHtml .= "<br><span class='text-[10px] $colorInt'>$".number_format($interesCalculado, 2)." ($simboloInt".number_format($excesoInteres, 2).')</span>';
+                    }
+                } else {
+                    // Cuota pendiente: mostrar el interés calculado
+                    $interesHtml = '$'.number_format($cuota['interes'], 2);
+                }
+
+                $html .= '<td class="px-2 md:px-3 py-2 text-right text-amber-600 dark:text-amber-400">'.$interesHtml.'</td>';
+                $html .= '<td class="px-2 md:px-3 py-2 text-right text-green-600 dark:text-green-400">$'.number_format($cuota['amortizacion'], 2).'</td>';
+                $html .= '<td class="px-2 md:px-3 py-2 text-right font-semibold">$'.number_format($cuota['saldo_final'], 2).'</td>';
+
+                // Estado
+                $html .= '<td class="px-2 md:px-3 py-2 text-center">';
+                if ($pagado) {
+                    $fechaPago = $cuota['fecha_pago'] ?? 'N/A';
+                    $html .= '<span class="inline-flex flex-col items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">';
+                    $html .= '<span>✅ Pagada</span><span class="text-[10px]">'.$fechaPago.'</span></span>';
+                } else {
+                    $html .= '<span class="inline-flex items-center px-2 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 rounded-full text-xs font-semibold">⏳ Pendiente</span>';
+                }
+                $html .= '</td>';
+
+                // Tipo
+                $html .= '<td class="px-2 md:px-3 py-2 text-center">';
+                if ($pagado) {
+                    $tipoBadge = match ($tipoPago) {
+                        'normal' => '<span class="inline-block px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded text-[10px] font-semibold">Normal</span>',
+                        'abono_extra' => '<span class="inline-block px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded text-[10px] font-semibold">💰 Abono Extra</span>',
+                        'pago_parcial' => '<span class="inline-block px-2 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 rounded text-[10px] font-semibold">⚠️ Parcial</span>',
+                        'liquidacion' => '<span class="inline-block px-2 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded text-[10px] font-semibold">🎉 Liquidación</span>',
+                        default => '<span class="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300 rounded text-[10px]">-</span>',
+                    };
+                    $html .= $tipoBadge;
+                } else {
+                    $html .= '<span class="text-gray-400 text-xs">-</span>';
+                }
+                $html .= '</td>';
+
+                $html .= '</tr>';
+            }
+
+            $html .= '</tbody></table></div>';
+
+            // Leyenda de tipos de pago
+            $html .= '<div class="mt-3 flex flex-wrap gap-2 text-xs">';
+            $html .= '<div class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-100 dark:bg-blue-900/50 rounded"></span>Normal: Pago exacto de cuota</div>';
+            $html .= '<div class="flex items-center gap-1"><span class="w-3 h-3 bg-green-100 dark:bg-green-900/50 rounded"></span>Abono Extra: Pago mayor (reduce cuotas)</div>';
+            $html .= '<div class="flex items-center gap-1"><span class="w-3 h-3 bg-yellow-100 dark:bg-yellow-900/50 rounded"></span>Parcial: Pago menor a cuota</div>';
+            $html .= '<div class="flex items-center gap-1"><span class="w-3 h-3 bg-purple-100 dark:bg-purple-900/50 rounded"></span>Liquidación: Pago final</div>';
+            $html .= '</div>';
+
+            $html .= '</div>';
+        }
+
+        // MENSAJE FINAL
+        $mensajeFinal = $data['mensaje_final'] ?? null;
+        if ($mensajeFinal) {
+            $html .= "
+        <div class='bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 rounded-xl p-4 border border-blue-300 dark:border-blue-700'>
+            <div class='flex items-start gap-3'>
+                <span class='text-2xl flex-shrink-0'>💬</span>
+                <div class='flex-1'>
+                    <h4 class='font-bold text-blue-900 dark:text-blue-100 text-sm mb-1'>RESUMEN</h4>
+                    <p class='text-sm text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensajeFinal}</p>
+                </div>
+            </div>
+        </div>";
+        }
+
+        $html .= '</div>';
+
+        return new HtmlString($html);
+    }
+
     /**
      * Helper para construir tarjetas de resultados
      */

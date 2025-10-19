@@ -200,11 +200,13 @@ class ListCredits extends Page implements HasTable
                     ->color('primary')
                     ->url(fn (Credit $record): string => ShowCredit::getUrl(['recordId' => $record->id]))
                     ->tooltip('Ver detalles completos del crédito'),
+
                 Action::make('edit')
                     ->label('')
                     ->icon('heroicon-o-pencil-square')
                     ->color('secondary')
                     ->url(fn (Credit $record): string => EditCredit::getUrl(['recordId' => $record->id]))
+                    ->visible(fn (Credit $record): bool => $record->payments()->count() === 0)
                     ->tooltip('Ver detalles completos del crédito'),
 
                 Action::make('duplicate')

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CalculationType;
+use Carbon\Carbon;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Model;
@@ -55,7 +56,7 @@ class Credit extends Model
         return match ($this->type) {
             CalculationType::SIMPLE => $this->getPagosDataSimple($data['amount'] ?? null),
             CalculationType::COMPUESTO => $this->getPagosDataCompuesto($data['amount'] ?? null),
-            CalculationType::AMORTIZACION => $this->getPagosDataAmortizacion($data['amount']),
+            CalculationType::AMORTIZACION => $this->getPagosDataAmortizacion($data),
             CalculationType::ANUALIDAD => $this->getPagosDataAnualidad($data['amount']),
             CalculationType::GRADIENTES => $this->getPagosDataGradientes($data['amount']),
             CalculationType::TIR => $this->getPagosDataTIR($data['amount']),
@@ -68,7 +69,7 @@ class Credit extends Model
         match ($this->type) {
             CalculationType::SIMPLE => $this->calculatePaymentDistributionSimple($get, $set, $data),
             CalculationType::COMPUESTO => $this->calculatePaymentDistributionCompuesto($get, $set, $data),
-            CalculationType::AMORTIZACION => $this->getPagosDataAmortizacion($data['amount']),
+            CalculationType::AMORTIZACION => $this->calculatePaymentDistributionAmortizacion($get, $set, $data),
             CalculationType::ANUALIDAD => $this->getPagosDataAnualidad($data['amount']),
             CalculationType::GRADIENTES => $this->getPagosDataGradientes($data['amount']),
             CalculationType::TIR => $this->getPagosDataTIR($data['amount']),
@@ -470,12 +471,643 @@ class Credit extends Model
     }
 
     /**
-     * Datos para Amortización (placeholder - implementar según necesidad)
+     * Datos para Amortización - Con recálculo dinámico basado en pagos reales
      */
-    public function getPagosDataAmortizacion(): array
+    public function getPagosDataAmortizacion(?array $data = null): array
     {
-        // Implementar lógica específica para amortización
-        return [];
+        $inputs = $this->inputs ?? [];
+
+        // Obtener resultados calculados originales
+        $resultados = is_string($inputs['resultados_calculados'] ?? null)
+            ? json_decode($inputs['resultados_calculados'], true)
+            : ($inputs['resultados_calculados'] ?? []);
+
+        // Datos originales del crédito
+        $capitalInicial = $resultados['monto_prestamo'] ?? $inputs['monto_prestamo'] ?? 0;
+        $tasaInteres = ($inputs['tasa_interes'] ?? 0) / 100;
+        $numeroCuotasOriginal = $resultados['numero_pagos'] ?? $inputs['numero_pagos'] ?? 0;
+        $sistema = $resultados['sistema'] ?? $inputs['sistema_amortizacion'] ?? 'Francés';
+
+        // Obtener todos los pagos completados ordenados por fecha
+        $pagosCompletados = $this->payments()
+            ->where('status', 'completed')
+            ->orderBy('payment_date')
+            ->get();
+
+        // RECALCULAR tabla de amortización basada en pagos reales Y SISTEMA
+        $tablaRecalculada = $this->recalcularTablaAmortizacionPorSistema(
+            $capitalInicial,
+            $tasaInteres,
+            $numeroCuotasOriginal,
+            $sistema,
+            $resultados,
+            $pagosCompletados
+        );
+
+        // Calcular totales
+        $totalPagado = $pagosCompletados->sum('amount');
+        $totalCapitalPagado = $pagosCompletados->sum('principal_paid');
+        $totalInteresPagado = $pagosCompletados->sum('interest_paid');
+        $numeroPagosRealizados = $pagosCompletados->count();
+
+        // Obtener cuota actual
+        $cuotaActual = $this->obtenerCuotaActualAmortizacion($tablaRecalculada);
+
+        // Totales del crédito
+        $numeroCuotasTotal = count($tablaRecalculada);
+        $montoTotalPendiente = array_sum(array_column(array_filter($tablaRecalculada, fn ($c) => ! $c['pagado']), 'cuota'));
+        $montoTotal = $totalPagado + $montoTotalPendiente;
+        $interesTotal = $montoTotal - $capitalInicial;
+
+        // Saldos actuales
+        $saldoRestante = $cuotaActual ? $cuotaActual['saldo_inicial'] : 0;
+        $capitalPendiente = $saldoRestante;
+        $interesPendiente = $cuotaActual ? $cuotaActual['interes'] : 0;
+
+        // Si se pasó data, calcular distribución del pago
+        if ($data !== null) {
+            // VERIFICAR SI ES MODO MANUAL
+            if (isset($data['interest_paid']) && isset($data['principal_paid'])) {
+                return $this->calcularDistribucionPagoManual(
+                    $data,
+                    $cuotaActual,
+                    $saldoRestante,
+                    $totalPagado,
+                    $montoTotal,
+                    $numeroPagosRealizados,
+                    $capitalPendiente,
+                    $interesPendiente
+                );
+            }
+
+            // MODO AUTOMÁTICO
+            $amount = $data['amount'] ?? 0;
+
+            return $this->calcularDistribucionPagoAmortizacion(
+                $amount,
+                $cuotaActual,
+                $saldoRestante,
+                $tasaInteres,
+                $totalPagado,
+                $montoTotal,
+                $numeroPagosRealizados,
+                $capitalPendiente,
+                $interesPendiente,
+                $sistema
+            );
+        }
+
+        // Resto del código para información general...
+        $ultimoPago = $pagosCompletados->last();
+        $fechaUltimoPago = $ultimoPago ? $ultimoPago->payment_date->format('Y-m-d') : null;
+        $montoUltimoPago = $ultimoPago ? $ultimoPago->amount : 0;
+
+        $promedioMontoPago = $numeroPagosRealizados > 0 ? $totalPagado / $numeroPagosRealizados : 0;
+        $cuotasRestantes = $numeroCuotasTotal - $numeroPagosRealizados;
+
+        $fechaInicio = $inputs['fecha_inicio'] ?? ($this->created_at ? $this->created_at->format('Y-m-d') : null);
+        $fechaVencimiento = null;
+        if ($fechaInicio && $numeroCuotasTotal > 0) {
+            $fechaVencimiento = Carbon::parse($fechaInicio)->addMonths($numeroCuotasTotal)->format('Y-m-d');
+        }
+
+        $estadoCredito = $this->determinarEstadoCredito($saldoRestante, $fechaVencimiento);
+        $porcentajePagado = $montoTotal > 0 ? round(($totalPagado / $montoTotal) * 100, 2) : 0;
+        $porcentajeCapitalPagado = $capitalInicial > 0 ? round(($totalCapitalPagado / $capitalInicial) * 100, 2) : 0;
+        $porcentajeInteresPagado = $interesTotal > 0 ? round(($totalInteresPagado / $interesTotal) * 100, 2) : 0;
+
+        $diasTranscurridos = $this->created_at ? smartRound($this->created_at->diffInDays(now())) : null;
+        $diasRestantes = $fechaVencimiento ? smartRound(now()->diffInDays(Carbon::parse($fechaVencimiento), false)) : null;
+
+        $mensajeFinal = $this->generarMensajeFinalPagos(
+            $estadoCredito,
+            $saldoRestante,
+            $numeroPagosRealizados,
+            $porcentajePagado,
+            $diasRestantes
+        );
+
+        return [
+            'capital_inicial' => $capitalInicial,
+            'monto_total_credito' => round($montoTotal, 2),
+            'interes_total_credito' => round($interesTotal, 2),
+            'numero_cuotas_original' => $numeroCuotasOriginal,
+            'numero_cuotas_actual' => $numeroCuotasTotal,
+            'cuotas_pagadas' => $numeroPagosRealizados,
+            'cuotas_restantes' => $cuotasRestantes,
+            'sistema_amortizacion' => $sistema,
+            'total_pagado' => $totalPagado,
+            'capital_pagado' => $totalCapitalPagado,
+            'interes_pagado' => $totalInteresPagado,
+            'saldo_restante' => $saldoRestante,
+            'capital_pendiente' => $capitalPendiente,
+            'interes_pendiente' => $interesPendiente,
+            'numero_pagos_realizados' => $numeroPagosRealizados,
+            'promedio_monto_pago' => $promedioMontoPago,
+            'pagos_estimados_restantes' => $cuotasRestantes,
+            'fecha_ultimo_pago' => $fechaUltimoPago,
+            'monto_ultimo_pago' => $montoUltimoPago,
+            'porcentaje_pagado' => $porcentajePagado,
+            'porcentaje_capital_pagado' => $porcentajeCapitalPagado,
+            'porcentaje_interes_pagado' => $porcentajeInteresPagado,
+            'fecha_inicio' => $fechaInicio,
+            'fecha_vencimiento' => $fechaVencimiento,
+            'dias_transcurridos' => $diasTranscurridos,
+            'dias_restantes' => $diasRestantes,
+            'estado_credito' => $estadoCredito,
+            'mensaje_final' => $mensajeFinal,
+            'tabla_amortizacion' => $tablaRecalculada,
+            'tabla_modificada' => $numeroCuotasTotal !== $numeroCuotasOriginal,
+            'cuota_siguiente' => $cuotaActual,
+        ];
+    }
+
+    private function recalcularTablaAmortizacionPorSistema(
+        float $capitalInicial,
+        float $tasa,
+        int $numeroCuotas,
+        string $sistema,
+        array $resultados,
+        $pagos
+    ): array {
+        match (strtolower($sistema)) {
+            'alemán', 'aleman' => $tabla = $this->recalcularTablaAleman($capitalInicial, $tasa, $numeroCuotas, $resultados, $pagos),
+            'americano', 'american' => $tabla = $this->recalcularTablaAmericano($capitalInicial, $tasa, $numeroCuotas, $resultados, $pagos),
+            default => $tabla = $this->recalcularTablaFrances($capitalInicial, $tasa, $resultados, $pagos),
+        };
+
+        return $tabla;
+    }
+
+    private function recalcularTablaFrances(float $capitalInicial, float $tasa, array $resultados, $pagos): array
+    {
+        $tabla = [];
+        $saldoActual = $capitalInicial;
+        $periodo = 1;
+        $cuotaFija = $resultados['cuota_fija'] ?? 0;
+
+        // Procesar cada pago realizado
+        foreach ($pagos as $pago) {
+            if ($saldoActual <= 0.01) {
+                break;
+            }
+
+            $interesCalculado = $saldoActual * $tasa;
+            $montoPagado = $pago->amount;
+            $interesPagadoReal = $pago->interest_paid;
+            $capitalPagadoReal = $pago->principal_paid;
+            $nuevoSaldo = max(0, $saldoActual - $capitalPagadoReal);
+            $tipoPago = $this->determinarTipoPago($montoPagado, $cuotaFija, $interesCalculado);
+            $diferenciaCuota = $montoPagado - $cuotaFija;
+
+            $tabla[] = [
+                'periodo' => $periodo,
+                'saldo_inicial' => round($saldoActual, 2),
+                'cuota' => round($montoPagado, 2),
+                'interes' => round($interesCalculado, 2),
+                'interes_pagado' => round($interesPagadoReal, 2),
+                'amortizacion' => round($capitalPagadoReal, 2),
+                'saldo_final' => round($nuevoSaldo, 2),
+                'pagado' => true,
+                'fecha_pago' => $pago->payment_date->format('d/m/Y'),
+                'pago_id' => $pago->id,
+                'tipo_pago' => $tipoPago,
+                'diferencia_cuota' => round($diferenciaCuota, 2),
+                'exceso_interes' => round($interesPagadoReal - $interesCalculado, 2),
+                'status' => $pago->status,
+            ];
+
+            $saldoActual = $nuevoSaldo;
+            $periodo++;
+        }
+
+        // Generar cuotas pendientes
+        if ($saldoActual > 0.01) {
+            $maxCuotas = 1000;
+            $cuotasGeneradas = 0;
+
+            while ($saldoActual > 0.01 && $cuotasGeneradas < $maxCuotas) {
+                $interes = $saldoActual * $tasa;
+
+                if ($saldoActual + $interes <= $cuotaFija) {
+                    $cuotaPendiente = $saldoActual + $interes;
+                    $capitalCuota = $saldoActual;
+                    $nuevoSaldo = 0;
+                } else {
+                    $cuotaPendiente = $cuotaFija;
+                    $capitalCuota = $cuotaFija - $interes;
+                    $nuevoSaldo = $saldoActual - $capitalCuota;
+                }
+
+                $tabla[] = [
+                    'periodo' => $periodo,
+                    'saldo_inicial' => round($saldoActual, 2),
+                    'cuota' => round($cuotaPendiente, 2),
+                    'interes' => round($interes, 2),
+                    'interes_pagado' => 0,
+                    'amortizacion' => round($capitalCuota, 2),
+                    'saldo_final' => round($nuevoSaldo, 2),
+                    'pagado' => false,
+                    'fecha_pago' => null,
+                    'pago_id' => null,
+                    'tipo_pago' => 'normal',
+                    'diferencia_cuota' => 0,
+                    'exceso_interes' => 0,
+                    'status' => 'pending',
+                ];
+
+                $saldoActual = $nuevoSaldo;
+                $periodo++;
+                $cuotasGeneradas++;
+            }
+        }
+
+        return $tabla;
+    }
+
+    private function recalcularTablaAleman(float $capitalInicial, float $tasa, int $numeroCuotas, array $resultados, $pagos): array
+    {
+        $tabla = [];
+        $saldoActual = $capitalInicial;
+        $periodo = 1;
+
+        // Amortización constante es la clave del sistema alemán
+        $amortizacionConstante = $resultados['amortizacion_constante'] ?? ($capitalInicial / $numeroCuotas);
+
+        // Procesar cada pago realizado
+        foreach ($pagos as $pago) {
+            if ($saldoActual <= 0.01) {
+                break;
+            }
+
+            // Interés sobre saldo actual
+            $interesCalculado = $saldoActual * $tasa;
+
+            // Interés esperado para este periodo
+            $cuotaEsperada = $amortizacionConstante + $interesCalculado;
+
+            $montoPagado = $pago->amount;
+            $capitalPagadoReal = $pago->principal_paid;
+            $interesPagadoReal = $pago->interest_paid;
+
+            $nuevoSaldo = max(0, $saldoActual - $capitalPagadoReal);
+            $tipoPago = $this->determinarTipoPago($montoPagado, $cuotaEsperada, $interesCalculado);
+            $diferenciaCuota = $montoPagado - $cuotaEsperada;
+
+            $tabla[] = [
+                'periodo' => $periodo,
+                'saldo_inicial' => round($saldoActual, 2),
+                'cuota' => round($montoPagado, 2),
+                'interes' => round($interesCalculado, 2),
+                'interes_pagado' => round($interesPagadoReal, 2),
+                'amortizacion' => round($capitalPagadoReal, 2),
+                'saldo_final' => round($nuevoSaldo, 2),
+                'pagado' => true,
+                'fecha_pago' => $pago->payment_date->format('d/m/Y'),
+                'pago_id' => $pago->id,
+                'tipo_pago' => $tipoPago,
+                'diferencia_cuota' => round($diferenciaCuota, 2),
+                'exceso_interes' => round($interesPagadoReal - $interesCalculado, 2),
+                'status' => $pago->status,
+            ];
+
+            $saldoActual = $nuevoSaldo;
+            $periodo++;
+        }
+
+        // Generar cuotas pendientes
+        if ($saldoActual > 0.01) {
+            while ($saldoActual > 0.01 && $periodo <= $numeroCuotas) {
+                $interes = $saldoActual * $tasa;
+
+                // En el último período
+                if ($periodo === $numeroCuotas || $saldoActual <= $amortizacionConstante + 0.01) {
+                    $capitalCuota = $saldoActual;
+                    $cuotaPendiente = $capitalCuota + $interes;
+                    $nuevoSaldo = 0;
+                } else {
+                    $capitalCuota = $amortizacionConstante;
+                    $cuotaPendiente = $capitalCuota + $interes;
+                    $nuevoSaldo = $saldoActual - $capitalCuota;
+                }
+
+                $tabla[] = [
+                    'periodo' => $periodo,
+                    'saldo_inicial' => round($saldoActual, 2),
+                    'cuota' => round($cuotaPendiente, 2),
+                    'interes' => round($interes, 2),
+                    'interes_pagado' => 0,
+                    'amortizacion' => round($capitalCuota, 2),
+                    'saldo_final' => round($nuevoSaldo, 2),
+                    'pagado' => false,
+                    'fecha_pago' => null,
+                    'pago_id' => null,
+                    'tipo_pago' => 'normal',
+                    'diferencia_cuota' => 0,
+                    'exceso_interes' => 0,
+                    'status' => 'pending',
+                ];
+
+                $saldoActual = $nuevoSaldo;
+                $periodo++;
+            }
+        }
+
+        return $tabla;
+    }
+
+    private function recalcularTablaAmericano(float $capitalInicial, float $tasa, int $numeroCuotas, array $resultados, $pagos): array
+    {
+        $tabla = [];
+        $saldoActual = $capitalInicial;
+        $periodo = 1;
+
+        // Sistema americano: solo interés hasta el final
+        $interesPeriodico = $capitalInicial * $tasa;
+
+        // Procesar cada pago realizado
+        foreach ($pagos as $pago) {
+            if ($saldoActual <= 0.01) {
+                break;
+            }
+
+            // Interés esperado para este período
+            $interesCalculado = $saldoActual * $tasa;
+            $montoPagado = $pago->amount;
+            $capitalPagadoReal = $pago->principal_paid;
+            $interesPagadoReal = $pago->interest_paid;
+
+            // En sistema americano, solo se paga capital en última cuota
+            $esUltimaCuota = ($periodo === $numeroCuotas);
+            $cuotaEsperada = $esUltimaCuota
+                ? $saldoActual + $interesCalculado  // Última: capital + interés
+                : $interesCalculado;                // Otras: solo interés
+
+            $nuevoSaldo = max(0, $saldoActual - $capitalPagadoReal);
+            $tipoPago = $this->determinarTipoPago($montoPagado, $cuotaEsperada, $interesCalculado);
+            $diferenciaCuota = $montoPagado - $cuotaEsperada;
+
+            $tabla[] = [
+                'periodo' => $periodo,
+                'saldo_inicial' => round($saldoActual, 2),
+                'cuota' => round($montoPagado, 2),
+                'interes' => round($interesCalculado, 2),
+                'interes_pagado' => round($interesPagadoReal, 2),
+                'amortizacion' => round($capitalPagadoReal, 2),
+                'saldo_final' => round($nuevoSaldo, 2),
+                'pagado' => true,
+                'fecha_pago' => $pago->payment_date->format('d/m/Y'),
+                'pago_id' => $pago->id,
+                'tipo_pago' => $tipoPago,
+                'diferencia_cuota' => round($diferenciaCuota, 2),
+                'exceso_interes' => round($interesPagadoReal - $interesCalculado, 2),
+                'status' => $pago->status,
+            ];
+
+            $saldoActual = $nuevoSaldo;
+            $periodo++;
+        }
+
+        // Generar cuotas pendientes
+        if ($saldoActual > 0.01) {
+            while ($saldoActual > 0.01 && $periodo <= $numeroCuotas) {
+                $interes = $saldoActual * $tasa;
+
+                // Última cuota: capital + interés
+                if ($periodo === $numeroCuotas) {
+                    $capitalCuota = $saldoActual;
+                    $cuotaPendiente = $capitalCuota + $interes;
+                    $nuevoSaldo = 0;
+                } else {
+                    // Cuotas intermedias: solo interés
+                    $capitalCuota = 0;
+                    $cuotaPendiente = $interes;
+                    $nuevoSaldo = $saldoActual;
+                }
+
+                $tabla[] = [
+                    'periodo' => $periodo,
+                    'saldo_inicial' => round($saldoActual, 2),
+                    'cuota' => round($cuotaPendiente, 2),
+                    'interes' => round($interes, 2),
+                    'interes_pagado' => 0,
+                    'amortizacion' => round($capitalCuota, 2),
+                    'saldo_final' => round($nuevoSaldo, 2),
+                    'pagado' => false,
+                    'fecha_pago' => null,
+                    'pago_id' => null,
+                    'tipo_pago' => 'normal',
+                    'diferencia_cuota' => 0,
+                    'exceso_interes' => 0,
+                    'status' => 'pending',
+                ];
+
+                $saldoActual = $nuevoSaldo;
+                $periodo++;
+            }
+        }
+
+        return $tabla;
+    }
+
+    private function calcularDistribucionPagoManual(
+        array $data,
+        ?array $cuotaActual,
+        float $saldoRestante,
+        float $totalPagado,
+        float $montoTotal,
+        int $numeroPagos,
+        float $capitalPendiente,
+        float $interesPendiente
+    ): array {
+        $interesPagado = (float) ($data['interest_paid'] ?? 0);
+        $capitalPagado = (float) ($data['principal_paid'] ?? 0);
+        $amount = $interesPagado + $capitalPagado;
+
+        $nuevoSaldo = max(0, $saldoRestante - $capitalPagado);
+
+        $cuotaPropuesta = $cuotaActual ? $cuotaActual['cuota'] : 0;
+        $diferencia = $amount - $cuotaPropuesta;
+
+        if (abs($diferencia) < 0.01) {
+            $tipoPago = 'normal';
+        } elseif ($diferencia > 0.01) {
+            $tipoPago = 'abono_extra';
+        } else {
+            $tipoPago = 'pago_parcial';
+        }
+
+        if ($nuevoSaldo <= 0.01) {
+            $tipoPago = 'liquidacion';
+            $nuevoSaldo = 0;
+        }
+
+        $porcentajeCompletado = $montoTotal > 0
+            ? round((($totalPagado + $amount) / $montoTotal) * 100, 2)
+            : 0;
+
+        return [
+            'principal_paid' => round($capitalPagado, 2),
+            'interest_paid' => round($interesPagado, 2),
+            'remaining_balance' => round($nuevoSaldo, 2),
+            'metadata' => [
+                'saldo_anterior' => round($saldoRestante, 2),
+                'saldo_nuevo' => round($nuevoSaldo, 2),
+                'capital_pendiente_anterior' => round($capitalPendiente, 2),
+                'capital_pendiente_nuevo' => round($nuevoSaldo, 2),
+                'interes_pendiente_anterior' => round($interesPendiente, 2),
+                'interes_pendiente_nuevo' => round(max(0, $interesPendiente - $interesPagado), 2),
+                'numero_pago' => $numeroPagos + 1,
+                'cuota_numero' => $cuotaActual ? $cuotaActual['periodo'] : null,
+                'cuota_propuesta' => round($cuotaPropuesta, 2),
+                'tipo_pago' => $tipoPago,
+                'diferencia_cuota' => round($diferencia, 2),
+                'porcentaje_completado' => $porcentajeCompletado,
+                'modo_ingreso' => 'manual',
+                'tipo_calculo' => $this->type->value,
+                'fecha_registro' => now()->toDateTimeString(),
+            ],
+        ];
+    }
+
+    private function calcularDistribucionPagoAmortizacion(
+        float $amount,
+        ?array $cuotaActual,
+        float $saldoRestante,
+        float $tasa,
+        float $totalPagado,
+        float $montoTotal,
+        int $numeroPagos,
+        float $capitalPendiente,
+        float $interesPendiente,
+        string $sistema
+    ): array {
+        if (! $cuotaActual || $amount <= 0) {
+            return [
+                'principal_paid' => 0,
+                'interest_paid' => 0,
+                'remaining_balance' => $saldoRestante,
+                'metadata' => [],
+            ];
+        }
+
+        $interesCuota = $cuotaActual['interes'];
+        $capitalCuota = $cuotaActual['amortizacion'];
+        $cuotaPropuesta = $cuotaActual['cuota'];
+
+        // CASO 1: Pago exacto de la cuota
+        if (abs($amount - $cuotaPropuesta) < 0.01) {
+            $interesPagado = $interesCuota;
+            $capitalPagado = $capitalCuota;
+            $nuevoSaldo = $cuotaActual['saldo_final'];
+            $tipoPago = 'normal';
+        }
+        // CASO 2: Pago mayor a la cuota (abono extra a capital)
+        elseif ($amount > $cuotaPropuesta) {
+            $interesPagado = $interesCuota;
+            $capitalCuotaNormal = $capitalCuota;
+            $excedenteCapital = $amount - $cuotaPropuesta;
+            $capitalPagado = $capitalCuotaNormal + $excedenteCapital;
+            $nuevoSaldo = max(0, $saldoRestante - $capitalPagado);
+            $tipoPago = 'abono_extra';
+        }
+        // CASO 3: Pago menor a la cuota (pago parcial)
+        elseif ($amount < $cuotaPropuesta) {
+            if ($amount <= $interesCuota) {
+                $interesPagado = $amount;
+                $capitalPagado = 0;
+            } else {
+                $interesPagado = $interesCuota;
+                $capitalPagado = $amount - $interesCuota;
+            }
+            $nuevoSaldo = max(0, $saldoRestante - $capitalPagado);
+            $tipoPago = 'pago_parcial';
+        }
+        // CASO 4: Liquidación
+        else {
+            $interesPagado = min($amount, $interesCuota);
+            $capitalPagado = min($amount - $interesPagado, $saldoRestante);
+            $nuevoSaldo = max(0, $saldoRestante - $capitalPagado);
+            $tipoPago = $nuevoSaldo <= 0.01 ? 'liquidacion' : 'normal';
+        }
+
+        $porcentajeCompletado = $montoTotal > 0
+            ? round((($totalPagado + $amount) / $montoTotal) * 100, 2)
+            : 0;
+
+        return [
+            'principal_paid' => round($capitalPagado, 2),
+            'interest_paid' => round($interesPagado, 2),
+            'remaining_balance' => round($nuevoSaldo, 2),
+            'metadata' => [
+                'saldo_anterior' => round($saldoRestante, 2),
+                'saldo_nuevo' => round($nuevoSaldo, 2),
+                'capital_pendiente_anterior' => round($capitalPendiente, 2),
+                'capital_pendiente_nuevo' => round($nuevoSaldo, 2),
+                'interes_pendiente_anterior' => round($interesPendiente, 2),
+                'interes_pendiente_nuevo' => round(max(0, $interesPendiente - $interesPagado), 2),
+                'numero_pago' => $numeroPagos + 1,
+                'cuota_numero' => $cuotaActual['periodo'],
+                'cuota_propuesta' => round($cuotaPropuesta, 2),
+                'tipo_pago' => $tipoPago,
+                'diferencia_cuota' => round($amount - $cuotaPropuesta, 2),
+                'porcentaje_completado' => $porcentajeCompletado,
+                'tipo_calculo' => $this->type->value,
+                'fecha_registro' => now()->toDateTimeString(),
+            ],
+        ];
+    }
+
+    private function determinarTipoPago(float $montoPagado, float $cuotaFija, float $interesCalculado): string
+    {
+        $diferencia = $montoPagado - $cuotaFija;
+
+        if (abs($diferencia) < 0.01) {
+            return 'normal';
+        } elseif ($diferencia > 0.01) {
+            return 'abono_extra';
+        } else {
+            return 'pago_parcial';
+        }
+    }
+
+    private function obtenerCuotaActualAmortizacion(array $tabla): ?array
+    {
+        foreach ($tabla as $cuota) {
+            if (! ($cuota['pagado'] ?? false)) {
+                return $cuota;
+            }
+        }
+
+        return end($tabla) ?: null;
+    }
+
+    private function calculatePaymentDistributionAmortizacion(Get $get, Set $set, ?array $data = null): void
+    {
+        $amount = isset($data['amount']) ? (float) $data['amount'] : null;
+        $interest = isset($data['interest_paid']) ? (float) $data['interest_paid'] : null;
+        $principal = isset($data['principal_paid']) ? (float) $data['principal_paid'] : null;
+
+        if ($amount !== null && $amount > 0) {
+            $paymentData = $this->getPagosDataAmortizacion($data);
+
+            $set('interest_paid', $paymentData['interest_paid']);
+            $set('principal_paid', $paymentData['principal_paid']);
+            $set('remaining_balance', $paymentData['remaining_balance']);
+
+            return;
+        }
+
+        if ($interest !== null || $principal !== null) {
+            $interest = $interest ?? 0.0;
+            $principal = $principal ?? 0.0;
+            $total = $interest + $principal;
+
+            $set('amount', round($total, 2));
+
+            $pagosData = $this->getPagosDataAmortizacion();
+            $set('remaining_balance', max(0, ($pagosData['saldo_restante'] ?? 0) - $principal));
+        }
     }
 
     /**

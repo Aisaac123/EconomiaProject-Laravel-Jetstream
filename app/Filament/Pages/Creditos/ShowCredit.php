@@ -74,14 +74,63 @@ class ShowCredit extends Page implements HasTable
 
     protected function getHeaderActions(): array
     {
-        return [
-            Action::make('back')
-                ->label('Volver')
-                ->icon('heroicon-o-arrow-left')
-                ->url(ListCredits::getUrl())
-                ->tooltip('Volver al listado'),
+        $pagosData = $this->record->getPagosData();
+        $saldoRestante = $pagosData['cuotas_restantes'] ?? 0;
 
-            Action::make('create_payment')
+        $actions = [];
+        // dd($saldoRestante);
+        // Solo mostrar si hay saldo restante
+        if ($saldoRestante > 0) {
+            $actions[] = Action::make('pagar_cuota_siguiente')
+                ->label('Proxima Cuota')
+                ->icon('heroicon-o-bolt')
+                ->color('success')
+                ->requiresConfirmation()
+                ->modalHeading(function () {
+                    $pagosData = $this->record->getPagosData();
+                    $cuotaActual = $pagosData['cuota_siguiente'] ?? null;
+
+                    return $cuotaActual
+                        ? 'Pagar Cuota #'.$cuotaActual['periodo']
+                        : 'Pagar Cuota';
+                })
+                ->modalDescription(function () {
+                    $pagosData = $this->record->getPagosData();
+                    $cuotaActual = $pagosData['cuota_siguiente'] ?? null;
+
+                    if (! $cuotaActual) {
+                        return 'No hay cuotas pendientes.';
+                    }
+
+                    return 'Monto de la cuota: $'.number_format($cuotaActual['cuota'], 2).
+                        ' (Interés: $'.number_format($cuotaActual['interes'], 2).
+                        ' + Capital: $'.number_format($cuotaActual['amortizacion'], 2).')';
+                })
+                ->modalIcon('heroicon-o-currency-dollar')
+                ->modalSubmitActionLabel('Confirmar Pago')
+                ->action(function () {
+                    $pagosData = $this->record->getPagosData();
+                    $cuotaActual = $pagosData['cuota_siguiente'] ?? null;
+
+                    if (! $cuotaActual) {
+                        Notification::make()
+                            ->title('Error')
+                            ->body('No hay cuotas pendientes para pagar.')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
+                    $this->createPayment([
+                        'amount' => $cuotaActual['cuota'],
+                        'payment_date' => now(),
+                        'status' => 'completed',
+                    ]);
+                })
+                ->tooltip('Pagar automáticamente la cuota propuesta');
+
+            $actions[] = Action::make('create_payment')
                 ->label('Registrar Pago')
                 ->icon('heroicon-o-plus-circle')
                 ->color('success')
@@ -93,17 +142,20 @@ class ShowCredit extends Page implements HasTable
                 ->form($this->getPaymentFormSchema())
                 ->action(function (array $data) {
                     $this->createPayment($data);
-                }),
+                });
+        }
 
-            DeleteAction::make()
-                ->label('Eliminar')
-                ->icon('heroicon-o-trash')
-                ->requiresConfirmation()
-                ->modalHeading('Eliminar Crédito')
-                ->modalDescription('¿Estás seguro? Esta acción eliminará el crédito y todos sus pagos.')
-                ->modalSubmitActionLabel('Sí, eliminar')
-                ->modalCancelActionLabel('Cancelar'),
-        ];
+        // Solo mostrar editar si no hay pagos
+        if ($this->record->payments()->count() === 0) {
+            $actions[] = Action::make('edit')
+                ->label('Editar')
+                ->icon('heroicon-o-pencil')
+                ->color('warning')
+                ->url(fn (): string => EditCredit::getUrl(['recordId' => $this->record->id]))
+                ->tooltip('Editar los datos del crédito');
+        }
+
+        return $actions;
     }
 
     protected function getActions(): array
@@ -307,48 +359,6 @@ class ShowCredit extends Page implements HasTable
     /**
      * Crea un nuevo pago
      */
-    protected function createPayment(array $data): void
-    {
-        try {
-            $amount = (float) ($data['amount'] ?? (float) (($data['interest_paid'] + $data['principal_paid'])) ?? 0);
-            $data['amount'] = $amount;
-            // Obtener datos del pago calculados por el modelo
-            $paymentData = $this->record->getPagosData($data);
-            // Crear el pago
-            Payment::create([
-                'credit_id' => $this->record->id,
-                'amount' => $amount,
-                ...$paymentData,
-                'payment_date' => $data['payment_date'],
-                'status' => $data['status'],
-            ]);
-
-            // Actualizar estado del crédito si está completamente pagado
-            if ($paymentData['remaining_balance'] <= 0) {
-                $this->record->update(['status' => 'completed']);
-            }
-
-            // Recargar relación
-            $this->record->load('payments');
-
-            Notification::make()
-                ->title('Pago registrado exitosamente')
-                ->body('Monto: $'.number_format($data['amount'], 2))
-                ->success()
-                ->send();
-
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Error al registrar el pago')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
-    }
-
-    /**
-     * Tabla de pagos asociados al crédito
-     */
     public function table(Table $table): Table
     {
         return $table
@@ -412,6 +422,24 @@ class ShowCredit extends Page implements HasTable
                     ])
                     ->sortable()
                     ->toggleable(),
+
+                // NUEVA COLUMNA: Tipo de Pago
+                BadgeColumn::make('metadata->tipo_pago')
+                    ->label('Tipo')
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'normal' => '💳 Normal',
+                        'abono_extra' => '💰 Abono Extra',
+                        'pago_parcial' => '⚠️ Parcial',
+                        'liquidacion' => '🎉 Liquidación',
+                        default => '-',
+                    })
+                    ->colors([
+                        'primary' => 'normal',
+                        'success' => 'abono_extra',
+                        'warning' => 'pago_parcial',
+                        'info' => 'liquidacion',
+                    ])
+                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -422,6 +450,21 @@ class ShowCredit extends Page implements HasTable
                         'reversed' => 'Revertido',
                     ])
                     ->placeholder('Todos los estados'),
+
+                SelectFilter::make('tipo_pago')
+                    ->label('Tipo de Pago')
+                    ->options([
+                        'normal' => 'Normal',
+                        'abono_extra' => 'Abono Extra',
+                        'pago_parcial' => 'Pago Parcial',
+                        'liquidacion' => 'Liquidación',
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (isset($data['value'])) {
+                            $query->whereJsonContains('metadata->tipo_pago', $data['value']);
+                        }
+                    })
+                    ->placeholder('Todos los tipos'),
 
                 Filter::make('today')
                     ->label('Pagos de Hoy')
@@ -441,11 +484,19 @@ class ShowCredit extends Page implements HasTable
                     ->requiresConfirmation()
                     ->visible(fn (Payment $record) => $record->status === 'pending')
                     ->modalHeading('Completar pago')
-                    ->modalDescription(fn (Payment $record) => '¿Deseas Completar este pago de $'.number_format($record->amount, 2).'? Esta acción no se puede deshacer.'
-                    )
+                    ->modalDescription(fn (Payment $record) => '¿Deseas Completar este pago de $'.number_format($record->amount, 2).'? Esta acción no se puede deshacer.')
                     ->modalIcon('heroicon-o-check-circle')
                     ->action(function (Payment $record) {
                         $record->update(['status' => 'completed']);
+
+                        // Verificar si el crédito está completamente pagado
+                        $pagosData = $this->record->getPagosData();
+                        if (($pagosData['saldo_restante'] ?? 0) <= 0) {
+                            $this->record->update(['status' => 'completed']);
+                        }
+
+                        $this->record->load('payments');
+
                         Notification::make()
                             ->title('Pago actualizado')
                             ->body('El pago de $'.number_format($record->amount, 2).' ha sido marcado como completado.')
@@ -453,6 +504,7 @@ class ShowCredit extends Page implements HasTable
                             ->send();
                     })
                     ->tooltip('Cambiar estado de pendiente a completado'),
+
                 Action::make('edit')
                     ->label('')
                     ->icon('heroicon-o-pencil')
@@ -462,24 +514,40 @@ class ShowCredit extends Page implements HasTable
                     ->modalHeading('Editar Pago')
                     ->modalWidth('2xl')
                     ->form($this->getPaymentFormSchema())
-                    ->record(fn (Payment $record) => $record) // asigna el registro
+                    ->fillForm(fn (Payment $record) => [
+                        'payment_date' => $record->payment_date,
+                        'status' => $record->status,
+                        'amount' => $record->amount,
+                        'interest_paid' => $record->interest_paid,
+                        'principal_paid' => $record->principal_paid,
+                        'payment_mode' => 'detalle',
+                    ])
                     ->action(function (Payment $record, array $data) {
-                        $amount = (float) ($data['amount'] ?? (float) (($data['interest_paid'] + $data['principal_paid'])) ?? 0);
+                        $amount = (float) ($data['amount'] ?? (($data['interest_paid'] ?? 0) + ($data['principal_paid'] ?? 0)));
                         $data['amount'] = $amount;
+
+                        // Recalcular distribución considerando el estado actual sin este pago
                         $paymentData = $this->record->getPagosData($data);
+
                         $record->update([
-                            'credit_id' => $this->record->id,
                             'amount' => $amount,
-                            ...$paymentData,
+                            'principal_paid' => $paymentData['principal_paid'],
+                            'interest_paid' => $paymentData['interest_paid'],
+                            'remaining_balance' => $paymentData['remaining_balance'],
                             'payment_date' => $data['payment_date'],
                             'status' => $data['status'],
+                            'metadata' => $paymentData['metadata'] ?? [],
                         ]);
+
+                        $this->record->load('payments');
+
                         Notification::make()
                             ->title('Pago actualizado')
-                            ->body('El pago de $'.number_format($record->amount, 2).' fue actualizado.')
+                            ->body('El pago de $'.number_format($amount, 2).' fue actualizado.')
                             ->success()
                             ->send();
                     }),
+
                 Action::make('view')
                     ->label('')
                     ->icon('heroicon-o-eye')
@@ -499,8 +567,7 @@ class ShowCredit extends Page implements HasTable
                     ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Eliminar Pago')
-                    ->modalDescription(fn (Payment $record) => '¿Deseas eliminar este pago de $'.number_format($record->amount, 2).'? Esta acción no se puede deshacer.'
-                    )
+                    ->modalDescription(fn (Payment $record) => '¿Deseas eliminar este pago de $'.number_format($record->amount, 2).'? Esta acción recalculará toda la tabla de amortización.')
                     ->modalSubmitActionLabel('Sí, eliminar')
                     ->modalCancelActionLabel('Cancelar')
                     ->after(function () {
@@ -513,6 +580,7 @@ class ShowCredit extends Page implements HasTable
 
                         Notification::make()
                             ->title('Pago eliminado')
+                            ->body('La tabla de amortización ha sido recalculada.')
                             ->success()
                             ->send();
                     }),
@@ -542,5 +610,64 @@ class ShowCredit extends Page implements HasTable
                         $this->createPayment($data);
                     }),
             ]);
+    }
+
+    /**
+     * Crea un nuevo pago con recálculo automático
+     */
+    protected function createPayment(array $data): void
+    {
+        try {
+            $amount = (float) ($data['amount'] ?? (($data['interest_paid'] ?? 0) + ($data['principal_paid'] ?? 0)));
+            $data['amount'] = $amount;
+
+            // Obtener datos del pago calculados por el modelo
+            $paymentData = $this->record->getPagosData($data);
+
+            // Crear el pago
+            Payment::create([
+                'credit_id' => $this->record->id,
+                'amount' => $amount,
+                'principal_paid' => $paymentData['principal_paid'],
+                'interest_paid' => $paymentData['interest_paid'],
+                'remaining_balance' => $paymentData['remaining_balance'],
+                'payment_date' => $data['payment_date'],
+                'status' => $data['status'],
+                'metadata' => $paymentData['metadata'] ?? [],
+            ]);
+
+            // Actualizar estado del crédito si está completamente pagado
+            if ($paymentData['remaining_balance'] <= 0) {
+                $this->record->update(['status' => 'paid']);
+            }
+            if ($this->record->status === 'calculated' || $this->record->status === 'calculated-updated' || $this->record->status === 'calculated-copied') {
+                $this->record->update(['status' => 'pending']);
+            }
+
+            // Recargar relación
+            $this->record->load('payments');
+
+            $tipoPago = $paymentData['metadata']['tipo_pago'] ?? 'normal';
+            $tipoPagoTexto = match ($tipoPago) {
+                'normal' => 'Pago normal',
+                'abono_extra' => 'Abono extra a capital',
+                'pago_parcial' => 'Pago parcial',
+                'liquidacion' => 'Liquidación del crédito',
+                default => 'Pago registrado',
+            };
+
+            Notification::make()
+                ->title('Pago registrado exitosamente')
+                ->body($tipoPagoTexto.' - Monto: $'.number_format($amount, 2))
+                ->success()
+                ->send();
+
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Error al registrar el pago')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 }
