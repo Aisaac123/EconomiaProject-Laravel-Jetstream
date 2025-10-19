@@ -770,7 +770,7 @@ class InteresSimpleSchema
         $html .= static::buildCard(
             'Saldo Restante',
             '💵',
-            '$' . number_format($saldoRestante, 2),
+            '$'.number_format($saldoRestante, 2),
             'Monto pendiente por pagar',
             true,
             $saldoRestante > 0 ? 'red' : 'green'
@@ -815,7 +815,7 @@ class InteresSimpleSchema
         $html .= static::buildCard(
             'Pagos Realizados',
             '✅',
-            (string)$numeroPagos,
+            (string) $numeroPagos,
             'Cantidad de pagos completados',
             false,
             'emerald'
@@ -825,7 +825,7 @@ class InteresSimpleSchema
         $html .= static::buildCard(
             'Progreso Total',
             '📈',
-            number_format($porcentajePagado, 1) . '%',
+            number_format($porcentajePagado, 1).'%',
             'Del monto total del crédito',
             true,
             'green'
@@ -835,7 +835,7 @@ class InteresSimpleSchema
         $html .= static::buildCard(
             'Total Pagado',
             '💵',
-            '$' . number_format($totalPagado, 2),
+            '$'.number_format($totalPagado, 2),
             'Suma de todos los pagos',
             false,
             'emerald'
@@ -847,7 +847,7 @@ class InteresSimpleSchema
             $html .= static::buildCard(
                 'Pagos Estimados Restantes',
                 '🔢',
-                (string)$pagosEstimados,
+                (string) $pagosEstimados,
                 'Basado en promedio actual',
                 false,
                 'teal'
@@ -876,7 +876,7 @@ class InteresSimpleSchema
         $html .= static::buildCard(
             'Capital Pagado',
             '🏦',
-            '$' . number_format($capitalPagado, 2),
+            '$'.number_format($capitalPagado, 2),
             'Abono al capital',
             false,
             'amber'
@@ -886,7 +886,7 @@ class InteresSimpleSchema
         $html .= static::buildCard(
             'Capital Pendiente',
             '📊',
-            '$' . number_format($capitalPendiente, 2),
+            '$'.number_format($capitalPendiente, 2),
             'Capital por amortizar',
             false,
             'yellow'
@@ -896,7 +896,7 @@ class InteresSimpleSchema
         $html .= static::buildCard(
             'Interés Pagado',
             '📈',
-            '$' . number_format($interesPagado, 2),
+            '$'.number_format($interesPagado, 2),
             'Intereses abonados',
             false,
             'orange'
@@ -906,7 +906,7 @@ class InteresSimpleSchema
         $html .= static::buildCard(
             'Interés Pendiente',
             '💹',
-            '$' . number_format($interesPendiente, 2),
+            '$'.number_format($interesPendiente, 2),
             'Intereses por pagar',
             false,
             'red'
@@ -945,7 +945,7 @@ class InteresSimpleSchema
                 $html .= static::buildCard(
                     'Monto Último Pago',
                     '💵',
-                    '$' . number_format($montoUltimoPago, 2),
+                    '$'.number_format($montoUltimoPago, 2),
                     'Valor del último abono',
                     false,
                     'blue'
@@ -956,7 +956,7 @@ class InteresSimpleSchema
                 $html .= static::buildCard(
                     'Promedio por Pago',
                     '📊',
-                    '$' . number_format($promedioMonto, 2),
+                    '$'.number_format($promedioMonto, 2),
                     'Promedio de pagos realizados',
                     false,
                     'cyan'
@@ -1009,7 +1009,7 @@ class InteresSimpleSchema
                 $html .= static::buildCard(
                     'Días Transcurridos',
                     '📅',
-                    (string)$diasTranscurridos . ' días',
+                    (string) $diasTranscurridos.' días',
                     'Desde el inicio del crédito',
                     false,
                     'violet'
@@ -1021,7 +1021,7 @@ class InteresSimpleSchema
                 $html .= static::buildCard(
                     'Días Restantes',
                     '⏱️',
-                    abs($diasRestantes) . ' días',
+                    abs($diasRestantes).' días',
                     $diasRestantes < 0 ? '¡Crédito vencido!' : 'Hasta el vencimiento',
                     $diasRestantes < 30,
                     $colorDias
@@ -1051,8 +1051,10 @@ class InteresSimpleSchema
         }
 
         $html .= '</div>';
+
         return new HtmlString($html);
     }
+
     private static function buildCard(string $title, string $icon, string $value, string $subtitle, bool $isCalculated, string $color = 'gray', string $p = 'p-6'): string
     {
         $colorClasses = match ($color) {

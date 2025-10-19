@@ -12,9 +12,11 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -40,7 +42,9 @@ class ShowCredit extends Page implements HasTable
     protected string $view = 'filament.pages.creditos.show';
 
     protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-document-text';
+
     protected static string|null|\UnitEnum $navigationGroup = PageGroupType::CREDIT->value;
+
     protected static ?string $slug = 'creditos/{recordId}';
 
     public function mount(int $recordId): void
@@ -101,6 +105,7 @@ class ShowCredit extends Page implements HasTable
                 ->modalCancelActionLabel('Cancelar'),
         ];
     }
+
     protected function getActions(): array
     {
         return [
@@ -126,6 +131,7 @@ class ShowCredit extends Page implements HasTable
     protected function getPaymentFormSchema(): array
     {
         $record = $this->record;
+
         return [
             Section::make('Información del Pago')
                 ->schema([
@@ -146,63 +152,134 @@ class ShowCredit extends Page implements HasTable
                                     'completed' => 'Completado',
                                     'pending' => 'Pendiente',
                                 ])
-                                ->default('completed')
+                                ->default('pending')
                                 ->required()
                                 ->native(false),
                         ]),
-
-                    TextInput::make('amount')
-                        ->label('Monto Total del Pago')
-                        ->required()
-                        ->numeric()
-                        ->prefix('$')
-                        ->minValue(0.01)
-                        ->step(0.01)
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(function (Get $get, Set $set) use ($record) {
-                            $formData = $get('../../');
-                            $record->calculatePaymentDistribution($get, $set, $formData[0]["data"]);
-                        })
-                        ->helperText('Ingresa el monto total que se va a pagar'),
                 ])->collapsible(),
 
             Section::make('Distribución del Pago')
-                ->description('Cálculo automático de la distribución entre capital e interés')
+                ->description('Puedes ingresar el monto total o dividirlo entre capital e interés')
                 ->schema([
-                    Grid::make(2)
+                    // 🔘 Selector de modo
+                    ToggleButtons::make('payment_mode')
+                        ->label('Modo de ingreso')
+                        ->options([
+                            'total' => 'Monto Total',
+                            'detalle' => 'Dividir entre Capital e Interés',
+                        ])
+                        ->default('total')
+                        ->inline()
+                        ->reactive(),
+
+                    // Campos de entrada
+                    Grid::make(1)
                         ->schema([
-                            TextInput::make('interest_paid')
-                                ->label('Interés Pagado')
-                                ->required()
+                            // MODO: MONTO TOTAL
+                            TextInput::make('amount')
+                                ->label('Monto Total del Pago')
                                 ->numeric()
                                 ->prefix('$')
-                                ->minValue(0)
+                                ->minValue(0.01)
                                 ->step(0.01)
-                                ->disabled()
-                                ->helperText('Calculado automáticamente'),
+                                ->columnSpanFull()
+                                ->visible(fn (Get $get) => $get('payment_mode') !== 'detalle')
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
+                                    static $isCalculating = false;
+                                    if ($isCalculating) {
+                                        return;
+                                    }
+                                    $isCalculating = true;
+                                    try {
+                                        $this->record->calculatePaymentDistribution($get, $set, ['amount' => (float) ($state ?? 0)]);
+                                    } finally {
+                                        $isCalculating = false;
+                                    }
+                                }),
 
-                            TextInput::make('principal_paid')
-                                ->label('Capital Pagado')
-                                ->required()
-                                ->numeric()
-                                ->prefix('$')
-                                ->minValue(0)
-                                ->step(0.01)
-                                ->disabled()
-                                ->helperText('Calculado automáticamente'),
+                            // MODO: DETALLE CAPITAL + INTERÉS
+                            Group::make()
+                                ->visible(fn (Get $get) => $get('payment_mode') !== 'total')
+                                ->schema([
+                                    Grid::make(2)
+                                        ->schema([
+                                            TextInput::make('interest_paid')
+                                                ->label('Interés Pagado')
+                                                ->numeric()
+                                                ->prefix('$')
+                                                ->minValue(0)
+                                                ->step(0.01)
+                                                ->live(onBlur: true)
+                                                ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
+                                                    static $isCalculating = false;
+                                                    if ($isCalculating) {
+                                                        return;
+                                                    }
+                                                    $isCalculating = true;
+                                                    try {
+                                                        $interest = (float) ($get('interest_paid') ?? 0);
+                                                        $principal = (float) ($get('principal_paid') ?? 0);
+                                                        $set('amount', round($interest + $principal, 2));
+                                                        $this->record->calculatePaymentDistribution($get, $set, [
+                                                            'interest_paid' => $interest,
+                                                            'principal_paid' => $principal,
+                                                        ]);
+                                                    } finally {
+                                                        $isCalculating = false;
+                                                    }
+                                                }),
 
+                                            TextInput::make('principal_paid')
+                                                ->label('Capital Pagado')
+                                                ->numeric()
+                                                ->prefix('$')
+                                                ->minValue(0)
+                                                ->step(0.01)
+                                                ->live(onBlur: true)
+                                                ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
+                                                    static $isCalculating = false;
+                                                    if ($isCalculating) {
+                                                        return;
+                                                    }
+                                                    $isCalculating = true;
+                                                    try {
+                                                        $interest = (float) ($get('interest_paid') ?? 0);
+                                                        $principal = (float) ($get('principal_paid') ?? 0);
+                                                        $set('amount', round($interest + $principal, 2));
+                                                        $this->record->calculatePaymentDistribution($get, $set, [
+                                                            'interest_paid' => $interest,
+                                                            'principal_paid' => $principal,
+                                                        ]);
+                                                    } finally {
+                                                        $isCalculating = false;
+                                                    }
+                                                }),
+                                        ]),
+
+                                    TextInput::make('amount')
+                                        ->label('Monto Total del Pago')
+                                        ->numeric()
+                                        ->prefix('$')
+                                        ->disabled()
+                                        ->reactive()
+                                        ->helperText('Monto total calculado automáticamente'),
+                                ]),
+
+                            // Saldo restante
                             TextInput::make('remaining_balance')
                                 ->label('Saldo Restante')
-                                ->required()
                                 ->numeric()
                                 ->prefix('$')
                                 ->minValue(0)
                                 ->step(0.01)
                                 ->disabled()
-                                ->helperText('Saldo después de este pago'),
+                                ->reactive()
+                                ->afterStateHydrated(function (Get $get, Set $set) {
+                                    $set('remaining_balance', $this->record->saldo_restante ?? 0);
+                                }),
                         ]),
-                ])
-                ->collapsible(),
+                ]),
 
             Section::make('Información Adicional')
                 ->collapsed()
@@ -210,17 +287,18 @@ class ShowCredit extends Page implements HasTable
                 ->schema([
                     Placeholder::make('saldo_actual')
                         ->label('Saldo Actual del Crédito')
-                        ->content(fn () => '$' . number_format($this->record->saldo_restante, 2)),
+                        ->content(fn () => '$'.number_format($this->record->saldo_restante, 2)),
 
                     Placeholder::make('total_pagado')
                         ->label('Total Pagado Hasta Ahora')
-                        ->content(fn () => '$' . number_format($this->record->total_pagado, 2)),
+                        ->content(fn () => '$'.number_format($this->record->total_pagado, 2)),
 
                     Placeholder::make('porcentaje_pagado')
                         ->label('Porcentaje Completado')
                         ->content(function () {
                             $pagosData = $this->record->getPagosData();
-                            return ($pagosData['porcentaje_pagado'] ?? 0) . '%';
+
+                            return ($pagosData['porcentaje_pagado'] ?? 0).'%';
                         }),
                 ]),
         ];
@@ -232,13 +310,14 @@ class ShowCredit extends Page implements HasTable
     protected function createPayment(array $data): void
     {
         try {
+            $amount = (float) ($data['amount'] ?? (float) (($data['interest_paid'] + $data['principal_paid'])) ?? 0);
+            $data['amount'] = $amount;
             // Obtener datos del pago calculados por el modelo
             $paymentData = $this->record->getPagosData($data);
-
             // Crear el pago
             Payment::create([
                 'credit_id' => $this->record->id,
-                'amount' => $data['amount'],
+                'amount' => $amount,
                 ...$paymentData,
                 'payment_date' => $data['payment_date'],
                 'status' => $data['status'],
@@ -254,7 +333,7 @@ class ShowCredit extends Page implements HasTable
 
             Notification::make()
                 ->title('Pago registrado exitosamente')
-                ->body("Monto: $" . number_format($data['amount'], 2))
+                ->body('Monto: $'.number_format($data['amount'], 2))
                 ->success()
                 ->send();
 
@@ -279,11 +358,10 @@ class ShowCredit extends Page implements HasTable
                     ->latest('payment_date')
             )
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->sortable()
-                    ->alignCenter()
-                    ->toggleable(),
+                TextColumn::make('index')
+                    ->label('#')
+                    ->rowIndex()
+                    ->sortable(),
 
                 TextColumn::make('payment_date')
                     ->label('Fecha de Pago')
@@ -356,6 +434,52 @@ class ShowCredit extends Page implements HasTable
                     ->toggle(),
             ])
             ->actions([
+                Action::make('mark_completed')
+                    ->label('')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (Payment $record) => $record->status === 'pending')
+                    ->modalHeading('Completar pago')
+                    ->modalDescription(fn (Payment $record) => '¿Deseas Completar este pago de $'.number_format($record->amount, 2).'? Esta acción no se puede deshacer.'
+                    )
+                    ->modalIcon('heroicon-o-check-circle')
+                    ->action(function (Payment $record) {
+                        $record->update(['status' => 'completed']);
+                        Notification::make()
+                            ->title('Pago actualizado')
+                            ->body('El pago de $'.number_format($record->amount, 2).' ha sido marcado como completado.')
+                            ->success()
+                            ->send();
+                    })
+                    ->tooltip('Cambiar estado de pendiente a completado'),
+                Action::make('edit')
+                    ->label('')
+                    ->icon('heroicon-o-pencil')
+                    ->color('primary')
+                    ->tooltip('Editar pago')
+                    ->visible(fn (Payment $record) => $record->status !== 'completed')
+                    ->modalHeading('Editar Pago')
+                    ->modalWidth('2xl')
+                    ->form($this->getPaymentFormSchema())
+                    ->record(fn (Payment $record) => $record) // asigna el registro
+                    ->action(function (Payment $record, array $data) {
+                        $amount = (float) ($data['amount'] ?? (float) (($data['interest_paid'] + $data['principal_paid'])) ?? 0);
+                        $data['amount'] = $amount;
+                        $paymentData = $this->record->getPagosData($data);
+                        $record->update([
+                            'credit_id' => $this->record->id,
+                            'amount' => $amount,
+                            ...$paymentData,
+                            'payment_date' => $data['payment_date'],
+                            'status' => $data['status'],
+                        ]);
+                        Notification::make()
+                            ->title('Pago actualizado')
+                            ->body('El pago de $'.number_format($record->amount, 2).' fue actualizado.')
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('view')
                     ->label('')
                     ->icon('heroicon-o-eye')
@@ -375,8 +499,7 @@ class ShowCredit extends Page implements HasTable
                     ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Eliminar Pago')
-                    ->modalDescription(fn (Payment $record) =>
-                        "¿Deseas eliminar este pago de $" . number_format($record->amount, 2) . "? Esta acción no se puede deshacer."
+                    ->modalDescription(fn (Payment $record) => '¿Deseas eliminar este pago de $'.number_format($record->amount, 2).'? Esta acción no se puede deshacer.'
                     )
                     ->modalSubmitActionLabel('Sí, eliminar')
                     ->modalCancelActionLabel('Cancelar')

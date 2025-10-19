@@ -9,7 +9,7 @@ use Illuminate\Support\HtmlString;
 
 class CreditSchemaFactory
 {
-    public static function buildResultHtml(string $type, array $inputs, Credit $credit = null): string
+    public static function buildResultHtml(string $type, array $inputs, ?Credit $credit = null): string
     {
         $map = [
             CalculationType::SIMPLE->value => InteresSimpleSchema::class,
@@ -31,7 +31,7 @@ class CreditSchemaFactory
         if ($credit && method_exists($schemaClass, 'buildPagosHtml')) {
             try {
                 $pagosData = $credit->getPagosData();
-                if (!empty($pagosData)) {
+                if (! empty($pagosData)) {
                     $pagosHtml = $schemaClass::buildPagosHtml($pagosData);
                 }
             } catch (\Exception $e) {

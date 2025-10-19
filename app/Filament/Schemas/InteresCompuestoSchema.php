@@ -859,6 +859,7 @@ class InteresCompuestoSchema
             $data['resultado_calculado_2'] ?? null,
         );
     }
+
     public static function buildPagosHtml(array $data): Htmlable
     {
         $html = '<div class="space-y-5">';
@@ -893,7 +894,7 @@ class InteresCompuestoSchema
         $html .= static::buildCard(
             'Saldo Restante',
             '💵',
-            '$' . number_format($saldoRestante, 2),
+            '$'.number_format($saldoRestante, 2),
             'Monto pendiente por pagar',
             true,
             $saldoRestante > 0 ? 'red' : 'green'
@@ -938,7 +939,7 @@ class InteresCompuestoSchema
         $html .= static::buildCard(
             'Pagos Realizados',
             '✅',
-            (string)$numeroPagos,
+            (string) $numeroPagos,
             'Cantidad de pagos completados',
             false,
             'emerald'
@@ -948,7 +949,7 @@ class InteresCompuestoSchema
         $html .= static::buildCard(
             'Progreso Total',
             '📈',
-            number_format($porcentajePagado, 1) . '%',
+            number_format($porcentajePagado, 1).'%',
             'Del monto total del crédito',
             true,
             'green'
@@ -958,7 +959,7 @@ class InteresCompuestoSchema
         $html .= static::buildCard(
             'Total Pagado',
             '💵',
-            '$' . number_format($totalPagado, 2),
+            '$'.number_format($totalPagado, 2),
             'Suma de todos los pagos',
             false,
             'emerald'
@@ -970,7 +971,7 @@ class InteresCompuestoSchema
             $html .= static::buildCard(
                 'Pagos Estimados Restantes',
                 '🔢',
-                (string)$pagosEstimados,
+                (string) $pagosEstimados,
                 'Basado en promedio actual',
                 false,
                 'teal'
@@ -999,7 +1000,7 @@ class InteresCompuestoSchema
         $html .= static::buildCard(
             'Capital Pagado',
             '🏦',
-            '$' . number_format($capitalPagado, 2),
+            '$'.number_format($capitalPagado, 2),
             'Abono al capital',
             false,
             'amber'
@@ -1009,7 +1010,7 @@ class InteresCompuestoSchema
         $html .= static::buildCard(
             'Capital Pendiente',
             '📊',
-            '$' . number_format($capitalPendiente, 2),
+            '$'.number_format($capitalPendiente, 2),
             'Capital por amortizar',
             false,
             'yellow'
@@ -1019,7 +1020,7 @@ class InteresCompuestoSchema
         $html .= static::buildCard(
             'Interés Pagado',
             '📈',
-            '$' . number_format($interesPagado, 2),
+            '$'.number_format($interesPagado, 2),
             'Intereses abonados',
             false,
             'orange'
@@ -1029,7 +1030,7 @@ class InteresCompuestoSchema
         $html .= static::buildCard(
             'Interés Pendiente',
             '💹',
-            '$' . number_format($interesPendiente, 2),
+            '$'.number_format($interesPendiente, 2),
             'Intereses por pagar',
             false,
             'red'
@@ -1068,7 +1069,7 @@ class InteresCompuestoSchema
                 $html .= static::buildCard(
                     'Monto Último Pago',
                     '💵',
-                    '$' . number_format($montoUltimoPago, 2),
+                    '$'.number_format($montoUltimoPago, 2),
                     'Valor del último abono',
                     false,
                     'blue'
@@ -1079,7 +1080,7 @@ class InteresCompuestoSchema
                 $html .= static::buildCard(
                     'Promedio por Pago',
                     '📊',
-                    '$' . number_format($promedioMonto, 2),
+                    '$'.number_format($promedioMonto, 2),
                     'Promedio de pagos realizados',
                     false,
                     'cyan'
@@ -1132,7 +1133,7 @@ class InteresCompuestoSchema
                 $html .= static::buildCard(
                     'Días Transcurridos',
                     '📅',
-                    (string)$diasTranscurridos . ' días',
+                    (string) $diasTranscurridos.' días',
                     'Desde el inicio del crédito',
                     false,
                     'violet'
@@ -1144,7 +1145,7 @@ class InteresCompuestoSchema
                 $html .= static::buildCard(
                     'Días Restantes',
                     '⏱️',
-                    abs($diasRestantes) . ' días',
+                    abs($diasRestantes).' días',
                     $diasRestantes < 0 ? '¡Crédito vencido!' : 'Hasta el vencimiento',
                     $diasRestantes < 30,
                     $colorDias
@@ -1174,6 +1175,7 @@ class InteresCompuestoSchema
         }
 
         $html .= '</div>';
+
         return new HtmlString($html);
     }
 

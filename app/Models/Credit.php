@@ -22,6 +22,8 @@ class Credit extends Model
         'calculated_at',
     ];
 
+    public bool $isCalculatingPayment = false;
+
     protected $casts = [
         'inputs' => 'array',
         'results' => 'array',
@@ -90,7 +92,7 @@ class Credit extends Model
                 return "¡Crédito liquidado! Total de {$numeroPagos} pagos realizados exitosamente.";
 
             case 'vencido':
-                return "Crédito vencido. Saldo pendiente: $" . number_format($saldoRestante, 2) . ". Se han realizado {$numeroPagos} pagos hasta la fecha.";
+                return 'Crédito vencido. Saldo pendiente: $'.number_format($saldoRestante, 2).". Se han realizado {$numeroPagos} pagos hasta la fecha.";
 
             case 'activo':
             case 'vigente':
@@ -98,7 +100,8 @@ class Credit extends Model
                     if ($diasRestantes !== null && $diasRestantes > 0) {
                         return "Crédito activo. Aún no se han registrado pagos. Quedan {$diasRestantes} días para el vencimiento.";
                     }
-                    return "Crédito activo. Aún no se han registrado pagos.";
+
+                    return 'Crédito activo. Aún no se han registrado pagos.';
                 }
 
                 $mensaje = "Progreso: {$porcentajePagado}% completado con {$numeroPagos} pago(s) realizado(s).";
@@ -107,7 +110,7 @@ class Credit extends Model
                     if ($diasRestantes > 0) {
                         $mensaje .= " Quedan {$diasRestantes} días para el vencimiento.";
                     } elseif ($diasRestantes === 0) {
-                        $mensaje .= " ¡Vence hoy!";
+                        $mensaje .= ' ¡Vence hoy!';
                     }
                 }
 
@@ -259,35 +262,38 @@ class Credit extends Model
             'mensaje_final' => $mensajeFinal,
         ];
     }
+
     private function calculatePaymentDistributionSimple(Get $get, Set $set, ?array $data = null): void
     {
-        $amount = $data['amount'] ?? 0;
-        if (!$amount || $amount <= 0) {
-            $set('interest_paid', 0);
-            $set('principal_paid', 0);
-            $set('remaining_balance', $this->record->saldo_restante ?? 0);
+        $amount = isset($data['amount']) ? (float) $data['amount'] : null;
+        $interest = isset($data['interest_paid']) ? (float) $data['interest_paid'] : null;
+        $principal = isset($data['principal_paid']) ? (float) $data['principal_paid'] : null;
+
+        // Caso 1: el usuario ingresa el monto total
+        if ($amount !== null && $amount > 0) {
+            $pagosData = $this->getPagosDataSimple($amount);
+
+            $interestPaid = (float) ($pagosData['interest_paid'] ?? 0);
+            $principalPaid = (float) ($pagosData['principal_paid'] ?? 0);
+            $remainingBalance = (float) ($pagosData['remaining_balance'] ?? 0);
+
+            $set('interest_paid', round($interestPaid, 2));
+            $set('principal_paid', round($principalPaid, 2));
+            $set('remaining_balance', round($remainingBalance, 2));
+
             return;
         }
 
-        $pagosData = $this->getPagosDataSimple($amount);
-        $interesPendiente = $pagosData['interest_paid'] ?? 0;
-        $saldoRestante = $pagosData['remaining_balance'] ?? 0;
-        $capitalPendiente = $saldoRestante ?? 0 - $interesPendiente ?? 0;
+        // Caso 2: el usuario ingresa interés y/o capital
+        $interest = $interest ?? 0.0;
+        $principal = $principal ?? 0.0;
+        $total = $interest + $principal;
+        $set('amount', round($total, 2));
+        $pagosData = $this->getPagosDataSimple($total);
+        $saldoRestante = (float) ($pagosData['remaining_balance'] ?? 0);
 
-        // Primero se paga el interés pendiente
-        $interesPagado = min($amount, $interesPendiente);
-
-        // Lo que sobra se aplica al capital
-        $capitalPagado = max(0, $amount - $interesPagado);
-
-        // Calcular nuevo saldo
-        $nuevoSaldo = max(0, $saldoRestante - $amount);
-
-        $set('interest_paid', round($interesPagado, 2));
-        $set('principal_paid', round($capitalPagado, 2));
-        $set('remaining_balance', round($nuevoSaldo, 2));
+        $set('remaining_balance', round($saldoRestante, 2));
     }
-
 
     /**
      * Datos para Interés Compuesto (placeholder - implementar según necesidad)
@@ -428,25 +434,39 @@ class Credit extends Model
         ];
     }
 
-    /**
-     * Calcula distribución para Interés Compuesto en el formulario
-     */
     private function calculatePaymentDistributionCompuesto(Get $get, Set $set, ?array $data = null): void
     {
-        $amount = $data['amount'] ?? 0;
-        if (!$amount || $amount <= 0) {
-            $pagosData = $this->getPagosDataCompuesto();
-            $set('interest_paid', 0);
-            $set('principal_paid', 0);
-            $set('remaining_balance', $pagosData['saldo_restante'] ?? 0);
+        $amount = isset($data['amount']) ? (float) $data['amount'] : null;
+        $interest = isset($data['interest_paid']) ? (float) $data['interest_paid'] : null;
+        $principal = isset($data['principal_paid']) ? (float) $data['principal_paid'] : null;
+
+        // Caso 1: el usuario ingresa el monto total
+        if ($amount !== null && $amount > 0) {
+            $paymentData = $this->getPagosDataCompuesto($amount);
+
+            $interestPaid = (float) ($paymentData['interest_paid'] ?? 0);
+            $principalPaid = (float) ($paymentData['principal_paid'] ?? 0);
+            $remainingBalance = (float) ($paymentData['remaining_balance'] ?? 0);
+
+            $set('interest_paid', round($interestPaid, 2));
+            $set('principal_paid', round($principalPaid, 2));
+            $set('remaining_balance', round($remainingBalance, 2));
+
             return;
         }
 
-        $paymentData = $this->getPagosDataCompuesto($amount);
+        // Caso 2: el usuario ingresa interés y/o capital manualmente
+        $interest = $interest ?? 0.0;
+        $principal = $principal ?? 0.0;
 
-        $set('interest_paid', $paymentData['interest_paid']);
-        $set('principal_paid', $paymentData['principal_paid']);
-        $set('remaining_balance', $paymentData['remaining_balance']);
+        $total = $interest + $principal;
+        $saldoRestante = (float) ($this->record->saldo_restante ?? 0);
+
+        // En compuesto también solo se reduce el saldo por el capital
+        $nuevoSaldo = max(0, $saldoRestante - $principal);
+
+        $set('amount', round($total, 2));
+        $set('remaining_balance', round($nuevoSaldo, 2));
     }
 
     /**
@@ -538,9 +558,11 @@ class Credit extends Model
                 $fechaFinal = $this->inputs['fecha_final'] ?? null;
                 if ($fechaFinal) {
                     $diasVencidos = now()->diffInDays(\Carbon\Carbon::parse($fechaFinal));
-                    return "El crédito está vencido desde hace {$diasVencidos} días. Saldo pendiente: $" . number_format($saldoRestante, 2);
+
+                    return "El crédito está vencido desde hace {$diasVencidos} días. Saldo pendiente: $".number_format($saldoRestante, 2);
                 }
-                return "El crédito está vencido. Saldo pendiente: $" . number_format($saldoRestante, 2);
+
+                return 'El crédito está vencido. Saldo pendiente: $'.number_format($saldoRestante, 2);
 
             case 'activo':
             case 'vigente':
@@ -553,7 +575,7 @@ class Credit extends Model
                 } elseif ($porcentajePagado >= 25) {
                     return "Crédito en curso. Has completado el {$porcentajePagado}% del total.";
                 } else {
-                    return "Mantén tus pagos al día para evitar intereses moratorios.";
+                    return 'Mantén tus pagos al día para evitar intereses moratorios.';
                 }
 
             case 'cancelado':
@@ -587,6 +609,7 @@ class Credit extends Model
     {
         $montoFinal = $this->inputs['resultado_calculado'] ?? $this->inputs['monto_final'] ?? 0;
         $saldo = $montoFinal - $this->total_pagado;
+
         return max(0, $saldo);
     }
 
