@@ -469,24 +469,6 @@ class ShowCredit extends Page implements HasTable
                     ])
                     ->sortable()
                     ->toggleable(),
-
-                // NUEVA COLUMNA: Tipo de Pago
-                BadgeColumn::make('metadata->tipo_pago')
-                    ->label('Tipo')
-                    ->formatStateUsing(fn (?string $state): string => match ($state) {
-                        'normal' => '💳 Normal',
-                        'abono_extra' => '💰 Abono Extra',
-                        'pago_parcial' => '⚠️ Parcial',
-                        'liquidacion' => '🎉 Liquidación',
-                        default => '-',
-                    })
-                    ->colors([
-                        'primary' => 'normal',
-                        'success' => 'abono_extra',
-                        'warning' => 'pago_parcial',
-                        'info' => 'liquidacion',
-                    ])
-                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -494,24 +476,8 @@ class ShowCredit extends Page implements HasTable
                     ->options([
                         'completed' => 'Completado',
                         'pending' => 'Pendiente',
-                        'reversed' => 'Revertido',
                     ])
                     ->placeholder('Todos los estados'),
-
-                SelectFilter::make('tipo_pago')
-                    ->label('Tipo de Pago')
-                    ->options([
-                        'normal' => 'Normal',
-                        'abono_extra' => 'Abono Extra',
-                        'pago_parcial' => 'Pago Parcial',
-                        'liquidacion' => 'Liquidación',
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        if (isset($data['value'])) {
-                            $query->whereJsonContains('metadata->tipo_pago', $data['value']);
-                        }
-                    })
-                    ->placeholder('Todos los tipos'),
 
                 Filter::make('today')
                     ->label('Pagos de Hoy')
@@ -693,18 +659,10 @@ class ShowCredit extends Page implements HasTable
             // Recargar relación
             $this->record->load('payments');
 
-            $tipoPago = $paymentData['metadata']['tipo_pago'] ?? 'normal';
-            $tipoPagoTexto = match ($tipoPago) {
-                'normal' => 'Pago normal',
-                'abono_extra' => 'Abono extra a capital',
-                'pago_parcial' => 'Pago parcial',
-                'liquidacion' => 'Liquidación del crédito',
-                default => 'Pago registrado',
-            };
 
             Notification::make()
                 ->title('Pago registrado exitosamente')
-                ->body($tipoPagoTexto.' - Monto: $'.number_format($amount, 2))
+                ->body(' - Monto: $'.number_format($amount, 2))
                 ->success()
                 ->send();
 
