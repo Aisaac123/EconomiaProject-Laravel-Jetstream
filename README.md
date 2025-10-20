@@ -76,18 +76,18 @@ Permite al usuario comprender de manera didáctica los fundamentos matemáticos 
 
 La aplicación organiza los temas en categorías prácticas y teóricas, según su naturaleza de cálculo o concepto.
 
+### 📗 Teóricos
+Secciones orientadas a la interpretación conceptual de los fundamentos financieros.
+
+- **Tasa de interés**
+- **Capitalización**
+
 ### 📘 Fundamentales
 Incluye modelos base para la comprensión de las operaciones financieras esenciales.
 
 - **Interés simple**
 - **Interés compuesto**
 - **Anualidades**
-
-### 📗 Teóricos
-Secciones orientadas a la interpretación conceptual de los fundamentos financieros.
-
-- **Tasa de interés**
-- **Capitalización**
 
 ### 📙 Aplicados / Avanzados
 Modelos de mayor complejidad para simulación y análisis financiero.
