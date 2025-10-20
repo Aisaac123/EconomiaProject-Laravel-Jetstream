@@ -1,61 +1,130 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🧭 Sistema de Modelos Financieros Educativo
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación web interactiva desarrollada con **Laravel 12**, **Filament 4**, **Jetstream**, **Livewire 3** y **Tailwind 4**, diseñada con fines **educativos** para la comprensión y aplicación práctica de los principales **modelos financieros**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 👨‍💻 Autores
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Isaac Jácome**
+- **Brayan Caro**
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🎯 Objetivo
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+El objetivo de esta aplicación es proporcionar una plataforma que facilite el aprendizaje y la aplicación de los distintos modelos financieros mediante simulaciones, cálculos automatizados y ejemplos prácticos.  
+Permite al usuario comprender de manera didáctica los fundamentos matemáticos y financieros que sustentan cada modelo, así como observar el impacto de las variables en los resultados.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ⚙️ Tecnologías principales
 
-## Laravel Sponsors
+- **Laravel 12.x** — Framework backend robusto y escalable.
+- **Filament 4.x** — Panel administrativo moderno para gestión modular.
+- **Tailwind CSS 4.x** — Sistema de diseño limpio y flexible.
+- **Jetstream** — Manejo de autenticación y sesiones de usuario.
+- **Livewire 3.x** — Interactividad reactiva sin necesidad de JavaScript.
+- **MySQL / PostgreSQL** — Base de datos relacional configurable.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🧩 Instalación
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1. Clona el repositorio:
 
-## Contributing
+   ```bash
+   git clone https://github.com/tuusuario/modelos-financieros.git
+   cd modelos-financieros
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. Instala las dependencias de PHP:
 
-## Code of Conduct
+   ```bash
+   composer install
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. Copia el archivo de entorno y configura tu conexión:
 
-## Security Vulnerabilities
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4. Instala dependencias de Node y compila Tailwind:
 
-## License
+   ```bash
+   npm install
+   npm run build
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+5. Ejecuta las migraciones y los seeders iniciales:
+
+   ```bash
+   php artisan migrate --seed
+   ```
+
+6. Inicia el servidor local:
+
+   ```bash
+   php artisan serve
+   ```
+
+---
+
+## 🧠 Modelos financieros incluidos
+
+La aplicación organiza los temas en categorías prácticas y teóricas, según su naturaleza de cálculo o concepto.
+
+### 📘 Fundamentales
+Incluye modelos base para la comprensión de las operaciones financieras esenciales.
+
+- **Interés simple**
+- **Interés compuesto**
+- **Anualidades**
+
+### 📗 Teóricos
+Secciones orientadas a la interpretación conceptual de los fundamentos financieros.
+
+- **Tasa de interés**
+- **Capitalización**
+
+### 📙 Aplicados / Avanzados
+Modelos de mayor complejidad para simulación y análisis financiero.
+
+- **Amortización**
+- **Gradientes aritméticos y geométricos**
+- **Tasa interna de retorno (TIR)**
+
+---
+
+## 🧮 Simulador de cálculo
+
+Cada modelo que requiere aplicación práctica incluye su propia calculadora interactiva, la cual permite ingresar parámetros financieros y obtener resultados automáticos con soporte para diferentes periodos, tasas y tipos de gradiente.
+
+---
+
+## 💳 Simulador de credito
+
+Estas simulaciones permiten analizar el comportamiento del crédito mediante tablas detalladas que muestran los valores de cada periodo: cuota, interés, amortización, saldo final y otros datos relevantes.
+
+El sistema cuenta con cuatro modelos principales de cálculo financiero:
+
+- 💰 Interés simple
+
+- 📈 Interés compuesto
+
+- 📊 Amortizaciones (francés, alemán, americano)
+
+- 🔁 Gradientes (aritmético y geométrico, anticipado o vencido)
+
+Cada modelo permite ingresar parámetros personalizados como capital, tasa, número de periodos o tipo de gradiente y obtener resultados automáticos con diferentes configuraciones de tiempo.
+
+El objetivo del simulador es ofrecer una herramienta clara y educativa que facilite la comprensión de cómo evolucionan los créditos, las deudas y las inversiones bajo distintos esquemas financieros.
+
+---
+
+## 🧭 Propósito del proyecto
+
+Este proyecto fue desarrollado con fines **educativos**, orientado a reforzar la comprensión práctica de los principales modelos financieros.  
+Su objetivo es ofrecer una herramienta clara y funcional que facilite el aprendizaje mediante la aplicación directa de conceptos teóricos.
