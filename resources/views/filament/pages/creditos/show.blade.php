@@ -1,13 +1,25 @@
 <x-filament-panels::page>
+    {{-- Botón flotante de acción rápida --}}
+    <div class="fixed bottom-6 right-6 z-50 flex gap-x-4">
+        <div class="flex gap-2 mb-4">
+            @foreach ($this->getHeaderActions() as $action)
+                {{ $action }}
+            @endforeach
+        </div>
+    </div>
+
     <div class="space-y-4 my-4">
         {{-- Información del Deudor --}}
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {{-- Card Principal: Información Básica --}}
             <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
                 <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
-                    <div class="flex items-center gap-3">
-                        <x-heroicon-o-user-circle class="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Información del Deudor</h3>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <x-heroicon-o-user-circle class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Información del Deudor</h3>
+                        </div>
                     </div>
                 </div>
                 <div class="p-6">
@@ -91,9 +103,9 @@
                         <p class="text-xs text-slate-600 dark:text-slate-400 mb-1">Estado</p>
                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full
                             @if($this->record->status === 'calculated') bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400
-                            @elseif($this->record->status === 'pending') dark:bg-amber-900/30 text-amber-700 dark:text-amber-400
-                            @elseif($this->record->status === 'paid') dark:bg-sky-900/30 text-sky-700 dark:text-sky-400
-                            @else dark:bg-slate-700 text-slate-700 dark:text-slate-400
+                            @elseif($this->record->status === 'pending') bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400
+                            @elseif($this->record->status === 'paid') bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400
+                            @else bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-400
                             @endif">
                             {{ match($this->record->status) {
                                 'calculated' => '✓ Calculado',
@@ -125,6 +137,24 @@
             </div>
         </div>
 
+        {{-- Tabla de Pagos --}}
+        <div id="pagos" class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <x-heroicon-o-currency-dollar class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Historial de Pagos</h3>
+                    </div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400">
+                        Total: {{ $this->record->payments->count() }} pago(s)
+                    </div>
+                </div>
+            </div>
+            <div class="">
+                {{ $this->table }}
+            </div>
+        </div>
+
         {{-- Resultados del Cálculo --}}
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
             <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
@@ -133,16 +163,14 @@
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white">Resultados del Cálculo</h3>
                 </div>
             </div>
-            <div class="p-6">
+            <div class="p-6 space-y-6">
                 @php
                     $inputs = $this->record->inputs ?? [];
-                    // Extraer datos de results
                     $resultadoCalculado = $inputs['resultado_calculado'] ?? null;
                     $resultadosCalculados = $inputs['resultados_calculados'] ?? null;
                 @endphp
                 @if($resultadoCalculado || $resultadosCalculados)
-                    {{-- Usar el método buildResultHtml de InteresSimpleSchema --}}
-                    {!! \App\Filament\Schemas\CreditSchemaFactory::buildResultHtml($this->record->type->value, $this->record->inputs ?? []) !!}
+                    {!! \App\Filament\Schemas\CreditSchemaFactory::buildResultHtml($this->record->type->value, $this->record->inputs ?? [], $this->record) !!}
                 @else
                     <div class="text-center py-12 text-slate-500 dark:text-slate-400">
                         <div class="text-5xl mb-4">📊</div>
@@ -154,7 +182,7 @@
         </div>
 
         {{-- Datos JSON (Debug - Opcional) --}}
-        <details class="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+        <details class=" mb-6 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
             <summary class="cursor-pointer font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
                 ℹ️ Datos JSON (Expandir)
             </summary>
@@ -170,4 +198,6 @@
             </div>
         </details>
     </div>
+
+    <x-filament-actions::modals />
 </x-filament-panels::page>

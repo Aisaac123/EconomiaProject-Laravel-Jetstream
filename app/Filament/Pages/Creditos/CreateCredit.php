@@ -13,6 +13,7 @@ use App\Filament\Schemas\InteresSimpleSchema;
 use App\Filament\Schemas\TasaInternaRetornoSchema;
 use App\Models\Credit;
 use App\Traits\FormCalculations;
+use Filament\Actions\Action;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -54,6 +55,18 @@ class CreateCredit extends Page implements HasForms
     public static function getNavigationLabel(): string
     {
         return 'Registrar crédito';
+    }
+
+    protected function getHeaderActions(): array
+    {
+        $actions[] = Action::make('list')
+            ->label('Gestionar Créditos')
+            ->icon('heroicon-o-document-text')
+            ->color('primary')
+            ->url(fn (): string => ListCredits::getUrl())
+            ->tooltip('Editar los datos del crédito');
+
+        return $actions;
     }
 
     public function getHeading(): Htmlable|string
@@ -101,9 +114,7 @@ class CreateCredit extends Page implements HasForms
         return [
             'simple' => 'Interés Simple',
             'compuesto' => 'Interés Compuesto',
-            'anualidad' => 'Anualidad',
             'amortizacion' => 'Amortización',
-            'tir' => 'Tasa Interna de Retorno (TIR)',
             'gradientes' => 'Gradientes',
         ];
     }
@@ -242,7 +253,7 @@ class CreateCredit extends Page implements HasForms
                     'debtor_id_number' => trim($this->debtorIdNumber),
                     'type' => CalculationType::from($this->calculationType),
                     'inputs' => $this->data,
-                    'results' => null,
+                    'results' => $this->data,
                     'status' => CreditStatusType::CALCULATED->value,
                     'reference_code' => $referenceCode,
                     'calculated_at' => now(),

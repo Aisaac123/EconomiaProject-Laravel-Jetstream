@@ -899,6 +899,380 @@ class GradientesSchema
         return new HtmlString($html);
     }
 
+    public static function buildPagosHtml(array $data): Htmlable
+    {
+        $html = '<div class="space-y-5">';
+
+        // HEADER
+        $tipoGradiente = $data['tipo_gradiente'] ?? 'aritmetico_anticipado';
+        $tablaModificada = $data['tabla_modificada'] ?? false;
+
+        $tipoGradienteTexto = match ($tipoGradiente) {
+            'aritmetico_vencido' => 'Gradiente Aritmético Vencido',
+            'aritmetico_anticipado' => 'Gradiente Aritmético Anticipado',
+            'geometrico_vencido' => 'Gradiente Geométrico Vencido',
+            'geometrico_anticipado' => 'Gradiente Geométrico Anticipado',
+            default => 'Gradiente',
+        };
+
+        $html .= '
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-blue-950/50 dark:to-indigo-800/50 rounded-xl p-5 border border-indigo-200 dark:border-indigo-800">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl">📈</span>
+                <div>
+                    <h3 class="text-lg font-bold text-indigo-900 dark:text-indigo-100">Tabla de Flujos de Gradiente</h3>
+                    <p class="text-sm text-indigo-700 dark:text-indigo-300">'.$tipoGradienteTexto.'</p>
+                </div>
+            </div>';
+
+        if ($tablaModificada) {
+            $flujosOriginal = $data['numero_pagos_original'] ?? 0;
+            $flujosActual = $data['numero_pagos_actual'] ?? 0;
+            $html .= '
+            <div class="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 px-3 py-2 rounded-lg text-xs font-semibold">
+                <div class="flex items-center gap-2">
+                    <span>⚠️</span>
+                    <div>
+                        <div>Tabla Recalculada</div>
+                        <div class="text-[10px]">'.$flujosOriginal.' → '.$flujosActual.' flujos</div>
+                    </div>
+                </div>
+            </div>';
+        }
+
+        $html .= '
+        </div>
+    </div>';
+
+        // RESUMEN DEL CRÉDITO
+        $html .= '<div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">';
+        $html .= '<h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2"><span>💰</span> RESUMEN DEL CRÉDITO</h4>';
+        $html .= '<div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
+
+        $anualidadInicial = $data['anualidad_inicial'] ?? 0;
+        $html .= static::buildCard('Flujo Inicial', '💳', '$'.number_format($anualidadInicial, 2), 'Primer pago', true, 'blue');
+
+        $numeroFlujos = $data['numero_pagos_actual'] ?? 0;
+        $html .= static::buildCard('Total Flujos', '🔢', (string) $numeroFlujos, 'Número de pagos', false, 'indigo');
+
+        $totalConAnticipos = $data['total_con_anticipos'] ?? 0;
+        $html .= static::buildCard('Total a Pagar', '💼', '$'.number_format($totalConAnticipos, 2), 'Flujos + Anticipos', true, 'purple');
+
+        $saldoRestante = $data['saldo_restante'] ?? 0;
+        $html .= static::buildCard('Saldo Restante', '💵', '$'.number_format($saldoRestante, 2), 'Por pagar', true, $saldoRestante > 0 ? 'red' : 'green');
+
+        $html .= '</div>';
+
+        // Mostrar desglose de totales si hay anticipos
+        $totalAnticipos = $data['total_anticipos_generados'] ?? 0;
+        if ($totalAnticipos > 0.01) {
+            $totalFlujos = $data['total_flujos_ajustados'] ?? 0;
+            $html .= '<div class="mt-3 grid grid-cols-3 gap-2 text-xs">';
+            $html .= '<div class="bg-blue-100 dark:bg-blue-900/30 rounded p-2 text-center">';
+            $html .= '<div class="text-blue-600 dark:text-blue-400 font-semibold">Flujos Ajustados</div>';
+            $html .= '<div class="text-blue-900 dark:text-blue-100 font-bold">$'.number_format($totalFlujos, 2).'</div>';
+            $html .= '</div>';
+            $html .= '<div class="bg-green-100 dark:bg-green-900/30 rounded p-2 text-center">';
+            $html .= '<div class="text-green-600 dark:text-green-400 font-semibold">Anticipos</div>';
+            $html .= '<div class="text-green-900 dark:text-green-100 font-bold">+$'.number_format($totalAnticipos, 2).'</div>';
+            $html .= '</div>';
+            $html .= '<div class="bg-purple-100 dark:bg-purple-900/30 rounded p-2 text-center">';
+            $html .= '<div class="text-purple-600 dark:text-purple-400 font-semibold">Total</div>';
+            $html .= '<div class="text-purple-900 dark:text-purple-100 font-bold">$'.number_format($totalConAnticipos, 2).'</div>';
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
+        $html .= '</div>';
+
+        // PROGRESO
+        $pagosPagados = $data['pagos_realizados'] ?? 0;
+        $pagosRestantes = $data['pagos_restantes'] ?? 0;
+        $porcentajePagado = $data['porcentaje_pagado'] ?? 0;
+        $totalPagado = $data['total_pagado'] ?? 0;
+
+        $html .= '<div class="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/50 dark:to-green-950/50 rounded-xl p-4 border-2 border-emerald-300 dark:border-emerald-700">';
+        $html .= '<h4 class="text-sm font-bold text-emerald-900 dark:text-emerald-100 mb-3 flex items-center gap-2"><span>📈</span> PROGRESO DE PAGOS</h4>';
+        $html .= '<div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
+
+        $html .= static::buildCard('Flujos Pagados', '✅', "$pagosPagados/$numeroFlujos", 'Completados', false, 'emerald');
+        $html .= static::buildCard('Flujos Restantes', '⏳', (string) $pagosRestantes, 'Pendientes', false, 'yellow');
+        $html .= static::buildCard('Progreso', '📊', number_format($porcentajePagado, 1).'%', 'Del total', true, 'green');
+        $html .= static::buildCard('Total Pagado', '💵', '$'.number_format($totalPagado, 2), 'Acumulado', false, 'teal');
+
+        $html .= '</div></div>';
+
+        // DESGLOSE VALORES
+        $capitalPagado = $data['capital_pagado'] ?? 0;
+        $capitalPendiente = $data['capital_pendiente'] ?? 0;
+        $vpRecalculado = $data['valor_presente_total'] ?? 0;
+        $vfRecalculado = $data['valor_futuro_total'] ?? 0;
+
+        $html .= '<div class="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/50 dark:to-yellow-950/50 rounded-xl p-4 border border-amber-300 dark:border-amber-700">';
+        $html .= '<h4 class="text-sm font-bold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2"><span>💎</span> ANÁLISIS DE VALORES</h4>';
+        $html .= '<div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
+
+        $html .= static::buildCard('Capital Pagado', '🏦', '$'.number_format($capitalPagado, 2), 'Acumulado', false, 'amber');
+        $html .= static::buildCard('Capital Pendiente', '📊', '$'.number_format($capitalPendiente, 2), 'Por pagar', false, 'yellow');
+        $html .= static::buildCard('VP Recalculado', '📈', '$'.number_format($vpRecalculado, 2), 'Valor presente', false, 'green');
+        $html .= static::buildCard('VF Recalculado', '📊', '$'.number_format($vfRecalculado, 2), 'Valor futuro', false, 'orange');
+
+        $html .= '</div></div>';
+
+        // PRÓXIMO FLUJO
+        $flujoActual = $data['cuota_siguiente'] ?? null;
+        if ($flujoActual && ! ($flujoActual['pagado'] ?? false)) {
+            $html .= '<div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 rounded-xl p-4 border-2 border-blue-300 dark:border-blue-700">';
+            $html .= '<h4 class="text-sm font-bold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+              <span>🎯</span> PRÓXIMO FLUJO
+              </h4>';
+
+            $anticipoAcum = $flujoActual['anticipo_acumulado'] ?? 0;
+
+            $colsLg = ($anticipoAcum > 0.01) ? 'lg:grid-cols-5' : 'lg:grid-cols-4';
+
+            $html .= '<div class="grid grid-cols-2 md:grid-cols-3 '.$colsLg.' gap-3">';
+
+            // Período
+            $html .= "
+        <div class='rounded-lg p-3 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800'>
+            <div class='text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1'>Período</div>
+            <div class='text-lg font-bold text-blue-900 dark:text-blue-100'>".($flujoActual['periodo'] ?? '-').'</div>
+        </div>
+        ';
+
+            // Flujo Ajustado (LO REAL A PAGAR)
+            $flujoAjustado = $flujoActual['flujo_ajustado'] ?? $flujoActual['pago'] ?? 0;
+            $html .= "
+        <div class='rounded-lg p-3 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800'>
+            <div class='text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1'>Flujo a Pagar</div>
+            <div class='text-lg font-bold text-blue-900 dark:text-blue-100'>\$".number_format($flujoAjustado, 2).'</div>
+        </div>
+        ';
+
+            // Anticipo Acumulado
+            if ($anticipoAcum > 0.01) {
+                $html .= "
+            <div class='rounded-lg p-3 bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-800'>
+                <div class='text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1'>Anticipo Aplicado</div>
+                <div class='text-lg font-bold text-purple-900 dark:text-purple-100'>-\$".number_format($anticipoAcum, 2).'</div>
+            </div>
+            ';
+            }
+
+            // Valor Presente
+            $vpCuota = $flujoActual['valor_presente'] ?? 0;
+            $html .= "
+        <div class='rounded-lg p-3 bg-white dark:bg-gray-800 border border-green-200 dark:border-green-800'>
+            <div class='text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1'>Valor Presente</div>
+            <div class='text-lg font-bold text-green-900 dark:text-green-100'>\$".number_format($vpCuota, 2).'</div>
+        </div>
+        ';
+
+            // Valor Futuro
+            $vfCuota = $flujoActual['valor_futuro'] ?? 0;
+            $html .= "
+        <div class='rounded-lg p-3 bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-800'>
+            <div class='text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1'>Valor Futuro</div>
+            <div class='text-lg font-bold text-orange-900 dark:text-orange-100'>\$".number_format($vfCuota, 2).'</div>
+        </div>
+        ';
+
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
+        // TABLA DE FLUJOS
+        $tablaGradientes = $data['tabla_gradientes'] ?? [];
+        if (! empty($tablaGradientes)) {
+            $html .= '<div class="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-700 overflow-x-auto">';
+            $html .= '<h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2"><span>📋</span> DETALLE DE FLUJOS</h4>';
+            $html .= '<table class="w-full text-xs md:text-sm">';
+            $html .= '<thead class="bg-slate-100 dark:bg-slate-800 sticky top-0">';
+            $html .= '<tr>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">Período</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">Flujo Ajustado</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">Anticipo</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">Total (Flujo + Anticipo)</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">VP</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-right font-bold">VF</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-center font-bold">Estado</th>';
+            $html .= '<th class="px-2 md:px-3 py-2 text-center font-bold">Tipo</th>';
+            $html .= '</tr></thead><tbody class="divide-y divide-slate-200 dark:divide-slate-700">';
+
+            foreach ($tablaGradientes as $index => $flujo) {
+                $pagado = $flujo['pagado'] ?? false;
+                $tipoPago = $flujo['tipo_pago'] ?? null;
+
+                $rowClass = 'bg-white dark:bg-slate-900';
+                if ($pagado) {
+                    $rowClass = match ($tipoPago) {
+                        'abono_extra' => 'bg-green-50 dark:bg-green-900/20',
+                        'pago_parcial' => 'bg-yellow-50 dark:bg-yellow-900/20',
+                        'liquidacion' => 'bg-blue-50 dark:bg-blue-900/20',
+                        'cubierto_anticipo' => 'bg-purple-50 dark:bg-purple-900/20',
+                        default => 'bg-emerald-50 dark:bg-emerald-900/20',
+                    };
+                }
+
+                $flujoAjustado = $flujo['flujo_ajustado'] ?? 0;
+                $anticipoGenerado = $flujo['anticipo_generado'] ?? 0;
+                $totalFlujo = $flujoAjustado + $anticipoGenerado;
+
+                $html .= "<tr class='$rowClass hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors'>";
+                $html .= '<td class="px-2 md:px-3 py-2 font-semibold">'.$flujo['periodo'].'</td>';
+                $html .= '<td class="px-2 md:px-3 py-2 text-right font-bold text-blue-600 dark:text-blue-400">$'.number_format($flujoAjustado, 2).'</td>';
+
+                // Mostrar anticipo (positivo cuando se genera)
+                if ($anticipoGenerado > 0.01) {
+                    $html .= '<td class="px-2 md:px-3 py-2 text-right text-green-600 dark:text-green-400 font-bold">+$'.number_format($anticipoGenerado, 2).'</td>';
+                } else {
+                    $html .= '<td class="px-2 md:px-3 py-2 text-right text-gray-400">--</td>';
+                }
+
+                // Total (flujo + anticipo)
+                $html .= '<td class="px-2 md:px-3 py-2 text-right font-bold text-indigo-600 dark:text-indigo-400">$'.number_format($totalFlujo, 2).'</td>';
+
+                $html .= '<td class="px-2 md:px-3 py-2 text-right text-green-600 dark:text-green-400">$'.number_format($flujo['valor_presente'] ?? 0, 2).'</td>';
+                $html .= '<td class="px-2 md:px-3 py-2 text-right text-orange-600 dark:text-orange-400">$'.number_format($flujo['valor_futuro'] ?? 0, 2).'</td>';
+
+                // Estado
+                $html .= '<td class="px-2 md:px-3 py-2 text-center">';
+                if ($pagado) {
+                    $fechaPago = $flujo['fecha_pago'] ?? 'N/A';
+                    if ($tipoPago === 'cubierto_anticipo') {
+                        $html .= '<span class="inline-flex flex-col items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-xs font-semibold">';
+                        $html .= '<span>💜 Cubierto</span><span class="text-[10px]">Por anticipo</span></span>';
+                    } else {
+                        $html .= '<span class="inline-flex flex-col items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">';
+                        $html .= '<span>✅ Pagado</span><span class="text-[10px]">'.$fechaPago.'</span></span>';
+                    }
+                } else {
+                    $html .= '<span class="inline-flex items-center px-2 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 rounded-full text-xs font-semibold">⏳ Pendiente</span>';
+                }
+                $html .= '</td>';
+
+                // Tipo
+                $html .= '<td class="px-2 md:px-3 py-2 text-center">';
+                if ($pagado) {
+                    $tipoBadge = match ($tipoPago) {
+                        'normal' => '<span class="inline-block px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded text-[10px] font-semibold">Normal</span>',
+                        'abono_extra' => '<span class="inline-block px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded text-[10px] font-semibold">Abono Extra</span>',
+                        'pago_parcial' => '<span class="inline-block px-2 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 rounded text-[10px] font-semibold">Parcial</span>',
+                        'liquidacion' => '<span class="inline-block px-2 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded text-[10px] font-semibold">Liquidación</span>',
+                        'cubierto_anticipo' => '<span class="inline-block px-2 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded text-[10px] font-semibold">Cubierto</span>',
+                        default => '<span class="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300 rounded text-[10px]">-</span>',
+                    };
+                    $html .= $tipoBadge;
+                } else {
+                    $html .= '<span class="text-gray-400 text-xs">-</span>';
+                }
+                $html .= '</td>';
+
+                $html .= '</tr>';
+            }
+
+            $html .= '</tbody><tfoot class="bg-gradient-to-r from-blue-200 to-cyan-200 dark:from-blue-800/50 dark:to-cyan-800/50"><tr>';
+
+            // Calcular totales para mostrar en 3 columnas
+            $totalFlujosAjustados = 0;
+            $totalAnticipos = 0;
+            $totalVP = 0;
+            $totalVF = 0;
+
+            foreach ($tablaGradientes as $flujo) {
+                $totalFlujosAjustados += $flujo['flujo_ajustado'] ?? 0;
+                $totalAnticipos += $flujo['anticipo_generado'] ?? 0;
+                $totalVP += $flujo['valor_presente'] ?? 0;
+                $totalVF += $flujo['valor_futuro'] ?? 0;
+            }
+
+            $totalConAnticipos = $totalFlujosAjustados + $totalAnticipos;
+
+            $html .= '<td class="px-4 py-4 text-sm font-bold text-blue-900 dark:text-blue-100">TOTALES</td>';
+            $html .= '<td class="px-4 py-4 text-sm text-right font-bold text-blue-600 dark:text-blue-400">$'.number_format($totalFlujosAjustados, 2).'</td>';
+            $html .= '<td class="px-4 py-4 text-sm text-right font-bold text-green-600 dark:text-green-400">+$'.number_format($totalAnticipos, 2).'</td>';
+            $html .= '<td class="px-4 py-4 text-sm text-right font-bold text-indigo-900 dark:text-indigo-100">$'.number_format($totalConAnticipos, 2).'</td>';
+            $html .= '<td class="px-4 py-4 text-sm text-right font-bold text-green-600 dark:text-green-400">$'.number_format($totalVP, 2).'</td>';
+            $html .= '<td class="px-4 py-4 text-sm text-right font-bold text-orange-600 dark:text-orange-400">$'.number_format($totalVF, 2).'</td>';
+            $html .= '<td colspan="2"></td>';
+            $html .= '</tr></tfoot></table></div>';
+
+            // Leyenda
+            $html .= '<div class="mt-3 space-y-2">';
+            $html .= '<div class="flex flex-wrap gap-2 text-xs">';
+            $html .= '<div class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-100 dark:bg-blue-900/50 rounded"></span>Normal: Pago exacto del flujo</div>';
+            $html .= '<div class="flex items-center gap-1"><span class="w-3 h-3 bg-green-100 dark:bg-green-900/50 rounded"></span>Abono Extra: Genera anticipo (+)</div>';
+            $html .= '<div class="flex items-center gap-1"><span class="w-3 h-3 bg-yellow-100 dark:bg-yellow-900/50 rounded"></span>Parcial: Pago menor al flujo</div>';
+            $html .= '<div class="flex items-center gap-1"><span class="w-3 h-3 bg-purple-100 dark:bg-purple-900/50 rounded"></span>Cubierto: Pagado con anticipo anterior</div>';
+            $html .= '</div>';
+
+            // Nota sobre valores recalculados
+            $valorOriginal = $data['total_pagos_esperado_original'] ?? 0;
+            $totalFlujosData = $data['total_flujos_ajustados'] ?? 0;
+            $totalAnticiposData = $data['total_anticipos_generados'] ?? 0;
+            $totalConAnticiposData = $data['total_con_anticipos'] ?? 0;
+
+            if (abs($valorOriginal - $totalConAnticiposData) > 0.01 || $totalAnticiposData > 0.01) {
+                $html .= '<div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-xs">';
+                $html .= '<div class="flex items-start gap-2">';
+                $html .= '<span class="text-blue-600 dark:text-blue-400">ℹ️</span>';
+                $html .= '<div class="flex-1">';
+                $html .= '<p class="font-semibold text-blue-900 dark:text-blue-100 mb-1">Cálculo de Totales con Anticipos</p>';
+                $html .= '<p class="text-blue-800 dark:text-blue-200">';
+                $html .= '<strong>Flujos ajustados:</strong> $'.number_format($totalFlujosData, 2).' + ';
+                $html .= '<strong>Anticipos generados:</strong> $'.number_format($totalAnticiposData, 2).' = ';
+                $html .= '<strong>Total:</strong> $'.number_format($totalConAnticiposData, 2);
+
+                if (abs($valorOriginal - $totalConAnticiposData) < 0.01) {
+                    $html .= ' ✅ <span class="text-green-700 dark:text-green-300">(Equivale al total original)</span>';
+                }
+                $html .= '</p>';
+                $html .= '</div></div></div>';
+            }
+
+            // Nota sobre VP/VF recalculados
+            $vpOriginal = $data['valor_presente_original'] ?? 0;
+            $vpRecalculado = $data['valor_presente_total'] ?? 0;
+
+            if (abs($vpOriginal - $vpRecalculado) > 0.01) {
+                $html .= '<div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-xs">';
+                $html .= '<div class="flex items-start gap-2">';
+                $html .= '<span class="text-amber-600 dark:text-amber-400">💡</span>';
+                $html .= '<div class="flex-1">';
+                $html .= '<p class="font-semibold text-amber-900 dark:text-amber-100 mb-1">Valores Presente y Futuro Recalculados</p>';
+                $html .= '<p class="text-amber-800 dark:text-amber-200">';
+                $html .= 'Los VP y VF se recalcularon para reflejar los pagos reales (incluyendo anticipos). ';
+                $html .= '<strong>VP original:</strong> $'.number_format($vpOriginal, 2).' → ';
+                $html .= '<strong>VP recalculado:</strong> $'.number_format($vpRecalculado, 2);
+                $html .= '</p>';
+                $html .= '</div></div></div>';
+            }
+
+            $html .= '</div>';
+        }
+
+        // MENSAJE FINAL
+        $mensajeFinal = $data['mensaje_final'] ?? null;
+        if ($mensajeFinal) {
+            $html .= "
+        <div class='mt-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 rounded-xl p-4 border border-blue-300 dark:border-blue-700'>
+            <div class='flex items-start gap-3'>
+                <span class='text-2xl flex-shrink-0'>💬</span>
+                <div class='flex-1'>
+                    <h4 class='font-bold text-blue-900 dark:text-blue-100 text-sm mb-1'>RESUMEN</h4>
+                    <p class='text-sm text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensajeFinal}</p>
+                </div>
+            </div>
+        </div>";
+        }
+
+        $html .= '</div>';
+
+        return new HtmlString($html);
+    }
+
     public static function buildTablaGradienteHtml(callable|array $data): Htmlable
     {
         // Soporte mixto: callable $get o array $data

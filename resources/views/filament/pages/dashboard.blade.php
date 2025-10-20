@@ -6,19 +6,19 @@
         href="#conceptos"
     >
         <x-slot:quote>
-            <p class="text-xl text-white/90 max-w-3xl mx-auto">Herramienta educativa para el análisis de modelos financieros básicos y avanzados.</p>
+            <p class="text-xl text-white/90 max-w-3xl mx-auto">Herramienta educativa para el análisis de modelos financieros básicos, avanzados y simulación de créditos.</p>
         </x-slot:quote>
         <x-slot:icon>
             <x-heroicon-c-calculator class="size-16 text-white" aria-hidden="true" />
         </x-slot:icon>
     </x-sections.heading-title>
 
-    <!-- Temas expuestos -->
+    <!-- Temas expuestos - Agregando Simulador de Créditos -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 -mt-8">
         <h2 class="text-xl font-bold text-gray-800 dark:text-white flex justify-center mb-6">
             Temas Fundamentales
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             <!-- Fundamentos Básicos -->
             <div class="text-center p-4 rounded-lg transition-colors">
                 <div class="mx-auto bg-primary-100 dark:bg-primary-900/30 w-14 h-14 rounded-full flex items-center justify-center mb-3">
@@ -58,6 +58,17 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-1">Anualidades</h3>
                 <p class="text-gray-600 dark:text-gray-300 text-sm">Pagos periódicos y su valor temporal</p>
+            </div>
+
+            <!-- Nuevo: Simulador de Créditos -->
+            <div class="text-center p-4 rounded-lg transition-colors bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+                <div class="mx-auto bg-blue-100 dark:bg-blue-900/30 w-14 h-14 rounded-full flex items-center justify-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-1">Simulador de Créditos</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">Cuatro modelos completos de simulación</p>
             </div>
         </div>
 
@@ -117,7 +128,7 @@
     <!-- Panel de contenido principal -->
     <div id="conceptos" class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
         <div class="lg:col-span-2">
-            <!-- Sección de metodología -->
+            <!-- Sección de metodología - Agregando referencia al simulador -->
             <x-filament::section>
                 <x-slot name="heading" class="text-2xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
                     <span class="mr-3">🔍</span> Metodología de Cálculo
@@ -129,20 +140,42 @@
                     sistema calculará automáticamente el parámetro faltante.
                 </p>
 
-                <x-filament::card class="rounded-xl border-2 border-primary-200 dark:border-primary-700 shadow-lg">
-                    <h3 class="text-xl font-bold text-primary-600 dark:text-primary-400 mb-4 flex items-center">
-                        <span class="text-2xl mr-2">💡</span> ¿Cómo utilizar esta herramienta?
-                    </h3>
-                    <ol class="text-gray-700 dark:text-gray-300 space-y-3 list-decimal list-inside pl-4">
-                        <li class="text-lg">Selecciona el tipo de cálculo que deseas realizar</li>
-                        <li class="text-lg">Ingresa los valores conocidos en los campos correspondientes</li>
-                        <li class="text-lg">Nuestro sistema calculará automáticamente el valor faltante</li>
-                        <li class="text-lg">Analiza los resultados y tablas de amortización generadas</li>
-                    </ol>
-                </x-filament::card>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <x-filament::card class="rounded-xl border-2 border-primary-200 dark:border-primary-700 shadow-lg">
+                        <h3 class="text-xl font-bold text-primary-600 dark:text-primary-400 mb-4 flex items-center">
+                            <span class="text-2xl mr-2">💡</span> ¿Cómo utilizar esta herramienta?
+                        </h3>
+                        <ol class="text-gray-700 dark:text-gray-300 space-y-3 list-decimal list-inside pl-4">
+                            <li class="text-lg">Selecciona el tipo de cálculo que deseas realizar</li>
+                            <li class="text-lg">Ingresa los valores conocidos en los campos correspondientes</li>
+                            <li class="text-lg">Nuestro sistema calculará automáticamente el valor faltante</li>
+                            <li class="text-lg">Analiza los resultados y tablas de amortización generadas</li>
+                        </ol>
+                    </x-filament::card>
+
+                    <x-filament::card class="rounded-xl border-2 border-blue-200 dark:border-blue-700 shadow-lg bg-blue-50 dark:bg-blue-900/20">
+                        <h3 class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4 flex items-center">
+                            <span class="text-2xl mr-2">🚀</span> Simulador de Créditos
+                        </h3>
+                        <p class="text-gray-700 dark:text-gray-300 mb-4">
+                            Explora nuestro <strong>simulador completo de créditos</strong> con cuatro modelos diferentes:
+                        </p>
+                        <ul class="text-gray-700 dark:text-gray-300 space-y-2 list-disc list-inside pl-4">
+                            <li>Modelo de Gradientes</li>
+                            <li>Interés Simple</li>
+                            <li>Interés Compuesto</li>
+                            <li>Sistemas de Amortización</li>
+                        </ul>
+                        <div class="mt-4 pt-4 flex justify-center">
+                            <a href="{{ url(\App\Filament\Pages\Creditos\ListCredits::getUrl()) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-300">
+                                <span class="mr-2">📊</span> Ir al Simulador
+                            </a>
+                        </div>
+                    </x-filament::card>
+                </div>
             </x-filament::section>
 
-            <!-- Sección de modelos financieros con toggle interactivo -->
+            <!-- Sección de modelos financieros con toggle interactivo MEJORADO -->
             <div x-data="modelToggle()" class="mt-6">
                 <style>
                     @keyframes slideIn {
@@ -183,7 +216,15 @@
                     }
 
                     .toggle-bg {
-                        transition: all 1.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+                        transition: left 0.25s ease, background-color 0.3s ease;
+                    }
+
+                    .toggle-bg {
+                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+                    }
+
+                    .dark .toggle-bg {
+                        box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
                     }
 
                     .toggle-overlay {
@@ -263,80 +304,131 @@
                         transition: all 0.3s ease;
                     }
 
+                    /* 🔄 Animaciones más suaves y naturales */
+                    .toggle-container {
+                        transition: transform 0.3s ease, opacity 0.3s ease;
+                        opacity: 1;
+                    }
+
+                    .toggle-bg {
+                        transition: left 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+                        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+                    }
+                    .dark .toggle-bg {
+                        box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+                    }
+
+                    /* Movimiento más sutil y sin rebote */
+                    .toggle-btn {
+                        position: relative;
+                        transition: color 0.25s ease, transform 0.25s ease, opacity 0.25s ease;
+                    }
+                    .toggle-btn.active {
+                        transform: scale(1);
+                        opacity: 1;
+                    }
+                    .toggle-btn:not(.active) {
+                        transform: scale(0.96);
+                        opacity: 0.8;
+                    }
+
+                    /* Emojis más suaves */
+                    .emoji-icon {
+                        transition: transform 0.25s ease;
+                    }
+                    .toggle-btn.active .emoji-icon {
+                        transform: scale(1.05);
+                    }
+                    .toggle-btn:not(.active) .emoji-icon {
+                        transform: scale(0.9);
+                    }
+
+                    /* Overlay de brillo más elegante */
+                    .toggle-overlay {
+                        transition: left 0.3s ease, opacity 0.3s ease;
+                        opacity: 0.3;
+                    }
+
+                    /* Descripción más fluida */
+                    .desc-text {
+                        transition: opacity 0.3s ease, transform 0.3s ease;
+                    }
+                    [x-show="true"] .desc-text {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+
                     [x-cloak] { display: none; }
                 </style>
 
                 <x-filament::section>
                     <x-slot name="heading" class="text-2xl font-bold text-primary-600 dark:text-primary-400 flex items-center justify-between">
                         <span class="flex items-center">
-                            <span class="mr-3 text-3xl transition-all duration-700" x-text="showFundamental ? '📚' : '🚀'"></span>
-                            <span class="transition-all duration-700" x-text="showFundamental ? 'Modelos Financieros Fundamentales' : 'Modelos Financieros Avanzados'"></span>
+                            <span class="mr-3 text-3xl transition-all duration-700" x-text="activeTab === 'fundamental' ? '📚' : activeTab === 'advanced' ? '🚀' : '💳'"></span>
+                            <span class="transition-all duration-700" x-text="activeTab === 'fundamental' ? 'Modelos Financieros Fundamentales' : activeTab === 'advanced' ? 'Modelos Financieros Avanzados' : 'Simulador de Créditos'"></span>
                         </span>
                     </x-slot>
 
-                    <!-- Toggle con animaciones fluidas -->
-                    <div class="flex justify-center mb-4 toggle-container">
-                        <div class="relative inline-flex bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-full p-2 shadow-2xl border border-gray-300 dark:border-gray-600 overflow-hidden">
-                            <!-- Fondo animado -->
+                    <!-- 🔄 Nuevo toggle minimalista -->
+                    <div class="flex justify-center mb-6 toggle-container">
+                        <div class="relative flex bg-gray-50 dark:bg-gray-900 rounded-full p-2 shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden w-[480px] sm:w-[520px] transition-all duration-500 ease-out">
+                            <!-- Fondo deslizante -->
                             <div
-                                class="toggle-bg absolute inset-y-2 w-1/2 rounded-full"
-                                :class="[
-                        showFundamental
-                            ? 'from-primary-400 via-primary-500 to-blue-600 left-2'
-                            : 'from-purple-400 via-purple-500 to-pink-600 right-2 left-auto'
-                    ]"
-                                :style="showFundamental ? 'background: linear-gradient(135deg, #60a5fa, #3b82f6, #2563eb)' : 'background: linear-gradient(135deg, #c084fc, #a855f7, #ec4899)'"
+                                class="absolute top-0 bottom-0 w-1/3 rounded-full transition-all duration-500 ease-[cubic-bezier(0.45,0,0.2,1)]"
+                                :class="{
+            'left-0 bg-green-200 dark:bg-green-700/60': activeTab === 'fundamental',
+            'left-1/3 bg-purple-300/80 dark:bg-purple-700/60': activeTab === 'advanced',
+            'left-2/3 bg-blue-300/80 dark:bg-blue-700/60': activeTab === 'simulator'
+        }"
                             ></div>
 
-                            <!-- Brillo interno -->
-                            <div
-                                class="toggle-overlay absolute inset-y-2 w-1/2 rounded-full opacity-40"
-                                :class="showFundamental ? 'left-2' : 'right-2 left-auto'"
-                                style="background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0), rgba(255,255,255,0.1));"
-                            ></div>
-
-                            <!-- Botón Fundamentales -->
+                            <!-- Botón: Fundamentales -->
                             <button
-                                @click="showFundamental = true"
-                                class="toggle-btn relative px-7 py-3 rounded-full font-bold text-sm z-10 flex items-center gap-3 w-auto transition-colors"
-                                :class="[
-                        showFundamental
-                            ? 'text-white active'
-                            : 'text-gray-600 dark:text-gray-400'
-                    ]"
+                                @click="activeTab = 'fundamental'"
+                                class="toggle-btn relative z-10 flex-1 h-full flex items-center justify-center text-[15px] font-medium rounded-full transition-all duration-500 ease-[cubic-bezier(0.45,0,0.2,1)]"
+                                :class="activeTab === 'fundamental' ? 'text-green-800 dark:text-green-200 active' : 'text-gray-700 dark:text-gray-300'"
                             >
-                                <span class="emoji-icon text-xl">📚</span>
-                                <span class="btn-text">Fundamentales</span>
+                                <span class="emoji-icon text-lg mr-1">📚</span>
+                                <span class="btn-text hidden sm:inline">Fundamentales</span>
                             </button>
 
-                            <!-- Botón Avanzados -->
+                            <!-- Botón: Avanzados -->
                             <button
-                                @click="showFundamental = false"
-                                class="toggle-btn relative px-7 py-3 rounded-full font-bold text-sm z-10 flex items-center gap-3 w-auto transition-colors"
-                                :class="[
-                        !showFundamental
-                            ? 'text-white active'
-                            : 'text-gray-600 dark:text-gray-400'
-                    ]"
+                                @click="activeTab = 'advanced'"
+                                class="toggle-btn relative z-10 flex-1 h-full flex items-center justify-center text-[15px] font-medium rounded-full transition-all duration-500 ease-[cubic-bezier(0.45,0,0.2,1)]"
+                                :class="activeTab === 'advanced' ? 'text-purple-800 dark:text-purple-200 active' : 'text-gray-700 dark:text-gray-300'"
                             >
-                                <span class="emoji-icon text-xl">🚀</span>
-                                <span class="btn-text">Avanzados</span>
+                                <span class="emoji-icon text-lg mr-1">🚀</span>
+                                <span class="btn-text hidden sm:inline">Avanzados</span>
+                            </button>
+
+                            <!-- Botón: Simulador -->
+                            <button
+                                @click="activeTab = 'simulator'"
+                                class="toggle-btn relative z-10 flex-1 h-full flex items-center justify-center text-[15px] font-medium rounded-full transition-all duration-500 ease-[cubic-bezier(0.45,0,0.2,1)]"
+                                :class="activeTab === 'simulator' ? 'text-blue-800 dark:text-blue-200 active' : 'text-gray-700 dark:text-gray-300'"
+                            >
+                                <span class="emoji-icon text-lg mr-1">💳</span>
+                                <span class="btn-text hidden sm:inline">Simulador</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Descripción con transición -->
                     <div class="relative h-12 mb-4 flex items-center justify-center">
-                        <p class="desc-text text-gray-700 dark:text-gray-300 text-center absolute inset-0 flex items-center justify-center" x-show="showFundamental" :class="showFundamental ? 'content-enter' : 'content-exit'">
+                        <p class="desc-text text-gray-700 dark:text-gray-300 text-center absolute inset-0 flex items-center justify-center" x-show="activeTab === 'fundamental'" :class="activeTab === 'fundamental' ? 'content-enter' : 'content-exit'">
                             Explora los principales modelos de cálculo financiero utilizados en el ámbito académico y profesional.
                         </p>
-                        <p class="desc-text text-gray-700 dark:text-gray-300 text-center absolute inset-0 flex items-center justify-center" x-show="!showFundamental" :class="!showFundamental ? 'content-enter' : 'content-exit'" style="display: none;">
+                        <p class="desc-text text-gray-700 dark:text-gray-300 text-center absolute inset-0 flex items-center justify-center" x-show="activeTab === 'advanced'" :class="activeTab === 'advanced' ? 'content-enter' : 'content-exit'" style="display: none;">
                             Herramientas especializadas para análisis financieros complejos y evaluación de proyectos.
+                        </p>
+                        <p class="desc-text text-gray-700 dark:text-gray-300 text-center absolute inset-0 flex items-center justify-center" x-show="activeTab === 'simulator'" :class="activeTab === 'simulator' ? 'content-enter' : 'content-exit'" style="display: none;">
+                            Simula diferentes escenarios de crédito con nuestros cuatro modelos completos de simulación.
                         </p>
                     </div>
 
                     <!-- Grid Fundamentales -->
-                    <div x-show="showFundamental" :class="showFundamental ? 'content-enter' : 'content-exit'">
+                    <div x-show="activeTab === 'fundamental'" :class="activeTab === 'fundamental' ? 'content-enter' : 'content-exit'">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Tarjeta Tasa de Interés -->
                             <a href="{{ url('/tasa-interes') }}" class="group block focus:outline-none">
@@ -457,7 +549,7 @@
                     </div>
 
                     <!-- Grid Avanzados -->
-                    <div x-show="!showFundamental" :class="!showFundamental ? 'content-enter' : 'content-exit'" style="display: none;">
+                    <div x-show="activeTab === 'advanced'" :class="activeTab === 'advanced' ? 'content-enter' : 'content-exit'" style="display: none;">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Tarjeta Sistemas Gradientes -->
                             <a href="{{ url('/gradientes') }}" class="group block focus:outline-none">
@@ -576,6 +668,84 @@
                             </a>
                         </div>
                     </div>
+
+                    <!-- Grid Simulador de Créditos -->
+                    <div x-show="activeTab === 'simulator'" :class="activeTab === 'simulator' ? 'content-enter' : 'content-exit'" style="display: none;">
+                        <div class="grid grid-cols-1 gap-6">
+                            <!-- Tarjeta principal del Simulador -->
+                            <a href="{{ url(\App\Filament\Pages\Creditos\ListCredits::getUrl()) }}" class="group block focus:outline-none">
+                                <div class="custom-hover rounded-xl shadow-md border-l-4 border-blue-500 p-6 relative overflow-hidden text-gray-800 dark:text-gray-200 transition-all duration-500 hover:shadow-xl hover:border-l-8 flex flex-col h-full">
+                                    <div class="absolute inset-0 bg-blue-500/20 rounded-xl -z-10 transition-all duration-700 group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:via-blue-600 group-hover:to-blue-500"></div>
+                                    <div class="flex items-start relative z-10 transition-colors duration-500 group-hover:text-white flex-1">
+                                        <div class="bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg mr-4 group-hover:bg-white/30 transition-colors duration-500 flex-shrink-0">
+                                            <span class="text-4xl text-blue-500 group-hover:text-white transition-colors duration-500">💳</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h3 class="text-2xl font-bold mb-3">Simulador de Créditos Completo</h3>
+                                            <p class="mt-2 text-lg mb-4">
+                                                Explora nuestros <strong>cuatro modelos de simulación de créditos</strong> diseñados para ayudarte a tomar decisiones financieras informadas.
+                                            </p>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                                <div class="flex items-center">
+                                                    <span class="text-2xl mr-3">📐</span>
+                                                    <div>
+                                                        <h4 class="font-semibold">Modelo Gradientes</h4>
+                                                        <p class="text-sm opacity-90">Pagos con incrementos constantes o porcentuales</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <span class="text-2xl mr-3">📈</span>
+                                                    <div>
+                                                        <h4 class="font-semibold">Interés Simple</h4>
+                                                        <p class="text-sm opacity-90">Cálculos sobre capital inicial únicamente</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <span class="text-2xl mr-3">📊</span>
+                                                    <div>
+                                                        <h4 class="font-semibold">Interés Compuesto</h4>
+                                                        <p class="text-sm opacity-90">Intereses sobre intereses acumulados</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <span class="text-2xl mr-3">📋</span>
+                                                    <div>
+                                                        <h4 class="font-semibold">Sistemas de Amortización</h4>
+                                                        <p class="text-sm opacity-90">Tablas de pago detalladas</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="pt-4 mx-auto items-center flex justify-center">
+                                        <span class="difficulty-badge difficulty-intermediate">
+                                            <span>🚀</span>
+                                            <span>Cuatro Modelos Integrados</span>
+                                            <span class="difficulty-dot">
+                                                <span style="background: #78350f;"></span>
+                                                <span style="background: #78350f;"></span>
+                                                <span style="background: #cbd5e1;"></span>
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Beneficios del Simulador -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center">
+                                <div class="text-3xl mb-2">🎯</div>
+                                <h4 class="font-semibold text-blue-700 dark:text-blue-300">Precisión</h4>
+                                <p class="text-sm text-blue-600 dark:text-blue-400">Cálculos exactos basados en fórmulas financieras estándar</p>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center">
+                                <div class="text-3xl mb-2">⚡</div>
+                                <h4 class="font-semibold text-green-700 dark:text-green-300">Rapidez</h4>
+                                <p class="text-sm text-green-600 dark:text-green-400">Resultados instantáneos para múltiples escenarios</p>
+                            </div>
+                        </div>
+                    </div>
                 </x-filament::section>
             </div>
 
@@ -583,22 +753,16 @@
                 <script>
                     function modelToggle() {
                         return {
-                            showFundamental: true
+                            activeTab: 'fundamental'
                         }
                     }
                 </script>
             @endpush
-            <x-filament::section class="mt-4 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-xl">
-                <p class="text-center text-lg text-primary-700 dark:text-primary-300 font-medium col-span-full">
-                    🎯 Esta herramienta ha sido desarrollada con fines educativos para apoyar el aprendizaje de conceptos financieros
-                    en el ámbito universitario. Siempre verifica tus cálculos con múltiples fuentes.
-                </p>
-            </x-filament::section>
         </div>
 
-        <!-- Sidebar con información adicional -->
+        <!-- Sidebar con información adicional - MEJORADO -->
         <div class="space-y-6">
-            <!-- Consejos útiles -->
+            <!-- Consejos útiles - Actualizado -->
             <x-filament::section>
                 <x-slot name="heading" class="text-xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
                     <span class="mr-2">💡</span> Consejos Prácticos
@@ -617,10 +781,14 @@
                         <span class="flex-shrink-0 text-success-500 text-lg mr-2">•</span>
                         <p class="text-sm text-gray-600 dark:text-gray-400">En gradientes, identifica si es aritmético (incremento constante) o geométrico (incremento porcentual).</p>
                     </div>
+                    <div class="flex items-start">
+                        <span class="flex-shrink-0 text-success-500 text-lg mr-2">•</span>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Usa nuestro simulador de créditos para comparar diferentes escenarios antes de tomar decisiones.</p>
+                    </div>
                 </div>
             </x-filament::section>
 
-            <!-- Enlaces útiles -->
+            <!-- Enlaces útiles - Actualizado -->
             <x-filament::section>
                 <x-slot name="heading" class="text-xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
                     <span class="mr-2">🔗</span> Enlaces de Interés
@@ -633,8 +801,8 @@
                     <a target="_blank" rel="noopener noreferrer" href="https://www.rankia.cl/blog/analisis-ipsa/3513617-matematicas-financieras-definicion-formulas-ejemplos-aplicadas-inversion" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
                         <span class="mr-2">→</span> Fórmulas financieras esenciales
                     </a>
-                    <a target="_blank" rel="noopener noreferrer" href="https://www.superprof.es/apuntes/escolar/matematicas/aritmetica/proporcionalidad/ejercicios-y-problemas-resueltos-sobre-el-interes-compuesto.html" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
-                        <span class="mr-2">→</span> Ejercicios prácticos resueltos
+                    <a href="{{ url(\App\Filament\Pages\Creditos\ListCredits::getUrl()) }}" class="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-semibold">
+                        <span class="mr-2">🚀</span> Simulador de Créditos
                     </a>
                     <a target="_blank" rel="noopener noreferrer" href="https://www.gestiopolis.com/calculadora-tir-tasa-interna-retorno/" class="flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">
                         <span class="mr-2">→</span> Guía para cálculo de TIR
@@ -642,7 +810,7 @@
                 </div>
             </x-filament::section>
 
-            <!-- Calculadora rápida -->
+            <!-- Calculadora rápida - Actualizado -->
             <x-filament::section>
                 <x-slot name="heading" class="text-xl font-bold text-success-600 dark:text-success-400 flex items-center">
                     <span class="mr-2">💼</span> Casos de Uso
@@ -676,12 +844,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-3">
+                    <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3">
                         <div class="flex items-start">
-                            <span class="text-2xl mr-3">📊</span>
+                            <span class="text-2xl mr-3">💳</span>
                             <div>
-                                <h4 class="font-semibold text-gray-800 dark:text-gray-200 text-sm">Evaluación de Proyectos</h4>
-                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Analiza viabilidad con TIR y VAN.</p>
+                                <h4 class="font-semibold text-gray-800 dark:text-gray-200 text-sm">Simulación de Créditos</h4>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Compara diferentes opciones con nuestro simulador.</p>
                             </div>
                         </div>
                     </div>
@@ -719,12 +887,24 @@
                             <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
                         </div>
                     </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Simulador</span>
+                        <div class="flex space-x-1">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <div class="w-3 h-3 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+                        </div>
+                    </div>
                 </div>
             </x-filament::section>
         </div>
 
     </div>
-
-    <!-- Nota final -->
-
+    <x-filament::section class="mt-4 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-xl">
+        <p class="text-center text-lg text-primary-700 dark:text-primary-300 font-medium col-span-full">
+            🎯 Esta herramienta ha sido desarrollada con fines educativos para apoyar el aprendizaje de conceptos financieros
+            en el ámbito universitario. Incluye un <strong>simulador completo de créditos</strong> con cuatro modelos diferentes.
+            Siempre verifica tus cálculos con múltiples fuentes.
+        </p>
+    </x-filament::section>
 </x-filament-panels::page>

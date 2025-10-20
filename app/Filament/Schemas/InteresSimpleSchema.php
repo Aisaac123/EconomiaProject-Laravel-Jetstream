@@ -735,6 +735,326 @@ class InteresSimpleSchema
         return static::buildResultHtml($capital, $montoFinal, $tasaInteres, $tiempo, $periodicidadTasa, $interesGenerado, $mensaje, $campoCalculado, $resultado, $resultado2);
     }
 
+    // Método específico para Interés Simple
+    public static function buildPagosHtml(array $data): Htmlable
+    {
+        $html = '<div class="space-y-5">';
+
+        // ============================================
+        // HEADER
+        // ============================================
+        $html .= '
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-blue-950/50 dark:to-indigo-800/50 rounded-xl p-5 border border-indigo-200 dark:border-indigo-800">
+        <div class="flex items-center gap-3">
+            <span class="text-3xl">💳</span>
+            <div>
+                <h3 class="text-lg font-bold text-indigo-900 dark:text-indigo-100">Estado de Pagos</h3>
+                <p class="text-sm text-indigo-700 dark:text-indigo-300">Seguimiento detallado del crédito</p>
+            </div>
+        </div>
+    </div>
+    ';
+
+        // ============================================
+        // BLOQUE 1: RESUMEN DE SALDOS
+        // ============================================
+        $html .= '<div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">';
+        $html .= '<h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+    <span>💰</span> SALDOS Y ESTADO
+    </h4>';
+
+        $html .= '<div class="grid grid-cols-2 gap-3">';
+
+        // Saldo Restante (destacado)
+        $saldoRestante = $data['saldo_restante'] ?? 0;
+        $html .= static::buildCard(
+            'Saldo Restante',
+            '💵',
+            '$'.number_format($saldoRestante, 2),
+            'Monto pendiente por pagar',
+            true,
+            $saldoRestante > 0 ? 'red' : 'green'
+        );
+
+        // Estado del Crédito
+        $estadoCredito = $data['estado_credito'] ?? 'Activo';
+        $estadoColor = match (strtolower($estadoCredito)) {
+            'pagado', 'liquidado' => 'green',
+            'vencido' => 'red',
+            'activo', 'vigente' => 'blue',
+            'cancelado' => 'gray',
+            default => 'gray'
+        };
+        $html .= static::buildCard(
+            'Estado',
+            '📘',
+            ucfirst($estadoCredito),
+            'Situación actual del crédito',
+            false,
+            $estadoColor
+        );
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        // ============================================
+        // BLOQUE 2: PROGRESO DE PAGOS
+        // ============================================
+        $numeroPagos = $data['numero_pagos_realizados'] ?? 0;
+        $totalPagado = $data['total_pagado'] ?? 0;
+        $porcentajePagado = $data['porcentaje_pagado'] ?? 0;
+
+        $html .= '<div class="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/50 dark:to-green-950/50 rounded-xl p-4 border-2 border-emerald-300 dark:border-emerald-700">';
+        $html .= '<h4 class="text-sm font-bold text-emerald-900 dark:text-emerald-100 mb-3 flex items-center gap-2">
+    <span>📊</span> PROGRESO DE PAGOS
+    </h4>';
+
+        $html .= '<div class="grid grid-cols-2 gap-3">';
+
+        // Número de pagos realizados
+        $html .= static::buildCard(
+            'Pagos Realizados',
+            '✅',
+            (string) $numeroPagos,
+            'Cantidad de pagos completados',
+            false,
+            'emerald'
+        );
+
+        // Porcentaje pagado
+        $html .= static::buildCard(
+            'Progreso Total',
+            '📈',
+            number_format($porcentajePagado, 1).'%',
+            'Del monto total del crédito',
+            true,
+            'green'
+        );
+
+        // Total pagado
+        $html .= static::buildCard(
+            'Total Pagado',
+            '💵',
+            '$'.number_format($totalPagado, 2),
+            'Suma de todos los pagos',
+            false,
+            'emerald'
+        );
+
+        // Pagos estimados restantes
+        $pagosEstimados = $data['pagos_estimados_restantes'] ?? null;
+        if ($pagosEstimados !== null && $pagosEstimados > 0) {
+            $html .= static::buildCard(
+                'Pagos Estimados Restantes',
+                '🔢',
+                (string) $pagosEstimados,
+                'Basado en promedio actual',
+                false,
+                'teal'
+            );
+        }
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        // ============================================
+        // BLOQUE 3: DESGLOSE CAPITAL E INTERÉS
+        // ============================================
+        $capitalPagado = $data['capital_pagado'] ?? 0;
+        $interesPagado = $data['interes_pagado'] ?? 0;
+        $capitalPendiente = $data['capital_pendiente'] ?? 0;
+        $interesPendiente = $data['interes_pendiente'] ?? 0;
+
+        $html .= '<div class="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/50 dark:to-yellow-950/50 rounded-xl p-4 border border-amber-300 dark:border-amber-700">';
+        $html .= '<h4 class="text-sm font-bold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2">
+    <span>💎</span> DESGLOSE CAPITAL E INTERÉS
+    </h4>';
+
+        $html .= '<div class="grid grid-cols-2 gap-3">';
+
+        // Capital pagado
+        $html .= static::buildCard(
+            'Capital Pagado',
+            '🏦',
+            '$'.number_format($capitalPagado, 2),
+            'Abono al capital',
+            false,
+            'amber'
+        );
+
+        // Capital pendiente
+        $html .= static::buildCard(
+            'Capital Pendiente',
+            '📊',
+            '$'.number_format($capitalPendiente, 2),
+            'Capital por amortizar',
+            false,
+            'yellow'
+        );
+
+        // Interés pagado
+        $html .= static::buildCard(
+            'Interés Pagado',
+            '📈',
+            '$'.number_format($interesPagado, 2),
+            'Intereses abonados',
+            false,
+            'orange'
+        );
+
+        // Interés pendiente
+        $html .= static::buildCard(
+            'Interés Pendiente',
+            '💹',
+            '$'.number_format($interesPendiente, 2),
+            'Intereses por pagar',
+            false,
+            'red'
+        );
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        // ============================================
+        // BLOQUE 4: ÚLTIMO PAGO Y ESTADÍSTICAS
+        // ============================================
+        $fechaUltimoPago = $data['fecha_ultimo_pago'] ?? null;
+        $montoUltimoPago = $data['monto_ultimo_pago'] ?? null;
+        $promedioMonto = $data['promedio_monto_pago'] ?? 0;
+
+        if ($fechaUltimoPago || $montoUltimoPago) {
+            $html .= '<div class="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/50 dark:to-blue-950/50 rounded-xl p-4 border border-indigo-200 dark:border-indigo-700">';
+            $html .= '<h4 class="text-sm font-bold text-indigo-900 dark:text-indigo-100 mb-3 flex items-center gap-2">
+        <span>📅</span> INFORMACIÓN DE PAGOS
+        </h4>';
+
+            $html .= '<div class="grid grid-cols-2 gap-3">';
+
+            if ($fechaUltimoPago) {
+                $html .= static::buildCard(
+                    'Último Pago',
+                    '📆',
+                    $fechaUltimoPago,
+                    'Fecha del último abono',
+                    false,
+                    'indigo'
+                );
+            }
+
+            if ($montoUltimoPago) {
+                $html .= static::buildCard(
+                    'Monto Último Pago',
+                    '💵',
+                    '$'.number_format($montoUltimoPago, 2),
+                    'Valor del último abono',
+                    false,
+                    'blue'
+                );
+            }
+
+            if ($promedioMonto > 0) {
+                $html .= static::buildCard(
+                    'Promedio por Pago',
+                    '📊',
+                    '$'.number_format($promedioMonto, 2),
+                    'Promedio de pagos realizados',
+                    false,
+                    'cyan'
+                );
+            }
+
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
+        // ============================================
+        // BLOQUE 5: TIEMPO Y FECHAS
+        // ============================================
+        $fechaInicio = $data['fecha_inicio'] ?? null;
+        $fechaVencimiento = $data['fecha_vencimiento'] ?? null;
+        $diasTranscurridos = $data['dias_transcurridos'] ?? null;
+        $diasRestantes = $data['dias_restantes'] ?? null;
+
+        if ($fechaInicio || $fechaVencimiento || $diasTranscurridos !== null || $diasRestantes !== null) {
+            $html .= '<div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/50 dark:to-pink-950/50 rounded-xl p-4 border border-purple-200 dark:border-purple-700">';
+            $html .= '<h4 class="text-sm font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
+        <span>⏰</span> CRONOLOGÍA
+        </h4>';
+
+            $html .= '<div class="grid grid-cols-2 gap-3">';
+
+            if ($fechaInicio) {
+                $html .= static::buildCard(
+                    'Fecha Inicio',
+                    '🗓️',
+                    $fechaInicio,
+                    'Inicio del crédito',
+                    false,
+                    'purple'
+                );
+            }
+
+            if ($fechaVencimiento) {
+                $html .= static::buildCard(
+                    'Fecha Vencimiento',
+                    '⏳',
+                    $fechaVencimiento,
+                    'Fecha límite de pago',
+                    false,
+                    'pink'
+                );
+            }
+
+            if ($diasTranscurridos !== null) {
+                $html .= static::buildCard(
+                    'Días Transcurridos',
+                    '📅',
+                    (string) $diasTranscurridos.' días',
+                    'Desde el inicio del crédito',
+                    false,
+                    'violet'
+                );
+            }
+
+            if ($diasRestantes !== null) {
+                $colorDias = $diasRestantes < 30 ? 'red' : ($diasRestantes < 60 ? 'yellow' : 'green');
+                $html .= static::buildCard(
+                    'Días Restantes',
+                    '⏱️',
+                    abs($diasRestantes).' días',
+                    $diasRestantes < 0 ? '¡Crédito vencido!' : 'Hasta el vencimiento',
+                    $diasRestantes < 30,
+                    $colorDias
+                );
+            }
+
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
+        // ============================================
+        // MENSAJE FINAL
+        // ============================================
+        $mensajeFinal = $data['mensaje_final'] ?? null;
+        if ($mensajeFinal) {
+            $html .= "
+    <div class='bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 rounded-xl p-4 border border-blue-300 dark:border-blue-700'>
+        <div class='flex items-start gap-3'>
+            <span class='text-2xl flex-shrink-0'>💬</span>
+            <div class='flex-1'>
+                <h4 class='font-bold text-blue-900 dark:text-blue-100 text-sm mb-1'>RESUMEN</h4>
+                <p class='text-sm text-blue-800 dark:text-blue-200 leading-relaxed'>{$mensajeFinal}</p>
+            </div>
+        </div>
+    </div>
+    ";
+        }
+
+        $html .= '</div>';
+
+        return new HtmlString($html);
+    }
+
     private static function buildCard(string $title, string $icon, string $value, string $subtitle, bool $isCalculated, string $color = 'gray', string $p = 'p-6'): string
     {
         $colorClasses = match ($color) {

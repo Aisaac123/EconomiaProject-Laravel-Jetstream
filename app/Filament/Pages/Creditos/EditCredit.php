@@ -7,6 +7,7 @@ use App\Enums\CreditStatusType;
 use App\Enums\PageGroupType;
 use App\Models\Credit;
 use App\Traits\FormCalculations;
+use Filament\Actions\Action;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -48,6 +49,32 @@ class EditCredit extends Page implements HasForms
     public static function getNavigationSort(): ?int
     {
         return 5;
+    }
+
+    protected function getHeaderActions(): array
+    {
+        $actions[] = Action::make('list')
+            ->label('Gestionar Créditos')
+            ->icon('heroicon-o-document-text')
+            ->color('primary')
+            ->url(fn (): string => ListCredits::getUrl())
+            ->tooltip('Editar los datos del crédito');
+
+        $actions[] = Action::make('show')
+            ->label('Ver Detalles')
+            ->icon('heroicon-o-eye')
+            ->color('primary')
+            ->url(fn (): string => ShowCredit::getUrl(['recordId' => $this->credit->id]))
+            ->tooltip('Editar los datos del crédito');
+
+        $actions[] = Action::make('show')
+            ->label('Ver Pagos')
+            ->icon('heroicon-o-currency-dollar')
+            ->color('success')
+            ->url(fn (): string => ShowCredit::getUrl(['recordId' => $this->credit->id]).'#pagos')
+            ->tooltip('Editar los datos del crédito');
+
+        return $actions;
     }
 
     public static function getNavigationLabel(): string
@@ -132,9 +159,7 @@ class EditCredit extends Page implements HasForms
         return [
             'simple' => 'Interés Simple',
             'compuesto' => 'Interés Compuesto',
-            'anualidad' => 'Anualidad',
             'amortizacion' => 'Amortización',
-            'tir' => 'Tasa Interna de Retorno (TIR)',
             'gradientes' => 'Gradientes',
         ];
     }
@@ -180,6 +205,7 @@ class EditCredit extends Page implements HasForms
                 'debtor_id_number' => trim($this->debtorIdNumber),
                 'type' => CalculationType::from($this->calculationType),
                 'inputs' => $this->creditInputs,
+                'results' => $this->creditInputs,
                 'status' => CreditStatusType::CALCULATED_UPDATED->value,
                 'calculated_at' => now(),
             ]);
