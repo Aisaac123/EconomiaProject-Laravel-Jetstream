@@ -40,6 +40,7 @@
             <span>📊</span> Distribución del Pago
         </h4>
 
+        @if($payment->credit->type !== \App\Enums\CalculationType::GRADIENTES)
         <div class="grid grid-cols-2 gap-4">
             <div class="bg-green-50 dark:bg-green-950/30 rounded-lg p-4 border border-green-200 dark:border-green-800">
                 <p class="text-xs text-green-700 dark:text-green-300 mb-1">Capital Pagado</p>
@@ -51,28 +52,53 @@
                 </p>
             </div>
 
-            <div class="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
-                <p class="text-xs text-amber-700 dark:text-amber-300 mb-1">Interés Pagado</p>
-                <p class="text-xl font-bold text-amber-900 dark:text-amber-100">
-                    ${{ number_format($payment->interest_paid, 2) }}
+                <div class="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+                    <p class="text-xs text-amber-700 dark:text-amber-300 mb-1">Interés Pagado</p>
+                    <p class="text-xl font-bold text-amber-900 dark:text-amber-100">
+                        ${{ number_format($payment->interest_paid, 2) }}
+                    </p>
+                    <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                        {{ $payment->interest_proportion }}% del pago
+                    </p>
+                </div>
+        </div>
+            <div class="mt-4 bg-red-50 dark:bg-red-950/30 rounded-lg p-4 border border-red-200 dark:border-red-800">
+                <p class="text-xs text-red-700 dark:text-red-300 mb-1">Saldo Restante Después del Pago</p>
+                <p class="text-2xl font-bold text-red-900 dark:text-red-100">
+                    ${{ number_format($payment->remaining_balance, 2) }}
                 </p>
-                <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                    {{ $payment->interest_proportion }}% del pago
-                </p>
+                @if($payment->is_final_payment)
+                    <p class="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
+                        <span>🎉</span> ¡Último pago! Crédito liquidado
+                    </p>
+                @endif
             </div>
-        </div>
-
-        <div class="mt-4 bg-red-50 dark:bg-red-950/30 rounded-lg p-4 border border-red-200 dark:border-red-800">
-            <p class="text-xs text-red-700 dark:text-red-300 mb-1">Saldo Restante Después del Pago</p>
-            <p class="text-2xl font-bold text-red-900 dark:text-red-100">
-                ${{ number_format($payment->remaining_balance, 2) }}
-            </p>
-            @if($payment->is_final_payment)
-                <p class="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
-                    <span>🎉</span> ¡Último pago! Crédito liquidado
-                </p>
-            @endif
-        </div>
+        @else
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <div class="bg-green-50 dark:bg-green-950/30 rounded-lg p-4 border border-green-200 dark:border-green-800">
+                        <p class="text-xs text-green-700 dark:text-green-300 mb-1">Capital Pagado</p>
+                        <p class="text-xl font-bold text-green-900 dark:text-green-100">
+                            ${{ number_format($payment->principal_paid, 2) }}
+                        </p>
+                        <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                            {{ $payment->capital_proportion }}% del pago
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-red-50 dark:bg-red-950/30 rounded-lg p-4 border border-red-200 dark:border-red-800">
+                    <p class="text-xs text-red-700 dark:text-red-300 mb-1">Saldo Restante Después del Pago</p>
+                    <p class="text-2xl font-bold text-red-900 dark:text-red-100">
+                        ${{ number_format($payment->remaining_balance, 2) }}
+                    </p>
+                    @if($payment->is_final_payment)
+                        <p class="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
+                            <span>🎉</span> ¡Último pago! Crédito liquidado
+                        </p>
+                    @endif
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- Metadata --}}

@@ -7,6 +7,8 @@ use Carbon\Carbon;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Credit extends Model
 {
@@ -23,8 +25,6 @@ class Credit extends Model
         'calculated_at',
     ];
 
-    public bool $isCalculatingPayment = false;
-
     protected $casts = [
         'inputs' => 'array',
         'results' => 'array',
@@ -32,12 +32,12 @@ class Credit extends Model
         'type' => CalculationType::class,
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function payments()
+    public function payments(): Credit|HasMany
     {
         return $this->hasMany(Payment::class);
     }
@@ -49,7 +49,7 @@ class Credit extends Model
     */
 
     /**
-     * Prepara los datos para buildPagosHtml según el tipo de crédito
+     * Prepara los datos para pagos
      */
     public function getPagosData(?array $data = null): array
     {
@@ -57,9 +57,7 @@ class Credit extends Model
             CalculationType::SIMPLE => $this->getPagosDataSimple($data['amount'] ?? null),
             CalculationType::COMPUESTO => $this->getPagosDataCompuesto($data['amount'] ?? null),
             CalculationType::AMORTIZACION => $this->getPagosDataAmortizacion($data),
-            CalculationType::ANUALIDAD => $this->getPagosDataAnualidad($data['amount']),
-            CalculationType::GRADIENTES => $this->getPagosDataGradientes($data['amount']),
-            CalculationType::TIR => $this->getPagosDataTIR($data['amount']),
+            CalculationType::GRADIENTES => $this->getPagosDataGradientes($data),
             default => [],
         };
     }
@@ -70,9 +68,7 @@ class Credit extends Model
             CalculationType::SIMPLE => $this->calculatePaymentDistributionSimple($get, $set, $data),
             CalculationType::COMPUESTO => $this->calculatePaymentDistributionCompuesto($get, $set, $data),
             CalculationType::AMORTIZACION => $this->calculatePaymentDistributionAmortizacion($get, $set, $data),
-            CalculationType::ANUALIDAD => $this->getPagosDataAnualidad($data['amount']),
-            CalculationType::GRADIENTES => $this->getPagosDataGradientes($data['amount']),
-            CalculationType::TIR => $this->getPagosDataTIR($data['amount']),
+            CalculationType::GRADIENTES => $this->calcularDistribucionPagoGradientes($get, $set, $data),
             default => [],
         };
     }
@@ -1111,37 +1107,507 @@ class Credit extends Model
     }
 
     /**
-     * Datos para Anualidad (placeholder - implementar según necesidad)
-     */
-    public function getPagosDataAnualidad(): array
-    {
-        // Implementar lógica específica para anualidad
-        return [];
-    }
-
-    /**
      * Datos para Gradientes (placeholder - implementar según necesidad)
      */
-    public function getPagosDataGradientes(): array
+    private function recalcularTablaGradientes(array $tablaOriginal, $pagos): array
     {
-        // Implementar lógica específica para gradientes
-        return [];
+        $tabla = [];
+        $anticipoDisponible = 0;
+        $indicePago = 0;
+
+        // Obtener datos para recalcular VP/VF
+        $inputs = $this->inputs ?? [];
+        $tasaInteres = ($inputs['tasa_interes'] ?? 0) / 100;
+        $numPeriodosTotal = count($tablaOriginal);
+
+        foreach ($tablaOriginal as $index => $flujo) {
+            $flujoOriginal = $flujo['pago'];
+            $periodo = $flujo['periodo'] ?? ($index + 1);
+
+            // Si hay anticipo disponible suficiente, el flujo se puede cubrir automáticamente
+            if ($anticipoDisponible >= $flujoOriginal) {
+                // El anticipo cubre completamente este flujo
+                $anticipoUsado = $flujoOriginal;
+                $anticipoDisponible -= $flujoOriginal;
+
+                // Recalcular VP y VF (flujo = 0 porque se cubrió con anticipo)
+                $vpRecalculado = 0;
+                $vfRecalculado = 0;
+
+                $tabla[] = array_merge($flujo, [
+                    'flujo_original' => round($flujoOriginal, 2),
+                    'flujo_ajustado' => 0,
+                    'valor_presente' => 0,
+                    'valor_futuro' => 0,
+                    'pagado' => true,
+                    'pago_realizado' => 0, // No hubo pago real, se usó anticipo
+                    'anticipo_usado' => round($anticipoUsado, 2),
+                    'anticipo_generado' => 0,
+                    'monto_efectivo' => 0,
+                    'anticipo_acumulado' => round($anticipoDisponible, 2),
+                    'interes_pagado' => 0,
+                    'capital_pagado' => 0,
+                    'fecha_pago' => null,
+                    'pago_id' => null,
+                    'tipo_pago' => 'cubierto_anticipo',
+                    'diferencia' => 0,
+                ]);
+
+                continue;
+            }
+
+            // Aplicar anticipo parcial si existe
+            $anticipoUsadoParcial = min($anticipoDisponible, $flujoOriginal);
+            $flujoAjustado = $flujoOriginal - $anticipoUsadoParcial;
+            $anticipoDisponible -= $anticipoUsadoParcial;
+
+            // Buscar si hay pago para este flujo
+            $pagoPeriodo = null;
+            if ($indicePago < count($pagos)) {
+                $pagoPeriodo = $pagos->get($indicePago);
+                $indicePago++;
+            }
+
+            if ($pagoPeriodo) {
+                // ===== HAY PAGO =====
+                $montoPagado = $pagoPeriodo->amount;
+
+                // Comparar pago con flujo ajustado
+                $diferencia = $montoPagado - $flujoAjustado;
+                $anticipoGenerado = max(0, $diferencia);
+
+                // Determinar tipo de pago
+                if (abs($diferencia) < 0.01) {
+                    $tipoPago = 'normal';
+                } elseif ($diferencia > 0.01) {
+                    $tipoPago = 'abono_extra';
+                    $anticipoDisponible += $anticipoGenerado;
+                } else {
+                    $tipoPago = 'pago_parcial';
+                }
+
+                // RECALCULAR VP y VF con el PAGO REAL
+                $vpRecalculado = $montoPagado / pow(1 + $tasaInteres, $periodo - 1);
+                $vfRecalculado = $montoPagado * pow(1 + $tasaInteres, $numPeriodosTotal - $periodo);
+
+                $tabla[] = array_merge($flujo, [
+                    'flujo_original' => round($flujoOriginal, 2),
+                    'flujo_ajustado' => round($flujoAjustado, 2),
+                    'valor_presente' => round($vpRecalculado, 2),
+                    'valor_futuro' => round($vfRecalculado, 2),
+                    'pagado' => true,
+                    'pago_realizado' => round($montoPagado, 2),
+                    'anticipo_usado' => round($anticipoUsadoParcial, 2),
+                    'anticipo_generado' => round($anticipoGenerado, 2),
+                    'monto_efectivo' => round($montoPagado, 2),
+                    'anticipo_acumulado' => round($anticipoDisponible, 2),
+                    'interes_pagado' => 0,
+                    'capital_pagado' => round($montoPagado, 2),
+                    'fecha_pago' => $pagoPeriodo->payment_date->format('d/m/Y'),
+                    'pago_id' => $pagoPeriodo->id,
+                    'tipo_pago' => $tipoPago,
+                    'diferencia' => round($diferencia, 2),
+                ]);
+            } else {
+                // ===== NO HAY PAGO - PENDIENTE =====
+
+                // RECALCULAR VP y VF con flujo ajustado
+                $vpRecalculado = $flujoAjustado / pow(1 + $tasaInteres, $periodo - 1);
+                $vfRecalculado = $flujoAjustado * pow(1 + $tasaInteres, $numPeriodosTotal - $periodo);
+
+                $tabla[] = array_merge($flujo, [
+                    'flujo_original' => round($flujoOriginal, 2),
+                    'flujo_ajustado' => round($flujoAjustado, 2),
+                    'valor_presente' => round($vpRecalculado, 2),
+                    'valor_futuro' => round($vfRecalculado, 2),
+                    'pagado' => false,
+                    'pago_realizado' => 0,
+                    'anticipo_usado' => round($anticipoUsadoParcial, 2),
+                    'anticipo_generado' => 0,
+                    'monto_efectivo' => 0,
+                    'anticipo_acumulado' => round($anticipoDisponible, 2),
+                    'interes_pagado' => 0,
+                    'capital_pagado' => 0,
+                    'fecha_pago' => null,
+                    'pago_id' => null,
+                    'tipo_pago' => null,
+                    'diferencia' => 0,
+                ]);
+            }
+        }
+
+        return $tabla;
     }
 
-    /**
-     * Datos para TIR (placeholder - implementar según necesidad)
-     */
-    public function getPagosDataTIR(): array
+    // Actualizar también el método getPagosDataGradientes
+    private function getPagosDataGradientes(?array $data = null): array
     {
-        // Implementar lógica específica para TIR
-        return [];
+        $inputs = $this->inputs ?? [];
+
+        // Obtener resultados calculados
+        $resultados = is_string($inputs['resultados_calculados'] ?? null)
+            ? json_decode($inputs['resultados_calculados'], true)
+            : ($inputs['resultados_calculados'] ?? []);
+
+        $tablaGradiente = is_string($inputs['tabla_gradiente'] ?? null)
+            ? json_decode($inputs['tabla_gradiente'], true)
+            : ($inputs['tabla_gradiente'] ?? []);
+
+        // Datos del gradiente
+        $tipoGradiente = $inputs['tipo_gradiente'] ?? 'aritmetico_anticipado';
+        $anualidadInicial = $resultados['anualidad_inicial'] ?? 0;
+        $numeroCuotasOriginal = count($tablaGradiente);
+        $valorPresenteOriginal = $resultados['valor_presente'] ?? 0;
+        $valorFuturoOriginal = $resultados['valor_futuro'] ?? 0;
+        $totalPagosEsperadoOriginal = $resultados['total_pagos'] ?? 0;
+
+        // Obtener todos los pagos completados
+        $pagosCompletados = $this->payments()
+            ->where('status', 'completed')
+            ->orderBy('created_at')
+            ->get();
+
+        // Recalcular tabla de gradientes con pagos reales
+        $tablaRecalculada = $this->recalcularTablaGradientes(
+            $tablaGradiente,
+            $pagosCompletados
+        );
+
+        // Calcular totales REALES de los pagos
+        $totalPagadoReal = $pagosCompletados->sum('amount');
+        $numeroPagosRealizados = $pagosCompletados->count();
+
+        // Calcular valores recalculados de la tabla
+        $valorPresenteRecalculado = 0;
+        $valorFuturoRecalculado = 0;
+        $totalFlujosAjustados = 0;
+        $totalAnticiposGenerados = 0;
+        $totalFlujosOriginales = 0;
+        $montoTotalPendiente = 0;
+        $capitalPagadoTotal = 0;
+
+        foreach ($tablaRecalculada as $flujo) {
+            $valorPresenteRecalculado += $flujo['valor_presente'];
+            $valorFuturoRecalculado += $flujo['valor_futuro'];
+            $totalFlujosOriginales += $flujo['flujo_original'];
+
+            if ($flujo['pagado'] ?? false) {
+                // Pagado
+                $totalFlujosAjustados += $flujo['flujo_ajustado'];
+                $totalAnticiposGenerados += $flujo['anticipo_generado'] ?? 0;
+                $capitalPagadoTotal += $flujo['capital_pagado'];
+            } else {
+                // Pendiente
+                $totalFlujosAjustados += $flujo['flujo_ajustado'];
+                $montoTotalPendiente += $flujo['flujo_ajustado'];
+            }
+        }
+
+        // Total con anticipos = flujos ajustados + anticipos generados
+        $totalConAnticipos = $totalFlujosAjustados + $totalAnticiposGenerados;
+
+        // Obtener flujo actual (próximo flujo pendiente)
+        $flujoActual = $this->obtenerCuotaActualGradientes($tablaRecalculada);
+
+        // Saldos actuales
+        $saldoRestante = $montoTotalPendiente;
+        $capitalPendiente = $saldoRestante;
+        $interesPendiente = 0;
+
+        // Interés generado
+        $interesTotalGenerado = $totalConAnticipos - $totalPagosEsperadoOriginal;
+
+        // Si se pasó data, calcular distribución del pago
+        if ($data !== null) {
+            if (isset($data['interest_paid']) && isset($data['principal_paid'])) {
+                return $this->calcularDistribucionPagoManualGradientes(
+                    $data,
+                    $flujoActual,
+                    $saldoRestante,
+                    $totalPagadoReal,
+                    $totalConAnticipos,
+                    $numeroPagosRealizados,
+                    $capitalPendiente,
+                    $interesPendiente
+                );
+            }
+
+            $amount = $data['amount'] ?? 0;
+
+            return $this->calcularDistribucionPagoAutomaticoGradientes(
+                $amount,
+                $flujoActual,
+                $saldoRestante,
+                $totalPagadoReal,
+                $totalConAnticipos,
+                $numeroPagosRealizados,
+                $capitalPendiente,
+                $interesPendiente
+            );
+        }
+
+        // Información general
+        $ultimoPago = $pagosCompletados->last();
+        $fechaUltimoPago = $ultimoPago ? $ultimoPago->payment_date->format('Y-m-d') : null;
+        $montoUltimoPago = $ultimoPago ? $ultimoPago->amount : 0;
+
+        $promedioMontoPago = $numeroPagosRealizados > 0 ? $totalPagadoReal / $numeroPagosRealizados : 0;
+
+        // Contar flujos restantes (incluyendo los cubiertos por anticipo)
+        $flujosRestantes = 0;
+        foreach ($tablaRecalculada as $flujo) {
+            if (! ($flujo['pagado'] ?? false)) {
+                $flujosRestantes++;
+            }
+        }
+
+        $fechaInicio = $inputs['fecha_inicio'] ?? ($this->created_at ? $this->created_at->format('Y-m-d') : null);
+        $fechaFinal = $inputs['fecha_final'] ?? null;
+
+        $estadoCredito = $this->determinarEstadoCredito($saldoRestante, $fechaFinal);
+        $porcentajePagado = $totalConAnticipos > 0 ? round(($totalPagadoReal / $totalConAnticipos) * 100, 2) : 0;
+        $porcentajeCapitalPagado = $totalPagosEsperadoOriginal > 0 ? round(($capitalPagadoTotal / $totalPagosEsperadoOriginal) * 100, 2) : 0;
+
+        $diasTranscurridos = $this->created_at ? smartRound($this->created_at->diffInDays(now())) : null;
+        $diasRestantes = $fechaFinal ? smartRound(now()->diffInDays(Carbon::parse($fechaFinal), false)) : null;
+
+        $mensajeFinal = $this->generarMensajeFinalPagos(
+            $estadoCredito,
+            $saldoRestante,
+            $numeroPagosRealizados,
+            $porcentajePagado,
+            $diasRestantes
+        );
+
+        return [
+            // Valores originales
+            'valor_presente_original' => round($valorPresenteOriginal, 2),
+            'valor_futuro_original' => round($valorFuturoOriginal, 2),
+            'total_pagos_esperado_original' => round($totalPagosEsperadoOriginal, 2),
+
+            // Valores recalculados
+            'valor_presente_total' => round($valorPresenteRecalculado, 2),
+            'valor_futuro_total' => round($valorFuturoRecalculado, 2),
+            'total_flujos_ajustados' => round($totalFlujosAjustados, 2),
+            'total_anticipos_generados' => round($totalAnticiposGenerados, 2),
+            'total_con_anticipos' => round($totalConAnticipos, 2),
+            'total_pagos_esperado' => round($totalConAnticipos, 2),
+            'interes_total_generado' => round($interesTotalGenerado, 2),
+
+            'anualidad_inicial' => round($anualidadInicial, 2),
+            'numero_pagos_original' => $numeroCuotasOriginal,
+            'numero_pagos_actual' => count($tablaRecalculada),
+            'pagos_realizados' => $numeroPagosRealizados,
+            'pagos_restantes' => $flujosRestantes,
+            'tipo_gradiente' => $tipoGradiente,
+            'total_pagado' => round($totalPagadoReal, 2),
+            'capital_pagado' => round($capitalPagadoTotal, 2),
+            'interes_pagado' => 0,
+            'saldo_restante' => round($saldoRestante, 2),
+            'capital_pendiente' => round($capitalPendiente, 2),
+            'interes_pendiente' => round($interesPendiente, 2),
+            'numero_pagos_realizados' => $numeroPagosRealizados,
+            'promedio_monto_pago' => round($promedioMontoPago, 2),
+            'pagos_estimados_restantes' => $flujosRestantes,
+            'fecha_ultimo_pago' => $fechaUltimoPago,
+            'monto_ultimo_pago' => round($montoUltimoPago, 2),
+            'porcentaje_pagado' => $porcentajePagado,
+            'porcentaje_capital_pagado' => $porcentajeCapitalPagado,
+            'porcentaje_interes_pagado' => 0,
+            'fecha_inicio' => $fechaInicio,
+            'fecha_final' => $fechaFinal,
+            'dias_transcurridos' => $diasTranscurridos,
+            'dias_restantes' => $diasRestantes,
+            'estado_credito' => $estadoCredito,
+            'mensaje_final' => $mensajeFinal,
+            'tabla_gradientes' => $tablaRecalculada,
+            'tabla_modificada' => false,
+            'cuota_siguiente' => $flujoActual,
+        ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Métodos auxiliares
-    |--------------------------------------------------------------------------
-    */
+    private function obtenerCuotaActualGradientes(array $tabla): ?array
+    {
+        foreach ($tabla as $cuota) {
+            if (! ($cuota['pagado'] ?? false)) {
+                return $cuota;
+            }
+        }
+
+        return end($tabla) ?: null;
+    }
+
+    private function calcularDistribucionPagoAutomaticoGradientes(
+        float $amount,
+        ?array $flujoActual,
+        float $saldoRestante,
+        float $totalPagado,
+        float $montoTotal,
+        int $numeroPagos,
+        float $capitalPendiente,
+        float $interesPendiente
+    ): array {
+        if (! $flujoActual || $amount <= 0) {
+            return [
+                'principal_paid' => 0,
+                'interest_paid' => 0,
+                'remaining_balance' => $saldoRestante,
+                'metadata' => [],
+            ];
+        }
+
+        $flujoPropuesto = $flujoActual['flujo_ajustado'] ?? $flujoActual['pago'];
+        $capitalPagado = $amount;
+        $interesPagado = 0;
+
+        $nuevoSaldo = max(0, $saldoRestante - $capitalPagado);
+
+        // Determinar tipo de pago
+        $diferencia = $amount - $flujoPropuesto;
+        $hayAnticipo = $diferencia > 0.01;
+
+        if (abs($diferencia) < 0.01) {
+            $tipoPago = 'normal';
+            $montoAnticipo = 0;
+        } elseif ($hayAnticipo) {
+            $tipoPago = 'abono_extra';
+            $montoAnticipo = $diferencia;
+        } else {
+            $tipoPago = 'pago_parcial';
+            $montoAnticipo = 0;
+        }
+
+        if ($nuevoSaldo <= 0.01) {
+            $tipoPago = 'liquidacion';
+            $nuevoSaldo = 0;
+        }
+
+        $porcentajeCompletado = $montoTotal > 0
+            ? round((($totalPagado + $amount) / $montoTotal) * 100, 2)
+            : 0;
+
+        return [
+            'principal_paid' => round($capitalPagado, 2),
+            'interest_paid' => 0,
+            'remaining_balance' => round($nuevoSaldo, 2),
+            'metadata' => [
+                'saldo_anterior' => round($saldoRestante, 2),
+                'saldo_nuevo' => round($nuevoSaldo, 2),
+                'numero_pago' => $numeroPagos + 1,
+                'cuota_numero' => $flujoActual['periodo'],
+                'flujo_propuesto' => round($flujoPropuesto, 2),
+                'tipo_pago' => $tipoPago,
+                'diferencia_flujo' => round($diferencia, 2),
+                'anticipo_generado' => round($montoAnticipo, 2),
+                'hay_anticipo' => $hayAnticipo,
+                'porcentaje_completado' => $porcentajeCompletado,
+                'tipo_calculo' => $this->type->value,
+                'fecha_registro' => now()->toDateTimeString(),
+            ],
+        ];
+    }
+
+    private function calcularDistribucionPagoManualGradientes(
+        array $data,
+        ?array $flujoActual,
+        float $saldoRestante,
+        float $totalPagado,
+        float $montoTotal,
+        int $numeroPagos,
+        float $capitalPendiente,
+        float $interesPendiente
+    ): array {
+        $amount = (float) ($data['amount'] ?? $data['principal_paid'] ?? 0);
+
+        if ($amount <= 0) {
+            return [
+                'principal_paid' => 0,
+                'interest_paid' => 0,
+                'remaining_balance' => $saldoRestante,
+                'metadata' => [],
+            ];
+        }
+
+        $capitalPagado = $amount;
+        $interesPagado = 0;
+
+        $nuevoSaldo = max(0, $saldoRestante - $capitalPagado);
+        $flujoPropuesto = $flujoActual ? ($flujoActual['flujo_ajustado'] ?? $flujoActual['pago']) : 0;
+        $diferencia = $amount - $flujoPropuesto;
+        $hayAnticipo = $diferencia > 0.01;
+
+        if (abs($diferencia) < 0.01) {
+            $tipoPago = 'normal';
+            $montoAnticipo = 0;
+        } elseif ($hayAnticipo) {
+            $tipoPago = 'abono_extra';
+            $montoAnticipo = $diferencia;
+        } else {
+            $tipoPago = 'pago_parcial';
+            $montoAnticipo = 0;
+        }
+
+        if ($nuevoSaldo <= 0.01) {
+            $tipoPago = 'liquidacion';
+            $nuevoSaldo = 0;
+        }
+
+        $porcentajeCompletado = $montoTotal > 0
+            ? round((($totalPagado + $amount) / $montoTotal) * 100, 2)
+            : 0;
+
+        return [
+            'principal_paid' => round($capitalPagado, 2),
+            'interest_paid' => 0,
+            'remaining_balance' => round($nuevoSaldo, 2),
+            'metadata' => [
+                'saldo_anterior' => round($saldoRestante, 2),
+                'saldo_nuevo' => round($nuevoSaldo, 2),
+                'numero_pago' => $numeroPagos + 1,
+                'cuota_numero' => $flujoActual ? $flujoActual['periodo'] : null,
+                'flujo_propuesto' => round($flujoPropuesto, 2),
+                'tipo_pago' => $tipoPago,
+                'diferencia_flujo' => round($diferencia, 2),
+                'anticipo_generado' => round($montoAnticipo, 2),
+                'hay_anticipo' => $hayAnticipo,
+                'porcentaje_completado' => $porcentajeCompletado,
+                'modo_ingreso' => 'manual',
+                'tipo_calculo' => $this->type->value,
+                'fecha_registro' => now()->toDateTimeString(),
+            ],
+        ];
+    }
+
+    private function calcularDistribucionPagoGradientes(Get $get, Set $set, ?array $data = null): void
+    {
+        $amount = isset($data['amount']) ? (float) $data['amount'] : null;
+        $interest = isset($data['interest_paid']) ? (float) $data['interest_paid'] : null;
+        $principal = isset($data['principal_paid']) ? (float) $data['principal_paid'] : null;
+
+        if ($amount !== null && $amount > 0) {
+            $paymentData = $this->getPagosDataGradientes(['amount' => $amount]);
+
+            $set('interest_paid', $paymentData['interest_paid']);
+            $set('principal_paid', $paymentData['principal_paid']);
+            $set('remaining_balance', $paymentData['remaining_balance']);
+
+            return;
+        }
+
+        if ($interest !== null || $principal !== null) {
+            $interest = $interest ?? 0.0;
+            $principal = $principal ?? 0.0;
+            $total = $interest + $principal;
+
+            $set('amount', round($total, 2));
+
+            $paymentData = $this->getPagosDataGradientes([
+                'interest_paid' => $interest,
+                'principal_paid' => $principal,
+            ]);
+            $set('remaining_balance', $paymentData['remaining_balance']);
+        }
+    }
 
     /**
      * Determina el estado del crédito basado en pagos y fechas
@@ -1171,58 +1637,6 @@ class Credit extends Model
         // Por defecto es activo
         return 'Activo';
     }
-
-    /**
-     * Genera un mensaje final personalizado según el estado del crédito
-     */
-    public function generarMensajeFinal(
-        string $estadoCredito,
-        float $saldoRestante,
-        float $montoFinal,
-        float $totalPagado
-    ): ?string {
-        switch (strtolower($estadoCredito)) {
-            case 'pagado':
-            case 'liquidado':
-                return '¡Felicitaciones! El crédito ha sido pagado en su totalidad.';
-
-            case 'vencido':
-                $fechaFinal = $this->inputs['fecha_final'] ?? null;
-                if ($fechaFinal) {
-                    $diasVencidos = now()->diffInDays(\Carbon\Carbon::parse($fechaFinal));
-
-                    return "El crédito está vencido desde hace {$diasVencidos} días. Saldo pendiente: $".number_format($saldoRestante, 2);
-                }
-
-                return 'El crédito está vencido. Saldo pendiente: $'.number_format($saldoRestante, 2);
-
-            case 'activo':
-            case 'vigente':
-                $porcentajePagado = $montoFinal > 0 ? round(($totalPagado / $montoFinal) * 100, 1) : 0;
-
-                if ($porcentajePagado >= 75) {
-                    return "¡Excelente progreso! Has completado el {$porcentajePagado}% del crédito.";
-                } elseif ($porcentajePagado >= 50) {
-                    return "Vas por buen camino. Has completado el {$porcentajePagado}% del crédito.";
-                } elseif ($porcentajePagado >= 25) {
-                    return "Crédito en curso. Has completado el {$porcentajePagado}% del total.";
-                } else {
-                    return 'Mantén tus pagos al día para evitar intereses moratorios.';
-                }
-
-            case 'cancelado':
-                return 'Este crédito ha sido cancelado.';
-
-            default:
-                return null;
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Accessors útiles
-    |--------------------------------------------------------------------------
-    */
 
     /**
      * Obtiene el total pagado

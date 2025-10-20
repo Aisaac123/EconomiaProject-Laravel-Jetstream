@@ -29,8 +29,16 @@ trait GradientesFormula
         }
 
         foreach ($basicFields as $field) {
-            if (empty($data[$field]) && $data[$field] !== '0' && $data[$field] !== 0) {
-                $emptyFields[] = $field;
+            if (in_array($field, ['gradiente_aritmetico', 'gradiente_geometrico'])) {
+                // Para estos dos campos, solo se consideran vacíos si son null o '' (no 0)
+                if (! isset($data[$field]) || $data[$field] === '') {
+                    $emptyFields[] = $field;
+                }
+            } else {
+                // Para los demás campos, se aplica empty normal
+                if (empty($data[$field])) {
+                    $emptyFields[] = $field;
+                }
             }
         }
 

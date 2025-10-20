@@ -74,14 +74,14 @@ class CreditSchemaFactory
 
             return new HtmlString(
                 Blade::render(<<<'BLADE'
-                    <div class="space-y-4">
-                        <x-sections.content title="Cálculo Inicial"  class="space-y-4">
-                            {!! $resultHtml !!}
-                            {!! $tablaHtml !!}
+                    <div class="space-y-6">
+                        <x-sections.content class="py-0 space-y-4" title="Resultado de Pagos">
+                            {!! $pagosHtml !!}
                         </x-sections.content>
 
-                        <x-sections.content title="Resultado de Pagos" class="space-y-4">
-                            {!! $pagosHtml !!}
+                        <x-sections.content class="py-0 space-y-4" collapsed="true" title="Cálculo Inicial">
+                            {!! $resultHtml !!}
+                            {!! $tablaHtml !!}
                         </x-sections.content>
                     </div>
                 BLADE, [
@@ -101,14 +101,14 @@ class CreditSchemaFactory
             if ($pagosHtml) {
                 return new HtmlString(
                     Blade::render(<<<'BLADE'
-                    <div class="space-y-4">
-                    <x-sections.content title="Cálculo Inicial" class="space-y-4">
-                        {!! $resultHtml !!}
-                    </x-sections.content>
+                    <div class="space-y-6">
+                        <x-sections.content class="py-0 space-y-4" title="Resultado de Pagos">
+                           {!! $pagosHtml !!}
+                        </x-sections.content>
 
-                    <x-sections.content collapsed="true" title="Resultado de Pagos" class="space-y-4">
-                        {!! $pagosHtml !!}
-                    </x-sections.content>
+                        <x-sections.content class="py-0 space-y-4" collapsed="true" title="Cálculo Inicial">
+                            {!! $resultHtml !!}
+                        </x-sections.content>
                     </div>
                 BLADE, [
                         'resultHtml' => $resultHtml,

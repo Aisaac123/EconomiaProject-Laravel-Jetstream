@@ -74,61 +74,94 @@ class ShowCredit extends Page implements HasTable
 
     protected function getHeaderActions(): array
     {
+        // Detectar el tipo de cálculo del crédito
+        $calculationType = $this->record->type->value;
+
+        // Usar el método correcto según el tipo
         $pagosData = $this->record->getPagosData();
-        $saldoRestante = $pagosData['cuotas_restantes'] ?? 0;
+
+        $saldoRestante = $pagosData['saldo_restante'] ?? 0;
 
         $actions = [];
-        // dd($saldoRestante);
+
         // Solo mostrar si hay saldo restante
         if ($saldoRestante > 0) {
-            $actions[] = Action::make('pagar_cuota_siguiente')
-                ->label('Proxima Cuota')
-                ->icon('heroicon-o-bolt')
-                ->color('success')
-                ->requiresConfirmation()
-                ->modalHeading(function () {
-                    $pagosData = $this->record->getPagosData();
-                    $cuotaActual = $pagosData['cuota_siguiente'] ?? null;
+            if (in_array($calculationType, ['gradientes', 'amortizacion'])) {
+                $actions[] = Action::make('pagar_flujo_siguiente')
+                    ->label(match ($calculationType) {
+                        'gradientes' => 'Próximo Flujo',
+                        default => 'Próxima Cuota',
+                    })
+                    ->icon('heroicon-o-bolt')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading(function () use ($calculationType, $pagosData) {
+                        $cuotaActual = $pagosData['cuota_siguiente'] ?? null;
 
-                    return $cuotaActual
-                        ? 'Pagar Cuota #'.$cuotaActual['periodo']
-                        : 'Pagar Cuota';
-                })
-                ->modalDescription(function () {
-                    $pagosData = $this->record->getPagosData();
-                    $cuotaActual = $pagosData['cuota_siguiente'] ?? null;
+                        $labelTexto = match ($calculationType) {
+                            'gradientes' => 'Pagar Flujo #',
+                            default => 'Pagar Cuota #',
+                        };
 
-                    if (! $cuotaActual) {
-                        return 'No hay cuotas pendientes.';
-                    }
+                        return $cuotaActual
+                            ? $labelTexto.$cuotaActual['periodo']
+                            : 'Pagar Flujo';
+                    })
+                    ->modalDescription(function () use ($calculationType, $pagosData) {
+                        $cuotaActual = $pagosData['cuota_siguiente'] ?? null;
 
-                    return 'Monto de la cuota: $'.number_format($cuotaActual['cuota'], 2).
-                        ' (Interés: $'.number_format($cuotaActual['interes'], 2).
-                        ' + Capital: $'.number_format($cuotaActual['amortizacion'], 2).')';
-                })
-                ->modalIcon('heroicon-o-currency-dollar')
-                ->modalSubmitActionLabel('Confirmar Pago')
-                ->action(function () {
-                    $pagosData = $this->record->getPagosData();
-                    $cuotaActual = $pagosData['cuota_siguiente'] ?? null;
+                        if (! $cuotaActual) {
+                            return match ($calculationType) {
+                                'gradientes' => 'No hay flujos pendientes.',
+                                default => 'No hay cuotas pendientes.',
+                            };
+                        }
 
-                    if (! $cuotaActual) {
-                        Notification::make()
-                            ->title('Error')
-                            ->body('No hay cuotas pendientes para pagar.')
-                            ->danger()
-                            ->send();
+                        if ($calculationType === 'gradientes') {
+                            // Para gradientes
+                            return 'Monto del flujo: $'.number_format($cuotaActual['flujo_ajustado'], 2).
+                                ' (VP: $'.number_format($cuotaActual['valor_presente'], 2).
+                                ' | VF: $'.number_format($cuotaActual['valor_futuro'], 2).')';
+                        } else {
+                            // Para amortización
+                            return 'Monto de la cuota: $'.number_format($cuotaActual['cuota'], 2).
+                                ' (Interés: $'.number_format($cuotaActual['interes'], 2).
+                                ' + Capital: $'.number_format($cuotaActual['amortizacion'], 2).')';
+                        }
+                    })
+                    ->modalIcon('heroicon-o-currency-dollar')
+                    ->modalSubmitActionLabel('Confirmar Pago')
+                    ->action(function () use ($calculationType, $pagosData) {
+                        $cuotaActual = $pagosData['cuota_siguiente'] ?? null;
+                        if (! $cuotaActual) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body(match ($calculationType) {
+                                    'gradientes' => 'No hay flujos pendientes para pagar.',
+                                    default => 'No hay cuotas pendientes para pagar.',
+                                })
+                                ->danger()
+                                ->send();
 
-                        return;
-                    }
+                            return;
+                        }
 
-                    $this->createPayment([
-                        'amount' => $cuotaActual['cuota'],
-                        'payment_date' => now(),
-                        'status' => 'completed',
-                    ]);
-                })
-                ->tooltip('Pagar automáticamente la cuota propuesta');
+                        $monto = match ($calculationType) {
+                            'gradientes' => $cuotaActual['flujo_ajustado'],
+                            default => $cuotaActual['cuota'],
+                        };
+
+                        $this->createPayment([
+                            'amount' => $monto,
+                            'payment_date' => now(),
+                            'status' => 'completed',
+                        ]);
+                    })
+                    ->tooltip(match ($calculationType) {
+                        'gradientes' => 'Pagar automáticamente el flujo propuesto',
+                        default => 'Pagar automáticamente la cuota propuesta',
+                    });
+            }
 
             $actions[] = Action::make('create_payment')
                 ->label('Registrar Pago')
@@ -193,7 +226,6 @@ class ShowCredit extends Page implements HasTable
                                 ->label('Fecha de Pago')
                                 ->required()
                                 ->default(now())
-                                ->maxDate(now())
                                 ->native(false)
                                 ->displayFormat('d/m/Y')
                                 ->closeOnDateSelection(),
@@ -222,10 +254,11 @@ class ShowCredit extends Page implements HasTable
                         ])
                         ->default('total')
                         ->inline()
+                        ->visible(fn () => $this->record->type->value !== 'gradientes')
                         ->reactive(),
 
                     // Campos de entrada
-                    Grid::make(1)
+                    Grid::make(2)
                         ->schema([
                             // MODO: MONTO TOTAL
                             TextInput::make('amount')
@@ -234,7 +267,6 @@ class ShowCredit extends Page implements HasTable
                                 ->prefix('$')
                                 ->minValue(0.01)
                                 ->step(0.01)
-                                ->columnSpanFull()
                                 ->visible(fn (Get $get) => $get('payment_mode') !== 'detalle')
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
@@ -249,10 +281,24 @@ class ShowCredit extends Page implements HasTable
                                         $isCalculating = false;
                                     }
                                 }),
+                            // Saldo restante
+                            TextInput::make('remaining_balance')
+                                ->label('Saldo Restante')
+                                ->numeric()
+                                ->prefix('$')
+                                ->minValue(0)
+                                ->step(0.01)
+                                ->disabled()
+                                ->visible(fn (Get $get) => $get('payment_mode') !== 'detalle')
+                                ->reactive()
+                                ->afterStateHydrated(function (Get $get, Set $set) {
+                                    $set('remaining_balance', $this->record->saldo_restante ?? 0);
+                                }),
 
                             // MODO: DETALLE CAPITAL + INTERÉS
                             Group::make()
                                 ->visible(fn (Get $get) => $get('payment_mode') !== 'total')
+                                ->columnSpanFull()
                                 ->schema([
                                     Grid::make(2)
                                         ->schema([
@@ -307,29 +353,29 @@ class ShowCredit extends Page implements HasTable
                                                         $isCalculating = false;
                                                     }
                                                 }),
-                                        ]),
+                                            TextInput::make('amount')
+                                                ->label('Monto Total del Pago')
+                                                ->numeric()
+                                                ->prefix('$')
+                                                ->disabled()
+                                                ->reactive()
+                                                ->helperText('Monto total calculado automáticamente'),
 
-                                    TextInput::make('amount')
-                                        ->label('Monto Total del Pago')
-                                        ->numeric()
-                                        ->prefix('$')
-                                        ->disabled()
-                                        ->reactive()
-                                        ->helperText('Monto total calculado automáticamente'),
+                                            // Saldo restante
+                                            TextInput::make('remaining_balance')
+                                                ->label('Saldo Restante')
+                                                ->numeric()
+                                                ->prefix('$')
+                                                ->minValue(0)
+                                                ->step(0.01)
+                                                ->disabled()
+                                                ->reactive()
+                                                ->afterStateHydrated(function (Get $get, Set $set) {
+                                                    $set('remaining_balance', $this->record->saldo_restante ?? 0);
+                                                }),
+                                        ]),
                                 ]),
 
-                            // Saldo restante
-                            TextInput::make('remaining_balance')
-                                ->label('Saldo Restante')
-                                ->numeric()
-                                ->prefix('$')
-                                ->minValue(0)
-                                ->step(0.01)
-                                ->disabled()
-                                ->reactive()
-                                ->afterStateHydrated(function (Get $get, Set $set) {
-                                    $set('remaining_balance', $this->record->saldo_restante ?? 0);
-                                }),
                         ]),
                 ]),
 
@@ -365,7 +411,7 @@ class ShowCredit extends Page implements HasTable
             ->query(
                 Payment::query()
                     ->where('credit_id', $this->record->id)
-                    ->latest('payment_date')
+                    ->orderBy('payment_date')
             )
             ->columns([
                 TextColumn::make('index')
@@ -398,7 +444,8 @@ class ShowCredit extends Page implements HasTable
                     ->label('Interés')
                     ->money('COP', true)
                     ->color('warning')
-                    ->toggleable(),
+                    ->toggleable()
+                    ->visible(fn () => $this->record->type->value !== 'gradientes'),
 
                 TextColumn::make('remaining_balance')
                     ->label('Saldo Restante')
@@ -567,7 +614,7 @@ class ShowCredit extends Page implements HasTable
                     ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Eliminar Pago')
-                    ->modalDescription(fn (Payment $record) => '¿Deseas eliminar este pago de $'.number_format($record->amount, 2).'? Esta acción recalculará toda la tabla de amortización.')
+                    ->modalDescription(fn (Payment $record) => '¿Deseas eliminar este pago de $'.number_format($record->amount, 2).'? Esta accion es irreversible.')
                     ->modalSubmitActionLabel('Sí, eliminar')
                     ->modalCancelActionLabel('Cancelar')
                     ->after(function () {
@@ -575,17 +622,16 @@ class ShowCredit extends Page implements HasTable
 
                         // Si ya no hay pagos y el crédito estaba completado, reactivarlo
                         if ($this->record->payments()->count() === 0 && $this->record->status === 'completed') {
-                            $this->record->update(['status' => 'active']);
+                            $this->record->update(['status' => 'pending']);
                         }
 
                         Notification::make()
                             ->title('Pago eliminado')
-                            ->body('La tabla de amortización ha sido recalculada.')
+                            ->body('Los datos han sido recalculados y el pago ha sido eliminado.')
                             ->success()
                             ->send();
                     }),
             ])
-            ->defaultSort('payment_date', 'desc')
             ->searchable()
             ->paginated([5, 10, 25, 50])
             ->defaultPaginationPageOption(10)

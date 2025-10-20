@@ -1,6 +1,7 @@
 <x-filament-panels::page>
     @if(isset($credit) && $credit->payments()->count() > 0)
         {{-- Mensaje de crédito ya iniciado --}}
+
         <div class="mb-6 flex h-[700px] items-center justify-center">
             <div class="rounded-lg border border-yellow-200 bg-yellow-50 dark:border-yellow-900/30 dark:bg-yellow-900/20 p-6">
                 <div class="flex items-start gap-4">
@@ -46,6 +47,16 @@
         </div>
     @else
         {{-- Contenido normal --}}
+
+        {{-- Botón flotante de acción rápida --}}
+        <div class="fixed bottom-6 right-6 z-50 flex gap-x-4">
+            <div class="flex gap-2 mb-4">
+                @foreach ($this->getHeaderActions() as $action)
+                    {{ $action }}
+                @endforeach
+            </div>
+        </div>
+
         <div class="space-y-6">
             {{-- 🔹 Título principal --}}
             <x-sections.heading-title

@@ -13,6 +13,7 @@ use App\Filament\Schemas\InteresSimpleSchema;
 use App\Filament\Schemas\TasaInternaRetornoSchema;
 use App\Models\Credit;
 use App\Traits\FormCalculations;
+use Filament\Actions\Action;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -54,6 +55,18 @@ class CreateCredit extends Page implements HasForms
     public static function getNavigationLabel(): string
     {
         return 'Registrar crédito';
+    }
+
+    protected function getHeaderActions(): array
+    {
+        $actions[] = Action::make('list')
+            ->label('Gestionar Créditos')
+            ->icon('heroicon-o-document-text')
+            ->color('primary')
+            ->url(fn (): string => ListCredits::getUrl())
+            ->tooltip('Editar los datos del crédito');
+
+        return $actions;
     }
 
     public function getHeading(): Htmlable|string

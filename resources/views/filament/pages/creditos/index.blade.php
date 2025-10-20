@@ -161,7 +161,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {{-- Paid Status Card --}}
                 <div
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow group">
@@ -198,21 +198,6 @@
                     </div>
                 </div>
 
-                {{-- Average Processing Time Card --}}
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow group">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="p-2.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-                            <x-heroicon-o-chart-bar class="w-5 h-5 text-indigo-600 dark:text-indigo-400"/>
-                        </div>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">2.5</p>
-                    </div>
-                    <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Tiempo Promedio</h4>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Días de procesamiento</p>
-                    <div class="mt-3 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div class="h-full bg-indigo-500 dark:bg-indigo-600" style="width: 60%"></div>
-                    </div>
-                </div>
             </div>
         </x-sections.content>
 
@@ -367,14 +352,14 @@
                     </div>
                     <div class="p-6 space-y-2">
                         <div
-                            class="flex items-center gap-3 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800/50">
+                            class="flex items-center gap-3 p-3 rounded-lg bg-primary-50 dark:bg-primary-900/10 border border-primary-200 dark:border-primary-800/50">
                             <div class="relative">
-                                <div class="w-3 h-3 rounded-full bg-emerald-500 dark:bg-emerald-600"></div>
+                                <div class="w-3 h-3 rounded-full bg-primary-500 dark:bg-primary-600"></div>
                                 <div
-                                    class="absolute inset-0 w-3 h-3 rounded-full bg-emerald-400 animate-pulse opacity-50"></div>
+                                    class="absolute inset-0 w-3 h-3 rounded-full bg-primary-400 animate-pulse opacity-50"></div>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">Calculado</p>
+                                <p class="text-sm font-semibold text-primary-900 dark:text-primary-100">Calculado</p>
                                 <p class="text-xs text-gray-600 dark:text-gray-400">Procesado correctamente</p>
                             </div>
                         </div>
@@ -386,27 +371,27 @@
                                     class="absolute inset-0 w-3 h-3 rounded-full bg-amber-400 animate-pulse opacity-50"></div>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">Pendiente</p>
+                                <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Pendiente</p>
                                 <p class="text-xs text-gray-600 dark:text-gray-400">En espera de procesamiento</p>
                             </div>
                         </div>
                         <div
-                            class="flex items-center gap-3 p-3 rounded-lg bg-sky-50 dark:bg-sky-900/10 border border-sky-200 dark:border-sky-800/50">
+                            class="flex items-center gap-3 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800/50">
                             <div class="relative">
-                                <div class="w-3 h-3 rounded-full bg-sky-500 dark:bg-sky-600"></div>
+                                <div class="w-3 h-3 rounded-full bg-emerald-500 dark:bg-emerald-600"></div>
                                 <div
-                                    class="absolute inset-0 w-3 h-3 rounded-full bg-sky-400 animate-pulse opacity-50"></div>
-                            </div>
+                                    class="absolute inset-0 w-3 h-3 rounded-full bg-emerald-400 animate-pulse opacity-50"></div>
+                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">Pagado</p>
+                                <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-100">Pagado</p>
                                 <p class="text-xs text-gray-600 dark:text-gray-400">Completamente liquidado</p>
                             </div>
                         </div>
                         <div
-                            class="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">
-                            <div class="w-3 h-3 rounded-full bg-gray-400 dark:bg-gray-600"></div>
+                            class="flex items-center gap-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50">
+                            <div class="w-3 h-3 rounded-full bg-red-400 dark:bg-red-600"></div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">Cancelado</p>
+                                <p class="text-sm font-semibold text-red-900 dark:text-red-100">Cancelado</p>
                                 <p class="text-xs text-gray-600 dark:text-gray-400">Anulado o rechazado</p>
                             </div>
                         </div>

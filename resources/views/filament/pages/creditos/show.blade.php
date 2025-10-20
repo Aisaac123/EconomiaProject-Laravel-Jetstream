@@ -8,8 +8,6 @@
         </div>
     </div>
 
-
-
     <div class="space-y-4 my-4">
         {{-- Información del Deudor --}}
 
@@ -139,6 +137,24 @@
             </div>
         </div>
 
+        {{-- Tabla de Pagos --}}
+        <div id="pagos" class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <x-heroicon-o-currency-dollar class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Historial de Pagos</h3>
+                    </div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400">
+                        Total: {{ $this->record->payments->count() }} pago(s)
+                    </div>
+                </div>
+            </div>
+            <div class="">
+                {{ $this->table }}
+            </div>
+        </div>
+
         {{-- Resultados del Cálculo --}}
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
             <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
@@ -147,7 +163,7 @@
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white">Resultados del Cálculo</h3>
                 </div>
             </div>
-            <div class="p-6">
+            <div class="p-6 space-y-6">
                 @php
                     $inputs = $this->record->inputs ?? [];
                     $resultadoCalculado = $inputs['resultado_calculado'] ?? null;
@@ -165,26 +181,8 @@
             </div>
         </div>
 
-        {{-- Tabla de Pagos --}}
-        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <x-heroicon-o-currency-dollar class="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Historial de Pagos</h3>
-                    </div>
-                    <div class="text-xs text-slate-600 dark:text-slate-400">
-                        Total: {{ $this->record->payments->count() }} pago(s)
-                    </div>
-                </div>
-            </div>
-            <div class="">
-                {{ $this->table }}
-            </div>
-        </div>
-
         {{-- Datos JSON (Debug - Opcional) --}}
-        <details class="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+        <details class=" mb-6 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
             <summary class="cursor-pointer font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
                 ℹ️ Datos JSON (Expandir)
             </summary>

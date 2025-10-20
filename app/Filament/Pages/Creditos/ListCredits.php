@@ -65,8 +65,7 @@ class ListCredits extends Page implements HasTable
                     ->icon('heroicon-o-hashtag')
                     ->weight('bold')
                     ->color('primary')
-                    ->url(fn (Credit $record): string => ShowCredit::getUrl(['recordId' => $record->id]))
-                    ->tooltip('Hacer clic para ver detalles')
+                    ->tooltip('Copiar Código')
                     ->toggleable(),
 
                 TextColumn::make('debtor_names')
@@ -83,6 +82,7 @@ class ListCredits extends Page implements HasTable
                     ->sortable()
                     ->icon('heroicon-o-identification')
                     ->copyable()
+                    ->tooltip('Copiar Cédula')
                     ->copyMessage('Cédula copiada')
                     ->badge()
                     ->toggleable(),
