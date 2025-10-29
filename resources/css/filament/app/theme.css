@@ -63,19 +63,3 @@ html { scroll-behavior: smooth; }
     background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0) 100%);
 }
 
-.fi-page-header-main-ctn {
-    display: flex
-;
-    flex-direction: column;
-    row-gap: calc(var(--spacing) * 0);
-    padding-block: calc(var(--spacing) * 0);
-}
-
-.fi-page-content {
-    display: grid
-;
-    flex: 1;
-    grid-auto-columns: minmax(0, 1fr);
-    row-gap: calc(var(--spacing) * 0);
-}
-
